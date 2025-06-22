@@ -45,7 +45,7 @@ Let's get straight into it with some examples to learn how we combine **r-JSONPo
 
 #### Conclusion
 
-As you can see, we use an **rJP** in the FROM-clause, quoted as JSON string, and in the SELECT-clause we can reuse the **range literal** to access the *replacement, path or value* for each match. By convention the range literal without preceding `~` represents the *replacement*, and with `/` it represents the *full path* up to and including the literal itself. To access the *value*, we prefix the literal with `@`. Every match forms an entry in the result table.
+As you can see, we use an **rJP** in the FROM-clause, quoted as JSON string, and in the SELECT-clause we can reuse the **range literal** to access the *replacement, path or value* for each match. By convention the range literal *without preceding `~`* represents the *replacement*, and *with `~`* it represents the *full path* up to and including the literal itself. To *access the value*, we prefix the literal with `@`. Every match forms an entry in the result table.
 
 *In SQL terms, you can think of an **rJP** as an SQL table and the range literal's replacement as the SQL primary key*
 
@@ -77,7 +77,7 @@ Only if you can replace all literals to a value-returning JSONPointer, it will g
 
 ### Example C - accessing and naming things 
 #### Query
-`SELECT first_level AS 'name', "first_level/age" AS 'age', "first_level/hobbies/0" AS 'primary_hobby' FROM "/~first_level"`
+`SELECT first_level AS 'name', "first_level/age" AS 'age', "~first_level/hobbies/0" AS 'primary_hobby' FROM "/~first_level"`
 #### Applied On Data
 ```json
 {
@@ -118,7 +118,7 @@ We can access range literals in the WHERE clause as in the SELECT clause and use
 ### Example E - combining ranged JSONPointers
 Let's assume we have 3 people with left and right pockets in which they can put colored marbles. Who has marbles of same color in both pockets?
 #### Query
-`SELECT name, @left_color, @right_color FROM "/~name/leftPocket/~left_color" JOIN "name/rightPocket/~right_color" WHERE @left_color == @right_color`
+`SELECT name, @left_color, @right_color FROM "/~name/leftPocket/~left_color" JOIN "~name/rightPocket/~right_color" WHERE @left_color == @right_color`
 #### Applied On Data
 ```json
 {
