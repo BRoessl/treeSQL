@@ -93,8 +93,7 @@ public class QueryParser extends TreeSQLBaseListener {
             }
 
             Stream<ScannableTreeNode> filteredStream = allFromStream
-                    .filter(this::conditionOkay)
-                    .limit(limit.orElse(Integer.MAX_VALUE));
+                    .filter(this::conditionOkay);
             Stream<ScannableTreeNode> orderedStream = filteredStream;
             if (ordering.isPresent()) {
                 orderedStream = filteredStream.sorted((stn1, stn2) -> {
