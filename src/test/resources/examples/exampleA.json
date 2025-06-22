@@ -1,0 +1,6 @@
+{
+    "foo": 42,
+    "bar": true,
+    "foobar": "barfoo",
+    "foofoo": [5,6,7]
+}

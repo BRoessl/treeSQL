@@ -1,0 +1,6 @@
+expression,reason
+foo/,must start with /
+/~[]/abc,not a valid shorthand
+~../foo,misses starting '/'
+~..{2}/foo,misses starting '/'
+~[+1]/foo,misses starting '/'

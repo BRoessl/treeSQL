@@ -1,0 +1,36 @@
+name: GraalVM Native Image builds for Windows
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: native build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        #os: [macos-latest, windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.PAT }}
+          native-image-job-reports: 'true'
+
+      - name: Native build using Maven plugin 
+        run: mvn -Pnative package -DskipTests
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/treesql.exe
+          asset_name: treesql-${{ github.event.release.tag_name }}-${{ matrix.os }}.exe
+          asset_content_type: application/octet-stream

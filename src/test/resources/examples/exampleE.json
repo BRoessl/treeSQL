@@ -1,0 +1,5 @@
+{
+    "Peter": {"leftPocket": ["green", "red"], "rightPocket": ["blue"]},
+    "Anne": {"leftPocket": ["red"], "rightPocket": ["red", "blue"]},
+    "Josh": {"leftPocket": [], "rightPocket": ["blue", "blue"]}
+}
