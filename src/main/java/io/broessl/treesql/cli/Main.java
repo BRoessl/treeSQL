@@ -46,7 +46,7 @@ public class Main {
 			System.out.printf("treeSQL> using directory '%s' as root%n", rootPath.toAbsolutePath());
 		}
 		System.out.println(
-				"treeSQL> treeSQL is ready! Try 'SELECT /foo FROM \"/~foo\"' or type 'exit' when you're done.");
+				"treeSQL> treeSQL is ready! Try 'SELECT foo FROM \"/~foo\"' or type 'exit' when you're done.");
 
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (!Thread.interrupted()) {
@@ -55,7 +55,7 @@ public class Main {
 				nextLine = scanner.nextLine();
 				if (nextLine.isBlank()) {
 					System.out.printf(
-							"treeSQL uses '%s' as root.%nTry 'SELECT /foo FROM \"/~foo\"' to list children.%n",
+							"treeSQL uses '%s' as root.%nTry 'SELECT foo FROM \"/~foo\"' to list children.%n",
 							rootPath);
 					continue; // skip empty lines
 				}
