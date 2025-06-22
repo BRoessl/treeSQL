@@ -26,7 +26,7 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 		}
 	};
 
-	public class DepthFirstIterator implements Iterator<ScannableTreeNode> {
+	private class DepthFirstIterator implements Iterator<ScannableTreeNode> {
 
 		List<Iterator<ScannableTreeNode>> deeperScans = new ArrayList<>();
 
@@ -67,9 +67,6 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 				case TreeScanStep.SingleSideStep j6 -> {
 					result.add(ScannableTreeNode.this.offsetScan(expression.subExpression(),
 							ScannableTreeNode.this.bindings, j6.getIndexManipulation()));
-				}
-				case TreeScanStep.ImpossibleStep j8 -> {
-					result.add(EMPTY_SCAN);
 				}
 				default -> {
 					throw new IllegalStateException("unexpected next step");

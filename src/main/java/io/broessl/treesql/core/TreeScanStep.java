@@ -111,51 +111,36 @@ public abstract sealed class TreeScanStep {
 		}
 		matcher = ANON_DEPTH_SCAN.matcher(raw);
 		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), false, matcher.group(0));
+			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
 			return new DepthScan(raw, boundaries);
 		}
 		matcher = NAMED_DEPTH_SCAN.matcher(raw);
 		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), false, matcher.group(0));
+			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
 			return new DepthScan(raw, boundaries, matcher.group(3));
 		}
 		matcher = ANON_SIBLING.matcher(raw);
 		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(1), false, matcher.group(0));
+			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
 			return new SingleSideStep(raw, null, boundaries.startInclusive);
 		}
 		matcher = NAMED_SIBLING.matcher(raw);
 		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(1), false, matcher.group(0));
+			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
 			String rangeLiteral = matcher.group(2);
 			return new SingleSideStep(raw, rangeLiteral, boundaries.startInclusive);
 		}
 		matcher = ANON_LEVEL_SCAN.matcher(raw);
 		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), true, matcher.group(0));
+			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
 			return new LevelScan(raw, null, boundaries);
 		}
 		matcher = NAMED_LEVEL_SCAN.matcher(raw);
 		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), true, matcher.group(0));
+			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
 			String rangeLiteral = matcher.group(3);
 			return new LevelScan(raw, rangeLiteral, boundaries);
 		}
-		/*
-		 * 
-		 matcher = MULTI_SIBLINGS.matcher(raw);
-		 if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), true, matcher.group(0));
-			String rangeLiteral = matcher.group(2);
-			return new MultiSideStep(raw, rangeLiteral, boundaries);
-		}
-		matcher = ALL_SIBLINGS.matcher(raw);
-		if (matcher.matches()) {
-			ScanBoundaries boundaries = new ScanBoundaries(null, null, true, matcher.group(0));
-			String rangeLiteral = matcher.group(1);
-			return new MultiSideStep(raw, rangeLiteral, boundaries);
-		}
-		*/
 		if (fallback == null) {
 			throw new IllegalArgumentException("Unknown pattern for '" + raw + "'.");
 		} else {
@@ -168,7 +153,7 @@ public abstract sealed class TreeScanStep {
 		return raw;
 	}
 
-	public static final class LiteralForwardStep extends TreeScanStep {
+	static final class LiteralForwardStep extends TreeScanStep {
 		LiteralForwardStep(String literal) {
 			super(literal);
 		}
@@ -187,7 +172,7 @@ public abstract sealed class TreeScanStep {
 		}
 	}
 
-	public static final class SingleForwardStep extends TreeScanStep {
+	static final class SingleForwardStep extends TreeScanStep {
 
 		SingleForwardStep(String raw, String rangeLiteral) {
 			super(raw, rangeLiteral);
@@ -199,7 +184,7 @@ public abstract sealed class TreeScanStep {
 
 	}
 
-	public static final class DepthScan extends TreeScanStep {
+	static final class DepthScan extends TreeScanStep {
 
 		private ScanBoundaries boundaries;
 		private String nameForLastStep;
@@ -268,7 +253,7 @@ public abstract sealed class TreeScanStep {
 
 	}
 
-	public static final class SingleBackStep extends TreeScanStep {
+	static final class SingleBackStep extends TreeScanStep {
 		SingleBackStep(String raw, String rangeLiteral) {
 			super(raw, rangeLiteral);
 		}
@@ -280,7 +265,7 @@ public abstract sealed class TreeScanStep {
 	}
 
 
-	public static final class SingleSideStep extends TreeScanStep {
+	static final class SingleSideStep extends TreeScanStep {
 
 		private Integer indexManipulation;
 
@@ -295,7 +280,7 @@ public abstract sealed class TreeScanStep {
 	}
 
 
-	public static final class LevelScan extends TreeScanStep {
+	static final class LevelScan extends TreeScanStep {
 
 		private ScanBoundaries boundaries;
 
@@ -357,20 +342,13 @@ public abstract sealed class TreeScanStep {
 		}
 	}
 
-	public static final class ImpossibleStep extends TreeScanStep {
-		ImpossibleStep() {
-			super("", null);
-		}
-	}
-
 	public static class ScanBoundaries {
 
 		Integer startInclusive;
 
 		Integer endInclusive;
 
-		public ScanBoundaries(String startInclusive, String endInclusive, boolean withOpenBoundaries,
-				String fullStepExpression) {
+		public ScanBoundaries(String startInclusive, String endInclusive, String fullStepExpression) {
 			try {
 				this.startInclusive = Integer.parseInt(startInclusive);
 			} catch (Exception e) {
@@ -381,7 +359,7 @@ public abstract sealed class TreeScanStep {
 			} catch (Exception e) {
 				// ignore
 			}
-			if (!withOpenBoundaries && (this.startInclusive == null || this.endInclusive == null)) {
+			if ((this.startInclusive == null || this.endInclusive == null)) {
 				throw new IllegalArgumentException(String.format("'%s' and '%s' are not valid boundaries in '%s'",
 						startInclusive, endInclusive, fullStepExpression));
 			}

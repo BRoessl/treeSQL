@@ -1,4 +1,4 @@
-package io.broessl.treesql;
+package io.broessl.treesql.core;
 
 import java.util.List;
 
@@ -10,8 +10,6 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.broessl.testutils.TestWithJsonData;
-import io.broessl.treesql.core.TreeScanExpression;
-import io.broessl.treesql.core.TreeScanStep;
 import io.broessl.treesql.core.TreeScanStep.*;
 import io.broessl.treesql.json.NavigableJsonNode;
 
