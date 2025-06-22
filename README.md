@@ -26,7 +26,7 @@ Let's get straight into it with some examples to learn how we combine **r-JSONPo
 
 ### Example A - in it's simpliest form
 #### Query
-`SELECT index, /index, @index FROM "/foofoo/~index"`
+`SELECT index, ~index, @index FROM "/foofoo/~index"`
 #### Applied On Data
 ```json
 {
@@ -37,7 +37,7 @@ Let's get straight into it with some examples to learn how we combine **r-JSONPo
 }
 ```
 #### Result
-|index|/index|@index
+|index|~index|@index
 |---|---|---|
 |0|/foofoo/0|5|
 |1|/foofoo/1|6|
