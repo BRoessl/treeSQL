@@ -2,6 +2,10 @@ package io.broessl.treesql.core.types;
 
 public final class TreeNull extends TreePrimitive {
 
+    public static final TreeNull INSTANCE = new TreeNull();
+
+    private TreeNull(){}
+
     @Override
     public Object nativeValue() {
         return null;
@@ -14,13 +18,14 @@ public final class TreeNull extends TreePrimitive {
 
     @Override
     public int compareTo(TreePrimitive o) {
-        if (equals(o)){
+        if (equals(o)) {
             return 0;
         }
-        throw new IllegalArgumentException(String.format("'%s' is not comparable with '%s'", this.getClass().getSimpleName(), o.getClass().getSimpleName()));
+        throw new IllegalArgumentException(String.format("'%s' is not comparable with '%s'",
+                this.getClass().getSimpleName(), o.getClass().getSimpleName()));
     }
 
-            @Override
+    @Override
     public int hashCode() {
         return 0;
     }
@@ -35,4 +40,5 @@ public final class TreeNull extends TreePrimitive {
             return false;
         return true;
     }
+
 }

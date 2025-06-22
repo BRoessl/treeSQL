@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeBool;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
+import io.broessl.treesql.core.types.TreeNull;
 import io.broessl.treesql.core.types.TreeNumber;
 import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
@@ -233,7 +234,7 @@ public class NavigableJsonNode implements NavigableTreeNode {
 	@Override
 	public TreePrimitive getValue() {
 		if (delegated == null || delegated.isNull() || delegated.isMissingNode()) {
-			return TreePrimitive.NULL;
+			return TreeNull.INSTANCE;
 		}
 		if (delegated.isNumber()) {
 			return new TreeNumber(delegated.numberValue());

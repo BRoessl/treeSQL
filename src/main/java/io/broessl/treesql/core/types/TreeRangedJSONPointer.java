@@ -25,8 +25,8 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
         stn.getNavigableTreeNode().getRoot();
         List<ScannableTreeNode> resultOfPointer = ScannableTreeNode
                 .forRoot(stn.getNavigableTreeNode().getRoot()).scan(this.selection).toList();
-        if (resultOfPointer.size() == 0) {
-            return new TreeNull();
+        if (resultOfPointer.isEmpty()) {
+            return TreeNull.INSTANCE;
         }
         if (resultOfPointer.size() == 1) {
             return new TreeString(resultOfPointer.get(0).getNavigableTreeNode().getValue().toString());
@@ -39,7 +39,7 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
     }
 
     public TreeRangedJSONPointer contextAware(ScannableTreeNode stn) {
-        String pointer = this.selection;
+        String pointer;
         if (isContextAware()) {
             String context;
             if (this.selection.contains("/")) {

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.broessl.treesql.core.eval.stack.Stackable;
 
-public sealed abstract class TreeValue implements Stackable
+public abstract sealed class TreeValue implements Stackable
         permits TreeContextualPrimitive, TreePrimitive {
 
     public static TreeNumber parseNumber(String text) {
@@ -33,7 +33,7 @@ public sealed abstract class TreeValue implements Stackable
 
     public static TreeNull parseNull(String text) {
         if ("NULL".equals(text)) {
-            return TreeNull.NULL;
+            return TreeNull.INSTANCE;
         }
         throw new IllegalArgumentException("Null must be the keyword NULL, got: " + text);
     }

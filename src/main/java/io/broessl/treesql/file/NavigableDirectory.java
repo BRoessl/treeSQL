@@ -16,6 +16,8 @@ import io.broessl.treesql.json.NavigableJsonNode;
 
 public class NavigableDirectory implements NavigableTreeNode {
 
+	private static final String JSON_DIRECTIVE = "#json";
+
 	private Path path;
 
 	private NavigableTreeNode parent;
@@ -49,9 +51,9 @@ public class NavigableDirectory implements NavigableTreeNode {
 	public Optional<NavigableTreeNode> getNextNode(String nameOrIndex) {
 		if (Files.isRegularFile(this.path, LinkOption.NOFOLLOW_LINKS)) {
 			try {
-				if ("#json".equals(nameOrIndex)) {
+				if (JSON_DIRECTIVE.equals(nameOrIndex)) {
 					byte[] allBytes = Files.readAllBytes(this.path);
-					NavigableJsonNode fromContent = NavigableJsonNode.fromContent(allBytes, this, "#json");
+					NavigableJsonNode fromContent = NavigableJsonNode.fromContent(allBytes, this, JSON_DIRECTIVE);
 					return Optional.ofNullable(fromContent);
 				}
 				return Optional.empty();
@@ -80,17 +82,13 @@ public class NavigableDirectory implements NavigableTreeNode {
 				});
 			}
 			if (Files.isRegularFile(this.path, LinkOption.NOFOLLOW_LINKS)) {
-				try {
 					String fileName = this.path.getFileName().toString();
 					if (fileName.endsWith(".json")) {
 						byte[] allBytes = Files.readAllBytes(this.path);
-						NavigableJsonNode fromContent = NavigableJsonNode.fromContent(allBytes, this, "#json");
+						NavigableJsonNode fromContent = NavigableJsonNode.fromContent(allBytes, this, JSON_DIRECTIVE);
 						return Stream.ofNullable((NavigableTreeNode) fromContent);
 					}
 					return Stream.empty();
-				} catch (IOException e) {
-					return Stream.empty();
-				}
 			}
 			return Stream.empty();
 		} catch (Exception e) {
@@ -126,7 +124,7 @@ public class NavigableDirectory implements NavigableTreeNode {
 		if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
 			return new TreeString("FILE_OBJECT");
 		}
-		return new TreeNull();
+		return TreeNull.INSTANCE;
 	}
 
 }

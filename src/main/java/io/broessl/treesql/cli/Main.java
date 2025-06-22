@@ -14,7 +14,7 @@ import io.broessl.treesql.sql.QueryParser;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException {
 		Path rootPath = null;
 		if (args.length != 1) {
 			System.out.println(
@@ -50,7 +50,7 @@ public class Main {
 
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (!Thread.interrupted()) {
-				System.out.printf("treeSQL> ");
+				System.out.print("treeSQL> ");
 				String nextLine = null;
 				nextLine = scanner.nextLine();
 				if (nextLine.isBlank()) {
@@ -68,7 +68,7 @@ public class Main {
 						final ResultPrinter printer = new ResultPrinter(System.out::print, consoleCols);
 						printer.printHeader(query.getColumnNames());
 						query.execute(root).sequential()
-								.takeWhile((list) -> {
+								.takeWhile(list -> {
 									// abort if user performs input
 									try {
 										if (System.in.available() == 0) {
@@ -83,15 +83,12 @@ public class Main {
 										return false;
 									}
 								})
-								.forEach(row -> {
-									printer.printRow(row);
-								});
+								.forEach(printer::printRow);
 						printer.printFooter();
 					} catch (Exception e) {
 						System.err
-								.println(String.format("✖ failed to perform query:\n>>> %s <<<\n%s", nextLine,
-										e.getMessage()));
-						// e.printStackTrace();
+								.printf("✖ failed to perform query:%n>>> %s <<<%n%s%n", nextLine,
+										e.getMessage());
 					}
 				}
 			}
@@ -122,10 +119,11 @@ public class Main {
 			                    %
 				""";
 
-	private static int readConsoleColumns() throws IOException {
+	private static int readConsoleColumns() {
 		try {
 			return Integer.parseInt(System.getenv("COLUMNS"));
 		} catch (Exception e) {
+			//ignore
 		}
 		return 120; // Default value if reading fails
 	}
@@ -136,7 +134,7 @@ public class Main {
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
-				// ignore
+				Thread.currentThread().interrupt();
 			}
 		});
 		System.out.println();
