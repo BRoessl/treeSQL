@@ -19,15 +19,17 @@ treeSQL uses common SQL syntax, e.g. `SELECT ... FROM ... JOIN ... WHERE ... ORD
 **Examples:**
 - `/foofoo/~index` is a *ranged JSONPointer* **rJP** and `~index` is a range literal.
 - `/foo/bar/..~` performs one back-traversal at `/foo/bar` and is virtually the same as `/foo`.
-- `my_range_literal/bar` is *context-aware rJP*, starting at whatever the literal "myLiteral" is supposed to be. E.g. "myLiteral" could be defined in an *absolute rJP* "/here/is/~myLiteral".
+- `~myLiteral/bar` is *context-aware rJP*, starting at whatever the literal "myLiteral" is supposed to be. E.g. "myLiteral" could be defined in an *absolute rJP* "/here/is/~myLiteral".
 
 ## Ranged JSONPointer
 In short, a ranged JSONPointer (r-JSONPointer or rJP) can
-1. denote multiple JSONPointer at once.
-1. be relative.
-1. reverse back the tree hierarchy.
-1. scan up or down a predefined depth range.
-1. go left or right a predefined range of sibling nodes.
+1. denote an arbitrary amount of JSONPointers at once which follow a certain path pattern (*"/fixed/~arbitrary/fixed_2/~arbitrary_2"*).
+1. be named (*"/bar/\~name/foo"*) or unnamed (*"/bar/\~/foo"*).
+1. be relative (*"~name/this_is_relative_to/tilde_name"*).
+1. reverse back the tree hierarchy (*"/foo/bar/..~back_to_foo"*).
+1. scan up or down a predefined depth range (*"/{1,3}~going_deep_1_2_and_then_3_levels/foo_at_level_2_3_or_4"*).
+1. go left or right a predefined range of sibling nodes (*"/foo/5/[+1,+2]~sibling_at_index_6_or_7/content_of_sibling"*).
+1. use regex pattern to specify what a range literal might match (*"/foo/(^a.\*)~starts_with_a"*).
 
 # Examples
 Let's get straight into it with some examples to learn how we combine **r-JSONPointers with SQL** statements:
