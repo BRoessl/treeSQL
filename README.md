@@ -14,12 +14,28 @@ treeSQL uses common SQL syntax, e.g. `SELECT ... FROM ... JOIN ... WHERE ... ORD
 ```
 **Quick Recap:** JSONPointer uses `/` as path delimiter. JSONPointer **`/foo`** would result in `42`, JSONPointer **`/foofoo/0`** would result in `5` and so on. Due to the special meaning for `/` there are two special escape char sequences: `~0` is `~` and `~1` is `/`. JSONPointers can be quoted as JSON string value: `"/foofoo/0"`
 
-**Custom JSONPointer Extension:** Since `~` is a special char in JSONPointers we will use it to mark a range of values, bound to a self-assigned name. E.g. `/foofoo/~index` is the representation of the value range `/foofoo/0`, `/foofoo/1` and `/foofoo/2`, where `~index` is some kind of a placeholder. We call `~index` a **range literal** and to avoid conflicts with escape sequences `~0` and `~1`, every range literal must match `~[a-z][a-z0-9_]*`. JSONPointer of this format will be called **r-JSONPointer** (or **rJP**) for "*ranged JSONPointer*". We also add a special range literal `..~` to back-traverse the tree (like `cd ..`, might help to build a relative path). Ranged literals can be reused as starting point of a *context-aware JSONPointer*
+**Custom JSONPointer Extension:** Since `~` is a special escape char in JSONPointers we (mis)use it to mark a range of values, bound to a self-assigned name. E.g. `/foofoo/~index` is the representation of the value range `/foofoo/0`, `/foofoo/1` and `/foofoo/2`, where `~index` is some kind of a placeholder. We call `~index` a **range literal** and to avoid conflicts with escape sequences `~0` and `~1`, every range literal must match `~[a-z][a-z0-9_]*`.
 
-**Conclusion:**
+JSONPointer of this format will be called **r-JSONPointer** (or **rJP**) for "*ranged JSONPointer*". We also add a special range literal `..~` to back-traverse the tree (like `cd ..`, might help to build a relative path). Range literals can be reused as starting point of a *context-aware (relative) JSONPointer*. We can think of even more features (see below) as long as the path element ends with `~[a-z][a-z0-9_]*` or just `~`.
+
+Any JSONPointer is a valid r-JSONPointer, but an r-JSONPointer is likely not a valid JSONPointer.
+
+
+
+**Examples:**
 - `/foofoo/~index` is a *ranged JSONPointer* **rJP** and `~index` is a range literal.
 - `/foo/bar/..~` performs one back-traversal at `/foo/bar` and is virtually the same as `/foo`.
-- `my_range_literal/bar` is *context-aware rJP*, starting at whatever the literal "myLiteral" is supposed to be. E.g. "myLiteral" could be defined in an *absolute rJP* "/here/is/~myLiteral".
+- `~myLiteral/bar` is a *context-aware (relative) rJP*, starting at whatever the literal "myLiteral" is supposed to be. E.g. "myLiteral" could be defined in a *root-based (absolute) rJP* "/here/is/~myLiteral".
+
+## Ranged JSONPointer
+In short, a ranged JSONPointer (r-JSONPointer or rJP) can
+1. denote an arbitrary amount of JSONPointers at once which follow a certain path pattern (*"/fixed/~arbitrary/fixed_2/~arbitrary_2"*).
+1. be named (*"/bar/\~name/foo"*) or unnamed (*"/bar/\~/foo"*).
+1. be relative (*"~name/this_is_relative_to/tilde_name"*).
+1. reverse back the tree hierarchy (*"/foo/bar/..~back_to_foo"*).
+1. scan up or down a predefined depth range (*"/{1,3}~going_deep_1_2_and_then_3_levels/foo_at_level_2_3_or_4"*).
+1. go left or right a predefined range of sibling nodes (*"/foo/5/[+1,+2]~sibling_at_index_6_or_7/content_of_sibling"*).
+1. use regex pattern to specify what a range literal might match (*"/foo/(^a.\*)~starts_with_a"*).
 
 # Examples
 Let's get straight into it with some examples to learn how we combine **r-JSONPointers with SQL** statements:
