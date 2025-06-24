@@ -5,14 +5,13 @@ import io.broessl.treesql.core.types.TreePrimitive;
 
 public abstract class StackOperation implements Stackable {
 
-    abstract public String getSymbol();
+  public abstract String getSymbol();
 
-    abstract public int getArgumentSize();
+  public abstract int getArgumentSize();
 
-    abstract public TreePrimitive call(TreePrimitive[] arguments);
+  public abstract TreePrimitive call(TreePrimitive[] arguments);
 
-    public String toString() {
-        return getSymbol();
-    }
-
+  public String toString() {
+    return getSymbol();
+  }
 }

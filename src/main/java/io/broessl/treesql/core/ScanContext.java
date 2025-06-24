@@ -1,29 +1,28 @@
 package io.broessl.treesql.core;
 
-import java.util.Map;
-
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
+import java.util.Map;
 
 public interface ScanContext {
 
-	String getEvaluationPath();
+  String getEvaluationPath();
 
-	public Object getBinding(String bindingName);
+  public Object getBinding(String bindingName);
 
-	public Map<String, Object> getPathBindings();
+  public Map<String, Object> getPathBindings();
 
-	ScanContext asImmutable();
+  ScanContext asImmutable();
 
-	ScanContext asMutable();
+  ScanContext asMutable();
 
-	ScanContext chain(TreeNodeIdentifier forNodeName);
+  ScanContext chain(TreeNodeIdentifier forNodeName);
 
-	ScanContext chainWithPathBinding(TreeNodeIdentifier forNodeName, String bindingName, NavigableTreeNode valueAt);
+  ScanContext chainWithPathBinding(
+      TreeNodeIdentifier forNodeName, String bindingName, NavigableTreeNode valueAt);
 
-	default String getAbsolutePath() {
-		TreeScanExpression scanExpression = TreeScanExpression.parse(getEvaluationPath());
-		scanExpression.toLiteralsOnly();
-		return scanExpression.toString();
-	}
-
+  default String getAbsolutePath() {
+    TreeScanExpression scanExpression = TreeScanExpression.parse(getEvaluationPath());
+    scanExpression.toLiteralsOnly();
+    return scanExpression.toString();
+  }
 }
