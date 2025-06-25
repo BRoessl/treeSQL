@@ -86,7 +86,6 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
               ScannableTreeNode.this.executeDirective(
                   expression.subExpression(), ScannableTreeNode.this.bindings, j7.getRaw()));
         }
-
         default -> {
           throw new IllegalStateException("unexpected next step");
         }

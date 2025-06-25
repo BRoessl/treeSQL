@@ -5,7 +5,7 @@ import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.ScannableTreeNode;
 import io.broessl.treesql.core.types.TreeString;
 import io.broessl.treesql.file.NavigableDirectory;
-import io.broessl.treesql.file.SquealableFileSystemTest;
+import io.broessl.treesql.file.NavigableDirectoryTest;
 import io.broessl.treesql.json.NavigableJsonNode;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -192,7 +192,7 @@ class ScannableTreeNodeTest extends TestWithJsonData {
   @Test
   void testFileScan() {
     NavigableDirectory squealableFileSystem =
-        new NavigableDirectory(SquealableFileSystemTest.TEST_DIR.toPath());
+        new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     List<String> scanResult = fileScan.scan("/{0,3}~/~JSON/0").map(t -> t.absolutePath()).toList();
     Assertions.assertEquals(7, scanResult.size());
@@ -208,7 +208,7 @@ class ScannableTreeNodeTest extends TestWithJsonData {
   @Test
   void testFileScanIntoAndOutJson() {
     NavigableDirectory squealableFileSystem =
-        new NavigableDirectory(SquealableFileSystemTest.TEST_DIR.toPath());
+        new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode into = fileScan.scan("/testA.json/~JSON/0").findFirst().orElseThrow();
     Assertions.assertEquals("0", into.getNameOrIndex().nativeValue().toString());
@@ -219,7 +219,7 @@ class ScannableTreeNodeTest extends TestWithJsonData {
   @Test
   void testFileScanWithTiled() {
     NavigableDirectory squealableFileSystem =
-        new NavigableDirectory(SquealableFileSystemTest.TEST_DIR.toPath());
+        new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode scanResult =
         fileScan.scan("/subFolder/sub~0SubFolder/testA.json/~JSON/0").findFirst().get();

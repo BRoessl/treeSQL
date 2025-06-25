@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import io.broessl.treesql.core.TreeScanStep.RegexStep;
+
 public class TreeScanExpression {
 
   private List<TreeScanStep> steps;
@@ -42,7 +44,7 @@ public class TreeScanExpression {
    */
   public List<TreeScanExpression> interpolateExpression(NavigableTreeNode contextNode) {
     LinkedList<TreeScanExpression> result = new LinkedList<>();
-    if (this.matches() || !steps.getFirst().ranged()) {
+    if (this.matches() || !steps.getFirst().interpolatable()) {
       result.add(this);
       return result;
     }
@@ -51,6 +53,7 @@ public class TreeScanExpression {
         switch (forInterpolation) {
           case TreeScanStep.DepthScan bs -> bs.interpolate();
           case TreeScanStep.LevelScan sd -> sd.interpolate(contextNode);
+          case TreeScanStep.RegexStep rs -> rs.interpolate(contextNode);
           default -> throw new IllegalStateException();
         };
     for (List<TreeScanStep> interpolatedSteps : allInpolations) {
@@ -136,7 +139,7 @@ public class TreeScanExpression {
   }
 
   public boolean hasRangedSteps() {
-    return steps.stream().filter(s -> s.ranged()).count() != 0;
+    return steps.stream().filter(s -> s.interpolatable()).count() != 0;
   }
 
   public boolean literalsOnly() {

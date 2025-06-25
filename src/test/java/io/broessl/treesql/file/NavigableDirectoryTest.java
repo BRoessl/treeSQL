@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class SquealableFileSystemTest {
+public class NavigableDirectoryTest {
 
   public static final File TEST_DIR = new File("src/test/resources/root");
 

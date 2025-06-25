@@ -32,8 +32,7 @@ class TreeScanExpressionTest extends TestWithJsonData {
 
   @Test
   void testParseBackwardStepsExpresions() {
-    TreeScanExpression expression =
-        TreeScanExpression.parse("/..~/{-2,-2}~/{-1,-3}~/{0,-3}~/{-1,-99}~/..~myBinding");
+    TreeScanExpression expression = TreeScanExpression.parse("/..~/{-2,-2}~/{-1,-3}~/{0,-3}~/{-1,-99}~/..~myBinding");
     List<TreeScanStep> step = expression.steps();
     Assertions.assertEquals(6, step.size());
     Assertions.assertInstanceOf(TreeScanStep.SingleBackStep.class, step.get(0));
@@ -56,8 +55,7 @@ class TreeScanExpressionTest extends TestWithJsonData {
 
   @Test
   void testParseForwardStepsExpresions() {
-    TreeScanExpression expression =
-        TreeScanExpression.parse("/~/{2,2}~/{1,3}~/{0,3}~/{1,5}~/~myBinding");
+    TreeScanExpression expression = TreeScanExpression.parse("/~/{2,2}~/{1,3}~/{0,3}~/{1,5}~/~myBinding");
     List<TreeScanStep> step = expression.steps();
     Assertions.assertEquals(6, step.size());
     Assertions.assertInstanceOf(TreeScanStep.SingleForwardStep.class, step.get(0));
@@ -65,8 +63,7 @@ class TreeScanExpressionTest extends TestWithJsonData {
     DepthScan i2 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(2));
     DepthScan i3 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(3));
     DepthScan i4 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(4));
-    SingleForwardStep i5 =
-        Assertions.assertInstanceOf(TreeScanStep.SingleForwardStep.class, step.get(5));
+    SingleForwardStep i5 = Assertions.assertInstanceOf(TreeScanStep.SingleForwardStep.class, step.get(5));
     Assertions.assertTrue(i1.getRangeLiteral().isEmpty());
     Assertions.assertEquals(2, i1.getBoundaries().getStartInclusive());
     Assertions.assertEquals(2, i1.getBoundaries().getEndInclusive());
@@ -81,8 +78,8 @@ class TreeScanExpressionTest extends TestWithJsonData {
 
   @Test
   void testParseSideStepsExpresions() {
-    TreeScanExpression expression =
-        TreeScanExpression.parse("/[+1]~/[-2]~/[+1,+3]~/[0,+3]~/[+1,+99]~/[-99,+99]~myBinding");
+    TreeScanExpression expression = TreeScanExpression
+        .parse("/[+1]~/[-2]~/[+1,+3]~/[0,+3]~/[+1,+99]~/[-99,+99]~myBinding");
     List<TreeScanStep> step = expression.steps();
     Assertions.assertEquals(6, step.size());
     SingleSideStep i0 = Assertions.assertInstanceOf(TreeScanStep.SingleSideStep.class, step.get(0));
@@ -141,25 +138,21 @@ class TreeScanExpressionTest extends TestWithJsonData {
     }
     {
       JsonNode testDataArrayWithTenIntegers = testDataArrayWithTenIntegers();
-      NavigableJsonNode backrefNode =
-          NavigableJsonNode.tryLink(
-                  testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(5))
-              .get();
+      NavigableJsonNode backrefNode = NavigableJsonNode.tryLink(
+          testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(5))
+          .get();
       TreeScanExpression expression = TreeScanExpression.parse("/[-1]~/foobar");
-      List<TreeScanExpression> interpolateExpressions =
-          expression.interpolateExpression(backrefNode);
+      List<TreeScanExpression> interpolateExpressions = expression.interpolateExpression(backrefNode);
       Assertions.assertEquals(1, interpolateExpressions.size());
       Assertions.assertEquals("/[-1]~/foobar", interpolateExpressions.get(0).toString());
     }
     {
       JsonNode testDataArrayWithTenIntegers = testDataArrayWithTenIntegers();
-      NavigableJsonNode backrefNode =
-          NavigableJsonNode.tryLink(
-                  testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(7))
-              .get();
+      NavigableJsonNode backrefNode = NavigableJsonNode.tryLink(
+          testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(7))
+          .get();
       TreeScanExpression expression = TreeScanExpression.parse("/[0,+99]~/foobar");
-      List<TreeScanExpression> interpolateExpressions =
-          expression.interpolateExpression(backrefNode);
+      List<TreeScanExpression> interpolateExpressions = expression.interpolateExpression(backrefNode);
       Assertions.assertEquals(3, interpolateExpressions.size());
       Assertions.assertEquals("/[0]~/foobar", interpolateExpressions.get(0).toString());
       Assertions.assertEquals("/[1]~/foobar", interpolateExpressions.get(1).toString());
@@ -167,25 +160,33 @@ class TreeScanExpressionTest extends TestWithJsonData {
     }
     {
       JsonNode testDataArrayWithTenIntegers = testDataArrayWithTenIntegers();
-      NavigableJsonNode backrefNode =
-          NavigableJsonNode.tryLink(
-                  testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(1))
-              .get();
+      NavigableJsonNode backrefNode = NavigableJsonNode.tryLink(
+          testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(1))
+          .get();
       TreeScanExpression expression = TreeScanExpression.parse("/[-99,0]~/foobar");
-      List<TreeScanExpression> interpolateExpressions =
-          expression.interpolateExpression(backrefNode);
+      List<TreeScanExpression> interpolateExpressions = expression.interpolateExpression(backrefNode);
       Assertions.assertEquals(2, interpolateExpressions.size());
       Assertions.assertEquals("/[-1]~/foobar", interpolateExpressions.get(0).toString());
       Assertions.assertEquals("/[0]~/foobar", interpolateExpressions.get(1).toString());
+    }
+    {
+      JsonNode testDataArrayWithTenIntegers = testDataArrayWithTenIntegers();
+      NavigableJsonNode forPatternMatch = new NavigableJsonNode(testDataArrayWithTenIntegers, null);
+      TreeScanExpression expression = TreeScanExpression.parse("/(0|1|2)~/foobar");
+      List<TreeScanExpression> interpolateExpressions = expression.interpolateExpression(forPatternMatch);
+      Assertions.assertEquals(3, interpolateExpressions.size());
+      Assertions.assertEquals("/0/foobar", interpolateExpressions.get(0).toString());
+      Assertions.assertEquals("/1/foobar", interpolateExpressions.get(1).toString());
+      Assertions.assertEquals("/2/foobar", interpolateExpressions.get(2).toString());
     }
   }
 
   @Test
   void testInterpolateSideReversed() {
     JsonNode testDataArrayWithTenIntegers = testDataArrayWithTenIntegers();
-    NavigableJsonNode backrefNode =
-        NavigableJsonNode.tryLink(testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(5))
-            .get();
+    NavigableJsonNode backrefNode = NavigableJsonNode
+        .tryLink(testDataArrayWithTenIntegers, testDataArrayWithTenIntegers.get(5))
+        .get();
     TreeScanExpression expression = TreeScanExpression.parse("/[+1,-1]~/foobar");
     List<TreeScanExpression> interpolateExpressions = expression.interpolateExpression(backrefNode);
     Assertions.assertEquals(3, interpolateExpressions.size());
@@ -208,5 +209,40 @@ class TreeScanExpressionTest extends TestWithJsonData {
     TreeScanExpression expression = TreeScanExpression.parse("/{1,3}~/a");
     Assertions.assertTrue(expression.hasRangedSteps());
     Assertions.assertThrows(IllegalArgumentException.class, () -> expression.toLiteralsOnly());
+  }
+
+  @Test
+  void testInterpolateExpression_basicCases() {
+    // Case: matches() == true (empty expression)
+    TreeScanExpression empty = TreeScanExpression.parse("");
+    List<TreeScanExpression> result = empty.interpolateExpression(null);
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("", result.get(0).toString());
+
+    // Case: first step is not ranged
+    TreeScanExpression nonRanged = TreeScanExpression.parse("/foo/bar");
+    List<TreeScanExpression> result2 = nonRanged.interpolateExpression(null);
+    Assertions.assertEquals(1, result2.size());
+    Assertions.assertEquals("/foo/bar", result2.get(0).toString());
+
+    // Case: first step is ranged DepthScan
+    TreeScanExpression rangedDepth = TreeScanExpression.parse("/{1,3}~/foo");
+    List<TreeScanExpression> result3 = rangedDepth.interpolateExpression(null);
+    Assertions.assertEquals(3, result3.size());
+    Assertions.assertEquals("/~/foo", result3.get(0).toString());
+    Assertions.assertEquals("/~/~/foo", result3.get(1).toString());
+    Assertions.assertEquals("/~/~/~/foo", result3.get(2).toString());
+
+    // Case: first step is ranged LevelScan (side step), needs contextNode
+    // We'll use a NavigableJsonNode as context, as in other tests
+    com.fasterxml.jackson.databind.JsonNode testData = testDataArrayWithTenIntegers();
+    io.broessl.treesql.json.NavigableJsonNode context = io.broessl.treesql.json.NavigableJsonNode
+        .tryLink(testData, testData.get(5)).get();
+    TreeScanExpression rangedLevel = TreeScanExpression.parse("/[0,+2]~/foo");
+    List<TreeScanExpression> result4 = rangedLevel.interpolateExpression(context);
+    Assertions.assertEquals(3, result4.size());
+    Assertions.assertEquals("/[0]~/foo", result4.get(0).toString());
+    Assertions.assertEquals("/[1]~/foo", result4.get(1).toString());
+    Assertions.assertEquals("/[2]~/foo", result4.get(2).toString());
   }
 }
