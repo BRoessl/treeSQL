@@ -18,8 +18,6 @@ import java.util.stream.Stream;
 
 public class NavigableDirectory implements NavigableTreeNode {
 
-  // private static final String JSON_DIRECTIVE = "~JSON";
-
   private Path path;
 
   private NavigableTreeNode parent;
@@ -40,7 +38,7 @@ public class NavigableDirectory implements NavigableTreeNode {
   @Override
   public TreeNodeIdentifier getSelfName() {
     if (parent == null) {
-      return new TreeString("");
+      return null;
     }
     return new TreeString(path.getFileName().toString());
   }

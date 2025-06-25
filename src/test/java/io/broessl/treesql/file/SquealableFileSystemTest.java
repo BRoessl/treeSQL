@@ -1,5 +1,7 @@
 package io.broessl.treesql.file;
 
+import io.broessl.treesql.core.types.TreeList;
+import io.broessl.treesql.core.types.TreePrimitive;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -30,5 +32,19 @@ public class SquealableFileSystemTest {
     Assertions.assertTrue(list.contains("3.json"));
     Assertions.assertTrue(list.contains("4.json"));
     Assertions.assertTrue(list.contains("5.json"));
+  }
+
+  @Test
+  void testList() {
+    NavigableDirectory squealableFileSystem = new NavigableDirectory(TEST_DIR.toPath());
+    Assertions.assertTrue(squealableFileSystem.getParentNode().isEmpty());
+    Assertions.assertTrue(squealableFileSystem.getChildNode("nope").isEmpty());
+    Assertions.assertTrue(squealableFileSystem.getChildNode("subFolder").isPresent());
+    Assertions.assertTrue(squealableFileSystem.getChildNode("testA.json").isPresent());
+    TreePrimitive tPrim = squealableFileSystem.getValue();
+    TreeList tList = Assertions.assertInstanceOf(TreeList.class, tPrim);
+    List<Object> nativeValues = tList.nativeValue().stream().map(t -> t.nativeValue()).toList();
+    Assertions.assertTrue(nativeValues.contains("subFolder"));
+    Assertions.assertTrue(nativeValues.contains("testA.json"));
   }
 }

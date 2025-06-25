@@ -20,7 +20,7 @@ import java.util.stream.StreamSupport;
 
 public class NavigableJsonNode implements NavigableTreeNode {
 
-  String externalNamed;
+  String externalNamedRoot;
 
   private NavigableTreeNode parent;
 
@@ -33,7 +33,7 @@ public class NavigableJsonNode implements NavigableTreeNode {
   public NavigableJsonNode(JsonNode delegated, NavigableTreeNode parent, String externalNamed) {
     this.delegated = delegated;
     this.parent = parent;
-    this.externalNamed = externalNamed;
+    this.externalNamedRoot = externalNamed;
   }
 
   public NavigableJsonNode(JsonNode delegated, NavigableJsonNode parent) {
@@ -119,11 +119,11 @@ public class NavigableJsonNode implements NavigableTreeNode {
 
   @Override
   public TreeNodeIdentifier getSelfName() {
-    // a json object never knows its own name, it is only by the parent object named
     if (parent == null) {
-      // root has no key and is empty string as by RFC
-      return new TreeString("");
+      return null;
     }
+    // jackson api specific: a com.fasterxml.jackson.databind.JsonNode's name is only accesible by
+    // parent map/object or list/array
     if (parent instanceof NavigableJsonNode jparent) {
       if (parent.isListNode()) {
         return new TreeNumber(findIndexFor(delegated, ((NavigableJsonNode) parent).delegated));
@@ -133,9 +133,9 @@ public class NavigableJsonNode implements NavigableTreeNode {
       }
       return new TreeString(findNameFor(delegated, jparent.delegated));
     }
-    // it is the json root object but a non-json parent (e.g. a file) exists
-    // we do not know the name, we are embedded
-    return new TreeString(externalNamed);
+    // it is the json root object but inside a non-json parent (e.g. a file) exists
+    // we do not know the name, we are "embedded"
+    return new TreeString(externalNamedRoot);
   }
 
   @Override
