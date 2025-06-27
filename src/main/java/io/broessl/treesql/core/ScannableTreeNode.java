@@ -1,140 +1,19 @@
 package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
-import io.broessl.treesql.core.types.TreeString;
-import io.broessl.treesql.json.NavigableJsonNode;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * A scannable wrapper around a NavigableTreeNode that provides tree scanning capabilities with
+ * support for expressions and context binding.
+ */
 public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 
-  static final Iterator<ScannableTreeNode> EMPTY_SCAN =
-      new Iterator<ScannableTreeNode>() {
-        @Override
-        public ScannableTreeNode next() {
-          throw new NoSuchElementException();
-        }
-
-        @Override
-        public boolean hasNext() {
-          return false;
-        }
-      };
-
-  private class DepthFirstIterator implements Iterator<ScannableTreeNode> {
-
-    List<Iterator<ScannableTreeNode>> deeperScans = new ArrayList<>();
-
-    List<TreeScanExpression> interpolatedScanExpressions;
-
-    public DepthFirstIterator() {
-      interpolatedScanExpressions =
-          ScannableTreeNode.this.scanExpression.interpolateExpression(ScannableTreeNode.this.node);
-      deepScansForNextExpression();
-    }
-
-    private void deepScansForNextExpression() {
-      if (interpolatedScanExpressions.isEmpty()) {
-        deeperScans = List.of();
-        return;
-      }
-      List<Iterator<ScannableTreeNode>> result = new LinkedList<>();
-      TreeScanExpression expression = interpolatedScanExpressions.removeFirst();
-      if (expression.matches()) {
-        result.add((List.of(ScannableTreeNode.this).iterator()));
-        deeperScans = result;
-        return;
-      }
-      switch (expression.currentStep()) {
-        case TreeScanStep.LiteralForwardStep j -> {
-          if (j.getRangeLiteral().isPresent()) {
-            ScannableTreeNode nextNodeByStep =
-                ScannableTreeNode.this.get(
-                    j.getRaw(),
-                    expression.subExpression(),
-                    ScannableTreeNode.this.bindings.chainWithPathBinding(
-                        new TreeString(j.getRaw()),
-                        j.getRangeLiteral().get(),
-                        ScannableTreeNode.this.node.getChildNode(j.getRaw()).get()));
-            result.add(nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN);
-          } else {
-            ScannableTreeNode nextNodeByStep =
-                ScannableTreeNode.this.get(
-                    j.getRaw(),
-                    expression.subExpression(),
-                    ScannableTreeNode.this.bindings.chain(new TreeString(j.getRaw())));
-            result.add(nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN);
-          }
-        }
-        case TreeScanStep.SingleForwardStep j2 -> {
-          result.addAll(
-              ScannableTreeNode.this.childrenScan(
-                  expression.subExpression(),
-                  ScannableTreeNode.this.bindings,
-                  j2.getRangeLiteral()));
-        }
-        case TreeScanStep.SingleBackStep j4 -> {
-          result.add(
-              ScannableTreeNode.this.backScan(
-                  expression.subExpression(),
-                  ScannableTreeNode.this.bindings,
-                  j4.getRangeLiteral()));
-        }
-        case TreeScanStep.SingleSideStep j6 -> {
-          result.add(
-              ScannableTreeNode.this.offsetScan(
-                  expression.subExpression(),
-                  ScannableTreeNode.this.bindings,
-                  j6.getIndexManipulation(),
-                  j6.getRangeLiteral()));
-        }
-        case TreeScanStep.DirectiveStep j7 -> {
-          result.add(
-              ScannableTreeNode.this.executeDirective(
-                  expression.subExpression(), ScannableTreeNode.this.bindings, j7.getRaw()));
-        }
-        default -> {
-          throw new IllegalStateException("unexpected next step");
-        }
-      }
-      deeperScans = result;
-    }
-
-    @Override
-    public boolean hasNext() {
-      while (!interpolatedScanExpressions.isEmpty() || !deeperScans.isEmpty()) {
-        if (deeperScans.getFirst().hasNext()) {
-          return true;
-        }
-        // try with next deep scan
-        deeperScans.removeFirst();
-        if (deeperScans.isEmpty()) {
-          // try again with next expression
-          deepScansForNextExpression();
-        }
-      }
-      // no deeper scan available
-      return false;
-    }
-
-    @Override
-    public ScannableTreeNode next() {
-      ScannableTreeNode next = deeperScans.getFirst().next();
-      return new ScannableTreeNode(next.node, next.bindings.asImmutable());
-    }
-  }
-
   private ScanContext bindings;
-
   private TreeScanExpression scanExpression;
-
-  final NavigableTreeNode node;
+  private final NavigableTreeNode node;
 
   public ScannableTreeNode(NavigableTreeNode node, ScanContext bindings) {
     this.bindings = bindings;
@@ -174,127 +53,12 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
     return new ScannableTreeNode(forth, bindings, scanExpression);
   }
 
-  public List<Iterator<ScannableTreeNode>> childrenScan(
-      TreeScanExpression subExpression, ScanContext subBindings, Optional<String> rangeLiteral) {
-    final String alreadyBound;
-    if (rangeLiteral.isPresent()) {
-      alreadyBound = (String) subBindings.getBinding(rangeLiteral.get());
-    } else {
-      alreadyBound = null;
-    }
-    return node.children()
-        .filter(
-            refNode -> {
-              if (alreadyBound != null) {
-                return false;
-              } else {
-                return true;
-              }
-            })
-        .map(
-            refNode -> {
-              TreeNodeIdentifier nameOrIndex = refNode.getSelfName();
-              if (rangeLiteral.isPresent()) {
-                return new ScannableTreeNode(
-                        refNode,
-                        subBindings.chainWithPathBinding(nameOrIndex, rangeLiteral.get(), refNode),
-                        subExpression)
-                    .iterator();
-              }
-              return new ScannableTreeNode(refNode, subBindings.chain(nameOrIndex), subExpression)
-                  .iterator();
-            })
-        .toList();
-  }
-
-  public Iterator<ScannableTreeNode> backScan(
-      TreeScanExpression subExpression, ScanContext subBindings) {
-    NavigableTreeNode parent = node.getParentNode().orElse(null);
-    if (parent == null) {
-      return EMPTY_SCAN;
-    }
-    return new ScannableTreeNode(node.getParentNode().orElseThrow(), subBindings, subExpression)
-        .iterator();
-  }
-
-  public Iterator<ScannableTreeNode> backScan(
-      TreeScanExpression subExpression,
-      ScanContext currentBindings,
-      Optional<String> rangeLiteral) {
-    try {
-      NavigableTreeNode parent = node.getParentNode().orElse(null);
-      if (parent == null) {
-        return EMPTY_SCAN;
-      }
-      TreeNodeIdentifier nodeName = parent.getSelfName();
-      if (rangeLiteral.isPresent()) {
-        TreeNodeIdentifier alreadyBound =
-            (TreeNodeIdentifier) currentBindings.getBinding(rangeLiteral.get());
-        if (alreadyBound != null && !alreadyBound.equals(nodeName)) {
-          return EMPTY_SCAN;
-        }
-        if (alreadyBound == null) {
-          return new ScannableTreeNode(
-                  node.getParentNode().orElseThrow(),
-                  currentBindings.chainWithPathBinding(
-                      new TreeString("~.."), rangeLiteral.get(), node.getParentNode().get()),
-                  subExpression)
-              .iterator();
-        }
-      }
-      return new ScannableTreeNode(
-              node.getParentNode().orElseThrow(),
-              currentBindings.chain(new TreeString("~..")),
-              subExpression)
-          .iterator();
-    } catch (NoSuchElementException e) {
-      return EMPTY_SCAN;
-    }
-  }
-
-  public Iterator<ScannableTreeNode> executeDirective(
-      TreeScanExpression subExpression, ScanContext currentBindings, String directive) {
-    if ("~JSON".equals(directive)) {
-      if (node.getValue() instanceof TreeString tString) {
-        return new ScannableTreeNode(
-                NavigableJsonNode.fromContent(tString.nativeValue(), node, directive),
-                currentBindings.chain(new TreeString(directive)),
-                subExpression)
-            .iterator();
-      }
-    }
-    return EMPTY_SCAN;
-  }
-
-  public Iterator<ScannableTreeNode> offsetScan(
-      TreeScanExpression subExpression,
-      ScanContext subBindings,
-      Integer indexManipulation,
-      Optional<String> rangeLiteral) {
-    NavigableTreeNode sibling = node.getSibling(indexManipulation).orElse(null);
-    if (sibling == null) {
-      return EMPTY_SCAN;
-    }
-    if (rangeLiteral.isEmpty()) {
-
-      return new ScannableTreeNode(
-              sibling,
-              subBindings.chain(new TreeString("[" + indexManipulation + "]~")),
-              subExpression)
-          .iterator();
-    } else {
-      return new ScannableTreeNode(
-              sibling,
-              subBindings.chainWithPathBinding(
-                  new TreeString("[" + indexManipulation + "]~"), rangeLiteral.get(), sibling),
-              subExpression)
-          .iterator();
-    }
-  }
-
   @Override
   public Iterator<ScannableTreeNode> iterator() {
-    return new DepthFirstIterator();
+    if (this.scanExpression == null) {
+      throw new IllegalStateException("no scan expression set");
+    }
+    return new TreeNodeIterator(this, new TreeScanOperations(this));
   }
 
   @Override
@@ -308,6 +72,10 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 
   public ScanContext getContext() {
     return bindings;
+  }
+
+  public TreeScanExpression getScanExpression() {
+    return scanExpression;
   }
 
   public void setContext(ScanContext bindings) {
