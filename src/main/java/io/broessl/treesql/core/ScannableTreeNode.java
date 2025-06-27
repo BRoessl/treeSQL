@@ -53,12 +53,24 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
       }
       switch (expression.currentStep()) {
         case TreeScanStep.LiteralForwardStep j -> {
-          ScannableTreeNode nextNodeByStep =
-              ScannableTreeNode.this.get(
-                  j.getRaw(),
-                  expression.subExpression(),
-                  ScannableTreeNode.this.bindings.chain(new TreeString(j.getRaw())));
-          result.add(nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN);
+          if (j.getRangeLiteral().isPresent()) {
+            ScannableTreeNode nextNodeByStep =
+                ScannableTreeNode.this.get(
+                    j.getRaw(),
+                    expression.subExpression(),
+                    ScannableTreeNode.this.bindings.chainWithPathBinding(
+                        new TreeString(j.getRaw()),
+                        j.getRangeLiteral().get(),
+                        ScannableTreeNode.this.node.getChildNode(j.getRaw()).get()));
+            result.add(nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN);
+          } else {
+            ScannableTreeNode nextNodeByStep =
+                ScannableTreeNode.this.get(
+                    j.getRaw(),
+                    expression.subExpression(),
+                    ScannableTreeNode.this.bindings.chain(new TreeString(j.getRaw())));
+            result.add(nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN);
+          }
         }
         case TreeScanStep.SingleForwardStep j2 -> {
           result.addAll(
@@ -79,7 +91,8 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
               ScannableTreeNode.this.offsetScan(
                   expression.subExpression(),
                   ScannableTreeNode.this.bindings,
-                  j6.getIndexManipulation()));
+                  j6.getIndexManipulation(),
+                  j6.getRangeLiteral()));
         }
         case TreeScanStep.DirectiveStep j7 -> {
           result.add(
@@ -254,16 +267,29 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
   }
 
   public Iterator<ScannableTreeNode> offsetScan(
-      TreeScanExpression subExpression, ScanContext subBindings, Integer indexManipulation) {
+      TreeScanExpression subExpression,
+      ScanContext subBindings,
+      Integer indexManipulation,
+      Optional<String> rangeLiteral) {
     NavigableTreeNode sibling = node.getSibling(indexManipulation).orElse(null);
     if (sibling == null) {
       return EMPTY_SCAN;
     }
-    return new ScannableTreeNode(
-            sibling,
-            subBindings.chain(new TreeString("[" + indexManipulation + "]~")),
-            subExpression)
-        .iterator();
+    if (rangeLiteral.isEmpty()) {
+
+      return new ScannableTreeNode(
+              sibling,
+              subBindings.chain(new TreeString("[" + indexManipulation + "]~")),
+              subExpression)
+          .iterator();
+    } else {
+      return new ScannableTreeNode(
+              sibling,
+              subBindings.chainWithPathBinding(
+                  new TreeString("[" + indexManipulation + "]~"), rangeLiteral.get(), sibling),
+              subExpression)
+          .iterator();
+    }
   }
 
   @Override

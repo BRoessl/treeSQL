@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import io.broessl.treesql.core.TreeScanStep.RegexStep;
-
 public class TreeScanExpression {
 
   private List<TreeScanStep> steps;

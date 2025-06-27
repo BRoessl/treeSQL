@@ -1,8 +1,5 @@
 package io.broessl.treesql.core;
 
-import io.broessl.treesql.core.TreeScanStep.DirectiveStep;
-import io.broessl.treesql.core.TreeScanStep.LevelScan;
-import io.broessl.treesql.core.TreeScanStep.ScanBoundaries;
 import io.broessl.treesql.core.types.TreeNumber;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -191,6 +188,10 @@ public abstract sealed class TreeScanStep {
       super(literal);
     }
 
+    LiteralForwardStep(String literal, String rangedLiteral) {
+      super(literal, rangedLiteral);
+    }
+
     @Override
     public boolean isLiteral() {
       return true;
@@ -323,19 +324,23 @@ public abstract sealed class TreeScanStep {
 
     @Override
     public boolean interpolatable() {
-        return true;
+      return true;
     }
 
-  public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
-    return contextNode.children()
-        .filter(c -> pattern.matcher(c.getSelfName().nativeValue().toString()).matches())
-        .map(
-            c -> {
-              TreeScanStep step = new TreeScanStep.SingleForwardStep(c.getSelfName().nativeValue().toString(), getRangeLiteral().orElse(null));
-              return List.of(step);
-            })
-        .toList();
-    }  }
+    public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
+      return contextNode
+          .children()
+          .filter(c -> pattern.matcher(c.getSelfName().nativeValue().toString()).matches())
+          .map(
+              c -> {
+                TreeScanStep step =
+                    new TreeScanStep.LiteralForwardStep(
+                        c.getSelfName().nativeValue().toString(), getRangeLiteral().orElse(null));
+                return List.of(step);
+              })
+          .toList();
+    }
+  }
 
   static final class LevelScan extends TreeScanStep {
 
@@ -385,25 +390,24 @@ public abstract sealed class TreeScanStep {
         toIndexOffset = Math.min(boundaries.endInclusive, (size - index) - 1);
       }
       if (fromIndexOffset == toIndexOffset) {
-        result.add(List.of(toSingleSteps(fromIndexOffset)));
+        result.add(List.of(toSingleSteps(fromIndexOffset, getRangeLiteral().orElse(null))));
       }
       if (fromIndexOffset > toIndexOffset) {
         for (int i = fromIndexOffset; i >= toIndexOffset; i--) {
-          result.add(List.of(toSingleSteps(i)));
+          result.add(List.of(toSingleSteps(i, getRangeLiteral().orElse(null))));
         }
       }
       if (fromIndexOffset < toIndexOffset) {
         for (int i = fromIndexOffset; i <= toIndexOffset; i++) {
-          result.add(List.of(toSingleSteps(i)));
+          result.add(List.of(toSingleSteps(i, getRangeLiteral().orElse(null))));
         }
       }
-      result.get(0).get(0).setRangeLiteral(getRangeLiteral().orElse(null));
       return result;
     }
 
-    private TreeScanStep toSingleSteps(int offset) {
+    private TreeScanStep toSingleSteps(int offset, String rangeLiteral) {
       return new TreeScanStep.SingleSideStep(
-          "[" + offset + "]~" + getRangeLiteral().orElse(""), null, offset);
+          "[" + offset + "]~" + getRangeLiteral().orElse(""), rangeLiteral, offset);
     }
   }
 

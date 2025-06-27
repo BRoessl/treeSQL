@@ -137,6 +137,16 @@ class ScannableTreeNodeTest extends TestWithJsonData {
   }
 
   @Test
+  void testUpToScanWithRangeLiteral() {
+    ScannableTreeNode firstScan =
+        ScannableTreeNode.forRoot(NavigableJsonNode.linkRoot(testDataArrayWithTenIntegers()));
+    List<ScannableTreeNode> scanResult = firstScan.scan("/5/[-99,-1]~foo").toList();
+    Assertions.assertEquals(5, scanResult.size());
+    Assertions.assertEquals("[-5]~", scanResult.get(0).getContext().getBinding("foo").toString());
+    Assertions.assertEquals("[-1]~", scanResult.get(4).getContext().getBinding("foo").toString());
+  }
+
+  @Test
   void testReversedScan() {
     ScannableTreeNode firstScan =
         ScannableTreeNode.forRoot(NavigableJsonNode.linkRoot(testDataArrayWithTenIntegers()));
@@ -166,6 +176,20 @@ class ScannableTreeNodeTest extends TestWithJsonData {
         Assertions.assertInstanceOf(
             NavigableTreeNode.class, scanResult.get(0).getContext().getBinding("@level_3"));
     Assertions.assertEquals(true, ntn.getValue().nativeValue());
+  }
+
+  @Test
+  void testRegexWithBindings() {
+    ScannableTreeNode patternScan =
+        ScannableTreeNode.forRoot(NavigableJsonNode.linkRoot(testDataSimpleDataTree()));
+    List<ScannableTreeNode> scanResult = patternScan.scan("/(foo)~level_1/~level_2").toList();
+    Assertions.assertEquals(2, scanResult.size());
+    Assertions.assertEquals(
+        "/foo", scanResult.get(0).getContext().getBinding("~level_1").toString());
+    Assertions.assertEquals(
+        "/foo", scanResult.get(1).getContext().getBinding("~level_1").toString());
+    Assertions.assertEquals("0", scanResult.get(0).getContext().getBinding("level_2").toString());
+    Assertions.assertEquals("1", scanResult.get(1).getContext().getBinding("level_2").toString());
   }
 
   @Test
