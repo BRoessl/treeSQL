@@ -23,7 +23,7 @@ public class NotInOperation extends StackOperation {
     TreePrimitive a = arguments[0];
     TreePrimitive b = arguments[1];
     if (b instanceof TreeList list) {
-      boolean result = list.nativeValue().stream().noneMatch(item -> item.equals(a));
+      boolean result = list.stream().noneMatch(item -> item.equals(a));
       return new TreeBool(result);
     } else {
       throw new IllegalArgumentException(

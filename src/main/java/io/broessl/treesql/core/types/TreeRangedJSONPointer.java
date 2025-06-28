@@ -17,28 +17,27 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
   }
 
   @Override
-  public TreePrimitive getPrimitiveValue(ScannableTreeNode stn) {
+  public TreeList getPrimitiveValue(ScannableTreeNode stn) {
     if (this.isContextAware()) {
       return this.contextAware(stn).getPrimitiveValue(stn);
     }
     stn.getNavigableTreeNode().getRoot();
-    List<ScannableTreeNode> resultOfPointer =
+    List<TreePrimitive> resultOfPointer =
         ScannableTreeNode.forRoot(stn.getNavigableTreeNode().getRoot())
             .scan(this.selection)
+            .map(s -> s.getNavigableTreeNode().getValue())
             .toList();
-    if (resultOfPointer.isEmpty()) {
+    return new TreeList(resultOfPointer);
+    /*if (resultOfPointer.isEmpty()) {
       return TreeNull.INSTANCE;
     }
     if (resultOfPointer.size() == 1) {
-      return new TreeString(resultOfPointer.get(0).getNavigableTreeNode().getValue().toString());
+      return new TreeString(resultOfPointer.get(0).toString());
     }
     if (resultOfPointer.size() > 1) {
-      return new TreeList(
-          resultOfPointer.stream()
-              .map(n -> new TreeString(n.getNavigableTreeNode().getValue().toString()))
-              .toList());
+      return new TreeList(resultOfPointer.stream().map(n -> new TreeString(n.toString())).toList());
     }
-    throw new IllegalStateException();
+    throw new IllegalStateException();*/
   }
 
   public TreeRangedJSONPointer contextAware(ScannableTreeNode stn) {
