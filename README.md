@@ -23,7 +23,7 @@ Any JSONPointer is a valid r-JSONPointer, but an r-JSONPointer is likely not a v
 **Examples:**
 - `/foofoo/~index` is a *ranged JSONPointer* (**rJP**) and `~index` is a range literal.
 - `/foo/bar/..~` performs one back-traversal at `/foo/bar` and is virtually the same as `/foo`.
-- `~myLiteral/bar` is a *context-aware (relative) rJP*, starting at whatever the literal "myLiteral" is supposed to be. E.g. "myLiteral" could be defined in a *root-based (absolute) rJP* "/here/is/~myLiteral".
+- `~my_literal/bar` is a *context-aware (relative) rJP*, starting at whatever the literal "my_literal" is supposed to be. E.g. "my_literal" could be defined in a *root-based (absolute) rJP* "/here/is/~my_literal".
 
 ## Ranged JSONPointer
 In short, a ranged JSONPointer (r-JSONPointer or rJP) can
