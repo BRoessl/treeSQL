@@ -28,9 +28,9 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return "[" + value.stream().map(i -> i.toString()).collect(Collectors.joining(", ")) + "]";
   }
 
-  public TreeList(List<? extends TreePrimitive> value) {
+  public TreeList(List<TreePrimitive> value) {
     if (value != null) {
-      this.value = new ArrayList(value);
+      this.value = value;
     } else {
       value = new ArrayList<>();
     }

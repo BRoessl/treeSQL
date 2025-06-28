@@ -12,6 +12,7 @@ import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -122,7 +123,8 @@ public class NavigableJsonNode implements NavigableTreeNode {
     if (parent == null) {
       return null;
     }
-    // jackson api specific: a com.fasterxml.jackson.databind.JsonNode's name is only accesible by
+    // jackson api specific: a com.fasterxml.jackson.databind.JsonNode's name is
+    // only accesible by
     // parent map/object or list/array
     if (parent instanceof NavigableJsonNode jparent) {
       if (parent.isListNode()) {
@@ -255,7 +257,10 @@ public class NavigableJsonNode implements NavigableTreeNode {
       return new TreeList(internalList);
     }
     if (delegated.isArray()) {
-      var list = IntStream.range(0, delegated.size()).mapToObj(TreeNumber::new).toList();
+      List<TreePrimitive> list =
+          IntStream.range(0, delegated.size())
+              .mapToObj(i -> (TreePrimitive) new TreeNumber(i))
+              .toList();
       return new TreeList(list);
     }
     if (delegated.isTextual()) {
