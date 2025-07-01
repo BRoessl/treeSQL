@@ -78,7 +78,7 @@ public class TreeScanExpression {
   }
 
   private static TreeScanStep createStepFrom(String rawUnescaped) {
-    return TreeScanStep.pattern(
+    return TreeScanStep.matchRangedPattern(
         rawUnescaped,
         s -> {
           if (s.matches(".*~[^01].*")) {
