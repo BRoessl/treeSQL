@@ -114,7 +114,7 @@ public abstract sealed class TreeScanStep {
   private static TreeScanStep namedStep(String raw) {
     Matcher matcher = NAMED_FORWARD.matcher(raw);
     if (matcher.matches()) {
-      return new SingleForwardStep(raw, matcher.group(1));
+      return new RangedForwardStep(raw, matcher.group(1));
     }
     matcher = NAMED_BACK.matcher(raw);
     if (matcher.matches()) {
@@ -159,7 +159,7 @@ public abstract sealed class TreeScanStep {
   private static TreeScanStep anonymousStep(String raw) {
     Matcher matcher = ANON_FORWARD.matcher(raw);
     if (matcher.matches()) {
-      return new SingleForwardStep(raw, null);
+      return new RangedForwardStep(raw, null);
     }
     matcher = ANON_BACK.matcher(raw);
     if (matcher.matches()) {
@@ -226,13 +226,13 @@ public abstract sealed class TreeScanStep {
     }
   }
 
-  static final class SingleForwardStep extends TreeScanStep {
+  static final class RangedForwardStep extends TreeScanStep {
 
-    SingleForwardStep(String raw, String rangeLiteral) {
+    RangedForwardStep(String raw, String rangeLiteral) {
       super(raw, rangeLiteral);
     }
 
-    SingleForwardStep() {
+    RangedForwardStep() {
       this("~", null);
     }
   }
@@ -290,7 +290,7 @@ public abstract sealed class TreeScanStep {
       if (size >= 0) {
         pre = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-          pre.add(new TreeScanStep.SingleForwardStep());
+          pre.add(new TreeScanStep.RangedForwardStep());
         }
       } else {
         pre = new ArrayList<>(size * -1);

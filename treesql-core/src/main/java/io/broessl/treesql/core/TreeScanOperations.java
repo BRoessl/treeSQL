@@ -2,7 +2,6 @@ package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeString;
-import io.broessl.treesql.json.NavigableJsonNode;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -57,7 +56,7 @@ class TreeScanOperations {
   }
 
   public List<Iterator<ScannableTreeNode>> childrenScan(
-      TreeScanExpression expression, TreeScanStep.SingleForwardStep step) {
+      TreeScanExpression expression, TreeScanStep.RangedForwardStep step) {
     return childrenScan(expression.subExpression(), rootNode.getContext(), step.getRangeLiteral());
   }
 
@@ -149,17 +148,18 @@ class TreeScanOperations {
 
   public Iterator<ScannableTreeNode> executeDirective(
       TreeScanExpression subExpression, ScanContext currentBindings, String directive) {
-    if ("~JSON".equals(directive)) {
-      if (rootNode.getNavigableTreeNode().getValue() instanceof TreeString tString) {
-        return new ScannableTreeNode(
-                NavigableJsonNode.fromContent(
-                    tString.nativeValue(), rootNode.getNavigableTreeNode(), directive),
-                currentBindings.chain(new TreeString(directive)),
-                subExpression)
-            .iterator();
-      }
+    var registered = DirectiveRegistry.INSTANCE.getDirective(directive);
+    if (registered == null) {
+      return EMPTY_SCAN;
     }
-    return EMPTY_SCAN;
+    var virtualChild = registered.apply(rootNode.getNavigableTreeNode());
+    if (virtualChild == null) {
+      return EMPTY_SCAN;
+    }
+    String virtualName = virtualChild.getSelfName().toString();
+    return new ScannableTreeNode(
+            virtualChild, currentBindings.chain(new TreeString(virtualName)), subExpression)
+        .iterator();
   }
 
   public Iterator<ScannableTreeNode> offsetScan(

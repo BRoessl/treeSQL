@@ -44,14 +44,16 @@ class TreeNodeIterator implements Iterator<ScannableTreeNode> {
   private void processExpression(
       TreeScanExpression expression, List<Iterator<ScannableTreeNode>> result) {
     switch (expression.currentStep()) {
-      case TreeScanStep.LiteralForwardStep j ->
-          result.add(scanOperations.literalForwardScan(expression, j));
-      case TreeScanStep.SingleForwardStep j2 ->
-          result.addAll(scanOperations.childrenScan(expression, j2));
-      case TreeScanStep.SingleBackStep j4 -> result.add(scanOperations.backScan(expression, j4));
-      case TreeScanStep.SingleSideStep j6 -> result.add(scanOperations.offsetScan(expression, j6));
-      case TreeScanStep.DirectiveStep j7 ->
-          result.add(scanOperations.executeDirective(expression, j7));
+      case TreeScanStep.LiteralForwardStep literalStep ->
+          result.add(scanOperations.literalForwardScan(expression, literalStep));
+      case TreeScanStep.RangedForwardStep rangeStep ->
+          result.addAll(scanOperations.childrenScan(expression, rangeStep));
+      case TreeScanStep.SingleBackStep backStep ->
+          result.add(scanOperations.backScan(expression, backStep));
+      case TreeScanStep.SingleSideStep sideStep ->
+          result.add(scanOperations.offsetScan(expression, sideStep));
+      case TreeScanStep.DirectiveStep directive ->
+          result.add(scanOperations.executeDirective(expression, directive));
       default -> throw new IllegalStateException("unexpected next step");
     }
   }

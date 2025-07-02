@@ -60,13 +60,13 @@ class TreeScanExpressionTest extends TestWithJsonData {
         TreeScanExpression.parse("/~/{2,2}~/{1,3}~/{0,3}~/{1,5}~/~myBinding");
     List<TreeScanStep> step = expression.steps();
     Assertions.assertEquals(6, step.size());
-    Assertions.assertInstanceOf(TreeScanStep.SingleForwardStep.class, step.get(0));
+    Assertions.assertInstanceOf(TreeScanStep.RangedForwardStep.class, step.get(0));
     DepthScan i1 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(1));
     DepthScan i2 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(2));
     DepthScan i3 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(3));
     DepthScan i4 = Assertions.assertInstanceOf(TreeScanStep.DepthScan.class, step.get(4));
-    SingleForwardStep i5 =
-        Assertions.assertInstanceOf(TreeScanStep.SingleForwardStep.class, step.get(5));
+    RangedForwardStep i5 =
+        Assertions.assertInstanceOf(TreeScanStep.RangedForwardStep.class, step.get(5));
     Assertions.assertTrue(i1.getRangeLiteral().isEmpty());
     Assertions.assertEquals(2, i1.getBoundaries().getStartInclusive());
     Assertions.assertEquals(2, i1.getBoundaries().getEndInclusive());
