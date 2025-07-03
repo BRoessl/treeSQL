@@ -8,10 +8,8 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>treesql-core</module>
-		<module>treesql-cli</module>
-		<!--<module>treesql-json</module>
 		<module>treesql-file</module>
-		-->
+		<module>treesql-cli</module>
 	</modules>
 	<properties>
 		<treesql.version>0.0.1-SNAPSHOT</treesql.version>
