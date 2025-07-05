@@ -21,6 +21,8 @@ import java.util.stream.StreamSupport;
 
 public class NavigableJsonNode implements NavigableTreeNode {
 
+  public static final ObjectMapper OM = new ObjectMapper();
+
   String externalNamedRoot;
 
   private NavigableTreeNode parent;
@@ -44,7 +46,7 @@ public class NavigableJsonNode implements NavigableTreeNode {
   public static NavigableJsonNode fromContent(byte[] content, NavigableJsonNode parent) {
     JsonNode tree;
     try {
-      tree = new ObjectMapper().readTree(content);
+      tree = OM.readTree(content);
     } catch (Exception e) {
       return null;
     }
@@ -55,7 +57,7 @@ public class NavigableJsonNode implements NavigableTreeNode {
       byte[] content, NavigableTreeNode parent, String externalNamed) {
     JsonNode tree;
     try {
-      tree = new ObjectMapper().readTree(content);
+      tree = OM.readTree(content);
     } catch (Exception e) {
       return null;
     }
@@ -66,11 +68,21 @@ public class NavigableJsonNode implements NavigableTreeNode {
       String content, NavigableTreeNode parent, String externalNamed) {
     JsonNode tree;
     try {
-      tree = new ObjectMapper().readTree(content);
+      tree = OM.readTree(content);
     } catch (Exception e) {
       return null;
     }
     return new NavigableJsonNode(tree, parent, externalNamed);
+  }
+
+  public static NavigableJsonNode fromContent(String content) {
+    JsonNode tree;
+    try {
+      tree = OM.readTree(content);
+    } catch (Exception e) {
+      return null;
+    }
+    return new NavigableJsonNode(tree, null, null);
   }
 
   public static NavigableJsonNode linkRoot(JsonNode rootNode) {
@@ -123,6 +135,12 @@ public class NavigableJsonNode implements NavigableTreeNode {
     if (parent == null) {
       return null;
     }
+
+    if (externalNamedRoot != null) {
+      // it is the json root object but inside a non-json parent (e.g. a file) exists
+      // we do not know the name, we are "embedded"
+      return new TreeString(externalNamedRoot);
+    }
     // jackson api specific: a com.fasterxml.jackson.databind.JsonNode's name is
     // only accesible by
     // parent map/object or list/array
@@ -130,14 +148,11 @@ public class NavigableJsonNode implements NavigableTreeNode {
       if (parent.isListNode()) {
         return new TreeNumber(findIndexFor(delegated, ((NavigableJsonNode) parent).delegated));
       }
-      if (!parent.isMapNode()) {
-        throw new IllegalStateException("a parent node is neither an array nor an object node");
+      if (parent.isMapNode()) {
+        return new TreeString(findNameFor(delegated, jparent.delegated));
       }
-      return new TreeString(findNameFor(delegated, jparent.delegated));
     }
-    // it is the json root object but inside a non-json parent (e.g. a file) exists
-    // we do not know the name, we are "embedded"
-    return new TreeString(externalNamedRoot);
+    throw new IllegalStateException("a parent node is neither an array nor an object node");
   }
 
   @Override

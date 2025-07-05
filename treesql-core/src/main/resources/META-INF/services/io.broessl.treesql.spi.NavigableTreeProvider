@@ -1,0 +1,3 @@
+io.broessl.treesql.json.NavigableJsonProvider
+io.broessl.treesql.text.NavigableLinesProvider
+io.broessl.treesql.text.NavigableRegexProvider

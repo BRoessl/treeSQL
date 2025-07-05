@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.broessl</groupId>
-	<artifactId>treesql-file</artifactId>
+	<artifactId>treesql-csv</artifactId>
 	<version>${treesql.version}</version>
 	<parent>
 		<artifactId>treesql-parent</artifactId>
@@ -18,19 +18,9 @@
 			<version>${treesql.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>treesql-csv</artifactId>
-			<groupId>io.broessl</groupId>
-			<version>${treesql.version}</version>
-		</dependency>
-		<dependency>
-			<artifactId>treesql-yaml</artifactId>
-			<groupId>io.broessl</groupId>
-			<version>${treesql.version}</version>
-		</dependency>
-		<dependency>
-			<artifactId>treesql-xml</artifactId>
-			<groupId>io.broessl</groupId>
-			<version>${treesql.version}</version>
+			<artifactId>commons-csv</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<version>1.14.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
