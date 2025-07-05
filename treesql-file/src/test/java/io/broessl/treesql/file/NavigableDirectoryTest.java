@@ -25,13 +25,19 @@ public class NavigableDirectoryTest {
             .children()
             .map(tn -> tn.getSelfName().nativeValue().toString())
             .toList();
-    Assertions.assertEquals(6, list.size());
+    Assertions.assertEquals(12, list.size());
     Assertions.assertTrue(list.contains("sub~SubFolder"));
     Assertions.assertTrue(list.contains("1.json"));
     Assertions.assertTrue(list.contains("2.json"));
     Assertions.assertTrue(list.contains("3.json"));
     Assertions.assertTrue(list.contains("4.json"));
     Assertions.assertTrue(list.contains("5.json"));
+    Assertions.assertTrue(list.contains("lines.txt"));
+    Assertions.assertTrue(list.contains("match.txt"));
+    Assertions.assertTrue(list.contains("csv.csv"));
+    Assertions.assertTrue(list.contains("csv_special_A.csv"));
+    Assertions.assertTrue(list.contains("csv_special_B.csv"));
+    Assertions.assertTrue(list.contains("catalog.xml"));
   }
 
   @Test

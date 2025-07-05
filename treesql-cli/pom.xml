@@ -26,6 +26,26 @@
 			<version>${treesql.version}</version>
 		</dependency>
 		<dependency>
+			<artifactId>treesql-xml</artifactId>
+			<groupId>io.broessl</groupId>
+			<version>${treesql.version}</version>
+		</dependency>
+		<dependency>
+			<artifactId>treesql-yaml</artifactId>
+			<groupId>io.broessl</groupId>
+			<version>${treesql.version}</version>
+		</dependency>
+		<dependency>
+			<artifactId>treesql-csv</artifactId>
+			<groupId>io.broessl</groupId>
+			<version>${treesql.version}</version>
+		</dependency>
+		<dependency>
+			<artifactId>treesql-core</artifactId>
+			<groupId>io.broessl</groupId>
+			<version>${treesql.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>de.vandermeer</groupId>
 			<artifactId>asciitable</artifactId>
 		</dependency>

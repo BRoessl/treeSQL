@@ -38,7 +38,8 @@ public abstract sealed class TreeScanStep {
   private static final Pattern NAMED_REGEX_CHILDREN_SCAN =
       Pattern.compile("^(\\(.*\\))~([a-z]\\w+)$");
 
-  private static final Pattern SPECIAL_DIRECTIVE = Pattern.compile("^~([A-Z]\\w+)$");
+  private static final Pattern SPECIAL_DIRECTIVE =
+      Pattern.compile("^~([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
 
   private String raw;
 
@@ -101,7 +102,7 @@ public abstract sealed class TreeScanStep {
     // special directive "~MY_DIRECTIVE"
     Matcher matcher = SPECIAL_DIRECTIVE.matcher(raw);
     if (matcher.matches()) {
-      return new DirectiveStep(raw);
+      return new DirectiveStep("~" + matcher.group(1), matcher.group(2));
     }
     // is not a ranged step, but might be a literal step
     if (fallback == null) {
@@ -467,8 +468,19 @@ public abstract sealed class TreeScanStep {
 
   static final class DirectiveStep extends TreeScanStep {
 
-    DirectiveStep(String directive) {
+    private List<String> arguments;
+
+    DirectiveStep(String directive, String argument) {
       super(directive, null);
+      if (argument == null || argument.trim().isEmpty()) {
+        arguments = List.of();
+      } else {
+        this.arguments = argument.lines().toList();
+      }
+    }
+
+    public List<String> getArguments() {
+      return arguments;
     }
   }
 }

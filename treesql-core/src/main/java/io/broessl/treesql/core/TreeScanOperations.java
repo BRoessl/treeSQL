@@ -2,6 +2,7 @@ package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.spi.NavigableTree;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -23,10 +24,10 @@ class TreeScanOperations {
         }
       };
 
-  private final ScannableTreeNode rootNode;
+  private final ScannableTreeNode scannableNode;
 
-  public TreeScanOperations(ScannableTreeNode rootNode) {
-    this.rootNode = rootNode;
+  public TreeScanOperations(ScannableTreeNode scannableNode) {
+    this.scannableNode = scannableNode;
   }
 
   public Iterator<ScannableTreeNode> literalForwardScan(
@@ -35,21 +36,21 @@ class TreeScanOperations {
 
     if (step.getRangeLiteral().isPresent()) {
       nextNodeByStep =
-          rootNode.get(
+          scannableNode.get(
               step.getRaw(),
               expression.subExpression(),
-              rootNode
+              scannableNode
                   .getContext()
                   .chainWithPathBinding(
                       new TreeString(step.getRaw()),
                       step.getRangeLiteral().get(),
-                      rootNode.getNavigableTreeNode().getChildNode(step.getRaw()).get()));
+                      scannableNode.getNavigableTreeNode().getChildNode(step.getRaw()).get()));
     } else {
       nextNodeByStep =
-          rootNode.get(
+          scannableNode.get(
               step.getRaw(),
               expression.subExpression(),
-              rootNode.getContext().chain(new TreeString(step.getRaw())));
+              scannableNode.getContext().chain(new TreeString(step.getRaw())));
     }
 
     return nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN;
@@ -57,26 +58,28 @@ class TreeScanOperations {
 
   public List<Iterator<ScannableTreeNode>> childrenScan(
       TreeScanExpression expression, TreeScanStep.RangedForwardStep step) {
-    return childrenScan(expression.subExpression(), rootNode.getContext(), step.getRangeLiteral());
+    return childrenScan(
+        expression.subExpression(), scannableNode.getContext(), step.getRangeLiteral());
   }
 
   public Iterator<ScannableTreeNode> backScan(
       TreeScanExpression expression, TreeScanStep.SingleBackStep step) {
-    return backScan(expression.subExpression(), rootNode.getContext(), step.getRangeLiteral());
+    return backScan(expression.subExpression(), scannableNode.getContext(), step.getRangeLiteral());
   }
 
   public Iterator<ScannableTreeNode> offsetScan(
       TreeScanExpression expression, TreeScanStep.SingleSideStep step) {
     return offsetScan(
         expression.subExpression(),
-        rootNode.getContext(),
+        scannableNode.getContext(),
         step.getIndexManipulation(),
         step.getRangeLiteral());
   }
 
   public Iterator<ScannableTreeNode> executeDirective(
       TreeScanExpression expression, TreeScanStep.DirectiveStep step) {
-    return executeDirective(expression.subExpression(), rootNode.getContext(), step.getRaw());
+    return executeDirective(
+        expression.subExpression(), scannableNode.getContext(), step.getRaw(), step.getArguments());
   }
 
   public List<Iterator<ScannableTreeNode>> childrenScan(
@@ -88,7 +91,7 @@ class TreeScanOperations {
       alreadyBound = null;
     }
 
-    return rootNode
+    return scannableNode
         .getNavigableTreeNode()
         .children()
         .filter(refNode -> alreadyBound == null)
@@ -113,7 +116,7 @@ class TreeScanOperations {
       ScanContext currentBindings,
       Optional<String> rangeLiteral) {
     try {
-      NavigableTreeNode parent = rootNode.getNavigableTreeNode().getParentNode().orElse(null);
+      NavigableTreeNode parent = scannableNode.getNavigableTreeNode().getParentNode().orElse(null);
       if (parent == null) {
         return EMPTY_SCAN;
       }
@@ -127,17 +130,17 @@ class TreeScanOperations {
         }
         if (alreadyBound == null) {
           return new ScannableTreeNode(
-                  rootNode.getNavigableTreeNode().getParentNode().orElseThrow(),
+                  scannableNode.getNavigableTreeNode().getParentNode().orElseThrow(),
                   currentBindings.chainWithPathBinding(
                       new TreeString("~.."),
                       rangeLiteral.get(),
-                      rootNode.getNavigableTreeNode().getParentNode().get()),
+                      scannableNode.getNavigableTreeNode().getParentNode().get()),
                   subExpression)
               .iterator();
         }
       }
       return new ScannableTreeNode(
-              rootNode.getNavigableTreeNode().getParentNode().orElseThrow(),
+              scannableNode.getNavigableTreeNode().getParentNode().orElseThrow(),
               currentBindings.chain(new TreeString("~..")),
               subExpression)
           .iterator();
@@ -147,18 +150,22 @@ class TreeScanOperations {
   }
 
   public Iterator<ScannableTreeNode> executeDirective(
-      TreeScanExpression subExpression, ScanContext currentBindings, String directive) {
-    var registered = DirectiveRegistry.INSTANCE.getDirective(directive);
-    if (registered == null) {
+      TreeScanExpression subExpression,
+      ScanContext currentBindings,
+      String directive,
+      List<String> arguments) {
+    Optional<NavigableTreeNode> virtualChild =
+        NavigableTree.providerFor(directive)
+            .attachTreeNode(
+                scannableNode.getNavigableTreeNode().getValue(),
+                scannableNode.getNavigableTreeNode(),
+                arguments);
+    if (virtualChild.isEmpty()) {
       return EMPTY_SCAN;
     }
-    var virtualChild = registered.apply(rootNode.getNavigableTreeNode());
-    if (virtualChild == null) {
-      return EMPTY_SCAN;
-    }
-    String virtualName = virtualChild.getSelfName().toString();
+    String virtualName = virtualChild.get().getSelfName().toString();
     return new ScannableTreeNode(
-            virtualChild, currentBindings.chain(new TreeString(virtualName)), subExpression)
+            virtualChild.get(), currentBindings.chain(new TreeString(virtualName)), subExpression)
         .iterator();
   }
 
@@ -168,7 +175,7 @@ class TreeScanOperations {
       Integer indexManipulation,
       Optional<String> rangeLiteral) {
     NavigableTreeNode sibling =
-        rootNode.getNavigableTreeNode().getSibling(indexManipulation).orElse(null);
+        scannableNode.getNavigableTreeNode().getSibling(indexManipulation).orElse(null);
     if (sibling == null) {
       return EMPTY_SCAN;
     }

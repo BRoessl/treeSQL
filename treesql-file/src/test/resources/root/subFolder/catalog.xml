@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns:prod="http://example.com/products">
+    <product id="p001" category="electronics">
+        <name>Smartphone</name>
+        <description>Latest model smartphone with advanced features</description>
+        <price currency="USD">699.99</price>
+        <specifications>
+            <screen size="6.1" type="OLED">1080x2400</screen>
+            <memory>
+                <ram>8GB</ram>
+                <storage>128GB</storage>
+            </memory>
+            <camera>
+                <main megapixels="48">Ultra-wide lens</main>
+                <front megapixels="12">Portrait mode</front>
+            </camera>
+        </specifications>
+        <reviews>
+            <review rating="5" author="John">Excellent phone, great battery life!</review>
+            <review rating="4" author="Sarah">Good performance but expensive</review>
+        </reviews>
+    </product>
+    <product id="p002" category="books">
+        <name>Programming Guide</name>
+        <description>Comprehensive guide to modern programming</description>
+        <price currency="USD">49.99</price>
+        <specifications>
+            <pages>450</pages>
+            <language>English</language>
+            <format>Paperback</format>
+        </specifications>
+    </product>
+</catalog>
