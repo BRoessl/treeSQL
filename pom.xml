@@ -13,6 +13,7 @@
 		<module>treesql-cli</module>
 		<module>treesql-yaml</module>
 		<module>treesql-xml</module>
+		<module>treesql-swing-gui</module>
 	</modules>
 	<properties>
 		<treesql.version>0.0.1-SNAPSHOT</treesql.version>
