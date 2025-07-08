@@ -12,6 +12,7 @@ import io.broessl.treesql.grammar.TreeSQLLexer;
 import io.broessl.treesql.grammar.TreeSQLParser;
 import io.broessl.treesql.grammar.TreeSQLParser.LimitStmtContext;
 import io.broessl.treesql.grammar.TreeSQLParser.OrderByStmtContext;
+import io.broessl.treesql.grammar.TreeSQLParser.SelectStmtContext;
 import io.broessl.treesql.grammar.TreeSQLParser.WhereExprContext;
 import java.util.ArrayList;
 import java.util.List;
@@ -162,5 +163,10 @@ public class QueryParser extends TreeSQLBaseListener {
   @Override
   public void enterLimitStmt(LimitStmtContext ctx) {
     limit = Optional.of(Integer.parseInt(ctx.NUMERIC_LITERAL().getText()));
+  }
+
+  @Override
+  public void exitSelectStmt(SelectStmtContext ctx) {
+    //doing assertions?
   }
 }

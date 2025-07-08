@@ -15,7 +15,7 @@ public class IntegrationTests {
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     List<String> scanResult =
-        fileScan.scan("/{0,3}~/~AS_JSON/0").map(t -> t.absolutePath()).toList();
+        fileScan.scan("/~{0,3}/~AS_JSON/0").map(t -> t.absolutePath()).toList();
     Assertions.assertEquals(7, scanResult.size());
     Assertions.assertTrue(scanResult.contains("/testA.json/!!JSON/0"));
     Assertions.assertTrue(scanResult.contains("/subFolder/1.json/!!JSON/0"));
@@ -33,7 +33,7 @@ public class IntegrationTests {
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode into = fileScan.scan("/testA.json/~AS_JSON/0").findFirst().orElseThrow();
     Assertions.assertEquals("0", into.getName().getValue().toString());
-    ScannableTreeNode out = into.scan("/..~/..~").findFirst().orElseThrow();
+    ScannableTreeNode out = into.scan("/~../~..").findFirst().orElseThrow();
     Assertions.assertEquals("testA.json", out.getName().getValue().toString());
   }
 
