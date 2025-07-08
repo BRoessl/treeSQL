@@ -7,7 +7,7 @@ public final class TreeString extends TreeNodeIdentifier {
   private String value;
 
   @Override
-  public String nativeValue() {
+  public String getValue() {
     return value;
   }
 

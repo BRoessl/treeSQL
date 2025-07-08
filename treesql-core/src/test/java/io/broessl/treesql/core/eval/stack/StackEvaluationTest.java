@@ -61,7 +61,7 @@ public class StackEvaluationTest {
     // -0.1411200081
     var result = new StackEvaluation(expressionStack).evaluate(null);
     Assertions.assertEquals(
-        -0.1411200081, ((TreeNumber) result).nativeValue().doubleValue(), 0.0000000001);
+        -0.1411200081, ((TreeNumber) result).getValue().doubleValue(), 0.0000000001);
   }
 
   @Test
@@ -76,19 +76,19 @@ public class StackEvaluationTest {
     List<Stackable> expressionStackA =
         ExpressionParser.parseExpressionStack("'FOO' + level_1 + level_2 + level_3");
     var resultA = new StackEvaluation(expressionStackA).evaluate(node);
-    Assertions.assertEquals("FOOhighlynestedobjects", ((TreeString) resultA).nativeValue());
+    Assertions.assertEquals("FOOhighlynestedobjects", ((TreeString) resultA).getValue());
 
     List<Stackable> expressionStackB = ExpressionParser.parseExpressionStack("@level_3");
     var resultB = new StackEvaluation(expressionStackB).evaluate(node);
-    Assertions.assertEquals(true, ((TreeBool) resultB).nativeValue());
+    Assertions.assertEquals(true, ((TreeBool) resultB).getValue());
 
     List<Stackable> expressionStackC = ExpressionParser.parseExpressionStack("~level_2");
     var resultC = new StackEvaluation(expressionStackC).evaluate(node);
-    Assertions.assertEquals("/highly/nested", ((TreeString) resultC).nativeValue());
+    Assertions.assertEquals("/highly/nested", ((TreeString) resultC).getValue());
 
     List<Stackable> expressionStackD =
         ExpressionParser.parseExpressionStack("~level_2 == '/highly/nested'");
     var resultD = new StackEvaluation(expressionStackD).evaluate(node);
-    Assertions.assertEquals(true, ((TreeBool) resultD).nativeValue());
+    Assertions.assertEquals(true, ((TreeBool) resultD).getValue());
   }
 }

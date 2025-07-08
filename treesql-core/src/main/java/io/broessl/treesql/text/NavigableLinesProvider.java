@@ -18,7 +18,7 @@ public class NavigableLinesProvider implements NavigableTreeProvider {
   public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
     if (fromContent instanceof TreeString tString) {
       var array = NavigableJsonNode.OM.createArrayNode();
-      tString.nativeValue().lines().forEach(array::add);
+      tString.getValue().lines().forEach(array::add);
       return Optional.of(
           new NavigableJsonNode(array, null, "!!LINES")); // Create a new instance for the root
     }
@@ -30,7 +30,7 @@ public class NavigableLinesProvider implements NavigableTreeProvider {
       TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       var array = NavigableJsonNode.OM.createArrayNode();
-      tString.nativeValue().lines().forEach(array::add);
+      tString.getValue().lines().forEach(array::add);
       return Optional.of(
           new NavigableJsonNode(
               array, parentNode, "!!LINES")); // Create a new instance for the root

@@ -7,7 +7,7 @@ public final class TreeNull extends TreePrimitive {
   private TreeNull() {}
 
   @Override
-  public Object nativeValue() {
+  public Object getValue() {
     return null;
   }
 

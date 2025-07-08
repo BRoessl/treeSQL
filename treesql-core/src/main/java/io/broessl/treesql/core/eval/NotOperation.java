@@ -21,7 +21,7 @@ public class NotOperation extends StackOperation {
     }
     TreePrimitive a = arguments[0];
     if (a instanceof TreeBool boolA) {
-      return new TreeBool(!boolA.nativeValue());
+      return new TreeBool(!boolA.getValue());
     } else {
       throw new IllegalArgumentException("NotOperation only supports booleans");
     }

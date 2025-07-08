@@ -49,7 +49,7 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
 
     TreeList assertInstanceOf = assertInstanceOf(TreeList.class, result);
     // Note: Boolean values are now in correct JSON format (lowercase)
-    assertEquals(true, ((TreeBool) assertInstanceOf.get(0)).nativeValue());
+    assertEquals(true, ((TreeBool) assertInstanceOf.get(0)).getValue());
   }
 
   @Test
@@ -58,7 +58,7 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
     TreeList result = pointer.getPrimitiveValue(rootNode);
 
     var str = assertInstanceOf(TreeString.class, result.get(0));
-    assertEquals("bar", (str).nativeValue());
+    assertEquals("bar", (str).getValue());
   }
 
   @Test
@@ -74,7 +74,7 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
     TreeRangedJSONPointer pointer = new TreeRangedJSONPointer("/highly");
     TreeList result = pointer.getPrimitiveValue(rootNode);
 
-    List<Object> resultStr = result.nativeValue();
+    List<Object> resultStr = result.getValue();
     assertEquals(
         "[[nested]]", resultStr.toString(), "Result should contain 'nested', got: " + resultStr);
   }
@@ -109,25 +109,25 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
       TreeRangedJSONPointer stringPointer = new TreeRangedJSONPointer("/string");
       TreeList stringResult = stringPointer.getPrimitiveValue(typeNode);
       assertInstanceOf(TreeString.class, stringResult.get(0));
-      assertEquals("hello", ((TreeString) stringResult.get(0)).nativeValue());
+      assertEquals("hello", ((TreeString) stringResult.get(0)).getValue());
 
       // Test number value
       TreeRangedJSONPointer numberPointer = new TreeRangedJSONPointer("/number");
       TreeList numberResult = numberPointer.getPrimitiveValue(typeNode);
       assertInstanceOf(TreeNumber.class, numberResult.get(0));
-      assertEquals(42, ((TreeNumber) numberResult.get(0)).nativeValue().intValue());
+      assertEquals(42, ((TreeNumber) numberResult.get(0)).getValue().intValue());
 
       // Test boolean value - note that it's now in correct JSON format (lowercase)
       TreeRangedJSONPointer boolPointer = new TreeRangedJSONPointer("/boolean");
       TreeList boolResult = boolPointer.getPrimitiveValue(typeNode);
       assertInstanceOf(TreeBool.class, boolResult.get(0));
-      assertEquals(true, ((TreeBool) boolResult.get(0)).nativeValue());
+      assertEquals(true, ((TreeBool) boolResult.get(0)).getValue());
 
       // Test null value - note that it's now in correct JSON format (lowercase)
       TreeRangedJSONPointer nullPointer = new TreeRangedJSONPointer("/null");
       TreeList nullResult = nullPointer.getPrimitiveValue(typeNode);
       assertInstanceOf(TreeNull.class, nullResult.get(0));
-      assertEquals(null, ((TreeNull) nullResult.get(0)).nativeValue());
+      assertEquals(null, ((TreeNull) nullResult.get(0)).getValue());
     } catch (Exception e) {
       fail("Failed to parse test JSON: " + e.getMessage());
     }
@@ -193,7 +193,7 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
     TreeList result = pointer.getPrimitiveValue(nodeWithContext);
 
     assertInstanceOf(TreeBool.class, result.get(0));
-    assertEquals(true, ((TreeBool) result.get(0)).nativeValue());
+    assertEquals(true, ((TreeBool) result.get(0)).getValue());
   }
 
   @Test

@@ -16,7 +16,7 @@ public class SubtractOperationTest {
     TreePrimitive b = new TreeNumber(3);
     TreePrimitive result = subOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeNumber);
-    assertEquals(BigDecimal.valueOf(7), ((TreeNumber) result).nativeValue());
+    assertEquals(BigDecimal.valueOf(7), ((TreeNumber) result).getValue());
   }
 
   @Test

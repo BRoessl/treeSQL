@@ -58,7 +58,7 @@ public class QueryParser extends TreeSQLBaseListener {
   private boolean conditionOkay(ScannableTreeNode stn) {
     var evalCondition = whereCondition.evaluate(stn);
     if (evalCondition instanceof TreeBool bool) {
-      return bool.nativeValue();
+      return bool.getValue();
     }
     throw new IllegalStateException(
         "WHERE condition did not evaluate to a boolean: " + evalCondition);

@@ -351,12 +351,12 @@ public abstract sealed class TreeScanStep {
     public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
       return contextNode
           .children()
-          .filter(c -> pattern.matcher(c.getSelfName().nativeValue().toString()).matches())
+          .filter(c -> pattern.matcher(c.getSelfName().getValue().toString()).matches())
           .map(
               c -> {
                 TreeScanStep step =
                     new TreeScanStep.LiteralForwardStep(
-                        c.getSelfName().nativeValue().toString(), getRangeLiteral().orElse(null));
+                        c.getSelfName().getValue().toString(), getRangeLiteral().orElse(null));
                 return List.of(step);
               })
           .toList();
@@ -385,7 +385,7 @@ public abstract sealed class TreeScanStep {
     public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
       Integer index;
       if (contextNode.getSelfName() instanceof TreeNumber idx) {
-        index = idx.nativeValue().intValue();
+        index = idx.getValue().intValue();
       } else {
         // this is bad introduce new ImpossibleStep
         return List.of(List.of());

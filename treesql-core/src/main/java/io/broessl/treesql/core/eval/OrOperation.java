@@ -22,7 +22,7 @@ public class OrOperation extends StackOperation {
     TreePrimitive a = arguments[0];
     TreePrimitive b = arguments[1];
     if (a instanceof TreeBool boolA && b instanceof TreeBool boolB) {
-      return new TreeBool(boolA.nativeValue() || boolB.nativeValue());
+      return new TreeBool(boolA.getValue() || boolB.getValue());
     } else {
       throw new IllegalArgumentException("OrOperation only supports booleans");
     }

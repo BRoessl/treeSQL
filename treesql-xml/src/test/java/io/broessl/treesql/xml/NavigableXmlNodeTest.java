@@ -57,8 +57,8 @@ public class NavigableXmlNodeTest {
     NavigableXmlNode attributeNode =
         new NavigableXmlNode(personElement.attribute("name"), rootNode, "@name");
 
-    assertEquals("@name", attributeNode.getSelfName().nativeValue());
-    assertEquals("John", attributeNode.getValue().nativeValue());
+    assertEquals("@name", attributeNode.getSelfName().getValue());
+    assertEquals("John", attributeNode.getValue().getValue());
     assertTrue(attributeNode.getParentNode().isPresent());
     assertFalse(attributeNode.isListNode());
     assertFalse(attributeNode.isMapNode());
@@ -69,7 +69,7 @@ public class NavigableXmlNodeTest {
     Element personElement = rootElement.element("person");
     NavigableXmlNode elementNode = new NavigableXmlNode(personElement, rootNode, 0);
 
-    assertEquals(0, ((TreeNumber) elementNode.getSelfName()).nativeValue().intValue());
+    assertEquals(0, ((TreeNumber) elementNode.getSelfName()).getValue().intValue());
     assertTrue(elementNode.getParentNode().isPresent());
     assertFalse(elementNode.isListNode());
     assertTrue(elementNode.isMapNode());
@@ -80,7 +80,7 @@ public class NavigableXmlNodeTest {
     List<Element> personElements = rootElement.elements("person");
     NavigableXmlNode listNode = new NavigableXmlNode(personElements, rootNode, "person");
 
-    assertEquals("person", listNode.getSelfName().nativeValue());
+    assertEquals("person", listNode.getSelfName().getValue());
     assertTrue(listNode.isListNode());
     assertFalse(listNode.isMapNode());
     assertEquals(2, listNode.getSize().orElse(-1));
@@ -90,8 +90,8 @@ public class NavigableXmlNodeTest {
   void testConstructorWithTextNode() {
     NavigableXmlNode textNode = new NavigableXmlNode("Some text content", rootNode);
 
-    assertEquals("text()", textNode.getSelfName().nativeValue());
-    assertEquals("Some text content", textNode.getValue().nativeValue());
+    assertEquals("text()", textNode.getSelfName().getValue());
+    assertEquals("Some text content", textNode.getValue().getValue());
     assertFalse(textNode.isListNode());
     assertFalse(textNode.isMapNode());
   }
@@ -100,7 +100,7 @@ public class NavigableXmlNodeTest {
   void testConstructorWithExternalRootName() {
     NavigableXmlNode namedRootNode = new NavigableXmlNode(rootElement, null, "customRoot");
 
-    assertEquals("customRoot", namedRootNode.getSelfName().nativeValue());
+    assertEquals("customRoot", namedRootNode.getSelfName().getValue());
     assertTrue(namedRootNode.getParentNode().isEmpty());
   }
 
@@ -112,13 +112,13 @@ public class NavigableXmlNodeTest {
     assertNull(rootWithoutName.getSelfName());
 
     // Root element with external name
-    assertEquals("root", rootNode.getSelfName().nativeValue());
+    assertEquals("root", rootNode.getSelfName().getValue());
   }
 
   @Test
   void testGetSelfNameForTextNode() {
     NavigableXmlNode textNode = new NavigableXmlNode("test text", rootNode);
-    assertEquals("text()", textNode.getSelfName().nativeValue());
+    assertEquals("text()", textNode.getSelfName().getValue());
   }
 
   @Test
@@ -135,7 +135,7 @@ public class NavigableXmlNodeTest {
   void testGetChildNodeByAttribute() {
     Optional<NavigableTreeNode> child = rootNode.getChildNode("@id");
     assertTrue(child.isPresent());
-    assertEquals("123", child.get().getValue().nativeValue());
+    assertEquals("123", child.get().getValue().getValue());
   }
 
   @Test
@@ -151,7 +151,7 @@ public class NavigableXmlNodeTest {
 
     Optional<NavigableTreeNode> textChild = metadataNode.getChildNode("text()");
     assertTrue(textChild.isPresent());
-    assertEquals("Some metadata text", textChild.get().getValue().nativeValue());
+    assertEquals("Some metadata text", textChild.get().getValue().getValue());
   }
 
   @Test
@@ -249,9 +249,9 @@ public class NavigableXmlNodeTest {
 
     // Check that we have the expected child types
     boolean hasPersonElement =
-        children.stream().anyMatch(child -> "person".equals(child.getSelfName().nativeValue()));
+        children.stream().anyMatch(child -> "person".equals(child.getSelfName().getValue()));
     boolean hasIdAttribute =
-        children.stream().anyMatch(child -> "@id".equals(child.getSelfName().nativeValue()));
+        children.stream().anyMatch(child -> "@id".equals(child.getSelfName().getValue()));
 
     assertTrue(hasPersonElement);
     assertTrue(hasIdAttribute);
@@ -283,8 +283,8 @@ public class NavigableXmlNodeTest {
     assertEquals(2, children.size());
 
     // Children should be indexed 0, 1
-    assertEquals(0, ((TreeNumber) children.get(0).getSelfName()).nativeValue().intValue());
-    assertEquals(1, ((TreeNumber) children.get(1).getSelfName()).nativeValue().intValue());
+    assertEquals(0, ((TreeNumber) children.get(0).getSelfName()).getValue().intValue());
+    assertEquals(1, ((TreeNumber) children.get(1).getSelfName()).getValue().intValue());
   }
 
   @Test
@@ -347,7 +347,7 @@ public class NavigableXmlNodeTest {
 
     TreePrimitive value = attributeNode.getValue();
     assertTrue(value instanceof TreeString);
-    assertEquals("John", value.nativeValue());
+    assertEquals("John", value.getValue());
   }
 
   @Test
@@ -356,7 +356,7 @@ public class NavigableXmlNodeTest {
 
     TreePrimitive value = textNode.getValue();
     assertTrue(value instanceof TreeString);
-    assertEquals("test content", value.nativeValue());
+    assertEquals("test content", value.getValue());
   }
 
   @Test
@@ -369,7 +369,7 @@ public class NavigableXmlNodeTest {
 
     // Should contain child element names and attribute names
     List<String> childNames =
-        list.stream().map(item -> item.nativeValue().toString()).collect(Collectors.toList());
+        list.stream().map(item -> item.getValue().toString()).collect(Collectors.toList());
 
     assertTrue(childNames.contains("person"));
     assertTrue(childNames.contains("metadata"));
@@ -388,8 +388,8 @@ public class NavigableXmlNodeTest {
     assertEquals(2, list.size());
 
     // Should contain indices 0, 1
-    assertEquals(0, ((TreeNumber) list.get(0)).nativeValue().intValue());
-    assertEquals(1, ((TreeNumber) list.get(1)).nativeValue().intValue());
+    assertEquals(0, ((TreeNumber) list.get(0)).getValue().intValue());
+    assertEquals(1, ((TreeNumber) list.get(1)).getValue().intValue());
   }
 
   @Test
@@ -437,12 +437,12 @@ public class NavigableXmlNodeTest {
     // Should be able to get text content
     Optional<NavigableTreeNode> textNode = metadataNode.getChildNode("text()");
     assertTrue(textNode.isPresent());
-    assertEquals("Some metadata text", textNode.get().getValue().nativeValue());
+    assertEquals("Some metadata text", textNode.get().getValue().getValue());
 
     // Children should include text() if present
     List<NavigableTreeNode> children = metadataNode.children().collect(Collectors.toList());
     boolean hasTextChild =
-        children.stream().anyMatch(child -> "text()".equals(child.getSelfName().nativeValue()));
+        children.stream().anyMatch(child -> "text()".equals(child.getSelfName().getValue()));
     assertTrue(hasTextChild);
   }
 }

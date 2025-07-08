@@ -22,7 +22,7 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
     if (fromContent instanceof TreeString tString) {
       try {
         SAXReader reader = new SAXReader();
-        Element root = reader.read(new StringReader(tString.nativeValue())).getRootElement();
+        Element root = reader.read(new StringReader(tString.getValue())).getRootElement();
         new NavigableXmlNode(root, null, (String) null);
       } catch (Exception e) {
         // log and ignore
@@ -37,7 +37,7 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
     if (fromContent instanceof TreeString tString) {
       try {
         SAXReader reader = new SAXReader();
-        Element root = reader.read(new StringReader(tString.nativeValue())).getRootElement();
+        Element root = reader.read(new StringReader(tString.getValue())).getRootElement();
         return Optional.of(new NavigableXmlNode(root, parentNode, "!!XML<" + root.getName() + ">"));
       } catch (Exception e) {
         // log and ignore

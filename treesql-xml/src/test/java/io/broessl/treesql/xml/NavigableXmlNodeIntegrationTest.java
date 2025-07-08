@@ -49,11 +49,11 @@ public class NavigableXmlNodeIntegrationTest {
     // Check book attributes
     Optional<NavigableTreeNode> bookId = firstBook.get().getChildNode("@id");
     assertTrue(bookId.isPresent());
-    assertEquals("book1", bookId.get().getValue().nativeValue());
+    assertEquals("book1", bookId.get().getValue().getValue());
 
     Optional<NavigableTreeNode> category = firstBook.get().getChildNode("@category");
     assertTrue(category.isPresent());
-    assertEquals("fiction", category.get().getValue().nativeValue());
+    assertEquals("fiction", category.get().getValue().getValue());
 
     // Navigate to title
     Optional<NavigableTreeNode> titleNode = firstBook.get().getChildNode("title");
@@ -62,7 +62,7 @@ public class NavigableXmlNodeIntegrationTest {
     Optional<NavigableTreeNode> titleText =
         titleNode.get().getChildNode("0").flatMap(t -> t.getChildNode("text()"));
     assertTrue(titleText.isPresent());
-    assertEquals("The Great Gatsby", titleText.get().getValue().nativeValue());
+    assertEquals("The Great Gatsby", titleText.get().getValue().getValue());
 
     // Navigate to reviews
     Optional<NavigableTreeNode> reviewsNode = firstBook.get().getChildNode("reviews");
@@ -79,11 +79,11 @@ public class NavigableXmlNodeIntegrationTest {
 
     Optional<NavigableTreeNode> rating = firstReview.get().getChildNode("@rating");
     assertTrue(rating.isPresent());
-    assertEquals("5", rating.get().getValue().nativeValue());
+    assertEquals("5", rating.get().getValue().getValue());
 
     Optional<NavigableTreeNode> reviewText = firstReview.get().getChildNode("text()");
     assertTrue(reviewText.isPresent());
-    assertEquals("Excellent classic", reviewText.get().getValue().nativeValue());
+    assertEquals("Excellent classic", reviewText.get().getValue().getValue());
 
     // Test sibling navigation within reviews
     Optional<NavigableTreeNode> secondReview = firstReview.get().getSibling(1);
@@ -91,7 +91,7 @@ public class NavigableXmlNodeIntegrationTest {
 
     Optional<NavigableTreeNode> secondRating = secondReview.get().getChildNode("@rating");
     assertTrue(secondRating.isPresent());
-    assertEquals("4", secondRating.get().getValue().nativeValue());
+    assertEquals("4", secondRating.get().getValue().getValue());
   }
 
   @Test

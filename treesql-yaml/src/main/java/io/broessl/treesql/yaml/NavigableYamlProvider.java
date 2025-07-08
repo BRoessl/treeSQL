@@ -24,7 +24,7 @@ public class NavigableYamlProvider implements NavigableTreeProvider {
     if (fromContent instanceof TreeString tString) {
       try {
         return Optional.of(
-            new NavigableJsonNode(YAML_MAPPER.readTree(tString.nativeValue()), null, null));
+            new NavigableJsonNode(YAML_MAPPER.readTree(tString.getValue()), null, null));
       } catch (Exception e) {
         // log and ignore
       }
@@ -38,8 +38,7 @@ public class NavigableYamlProvider implements NavigableTreeProvider {
     if (fromContent instanceof TreeString tString) {
       try {
         return Optional.of(
-            new NavigableJsonNode(
-                YAML_MAPPER.readTree(tString.nativeValue()), parentNode, "!!YAML"));
+            new NavigableJsonNode(YAML_MAPPER.readTree(tString.getValue()), parentNode, "!!YAML"));
       } catch (Exception e) {
         // log and ignore
       }

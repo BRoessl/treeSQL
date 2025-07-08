@@ -32,9 +32,9 @@ public class IntegrationTests {
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode into = fileScan.scan("/testA.json/~AS_JSON/0").findFirst().orElseThrow();
-    Assertions.assertEquals("0", into.getNameOrIndex().nativeValue().toString());
+    Assertions.assertEquals("0", into.getNameOrIndex().getValue().toString());
     ScannableTreeNode out = into.scan("/..~/..~").findFirst().orElseThrow();
-    Assertions.assertEquals("testA.json", out.getNameOrIndex().nativeValue().toString());
+    Assertions.assertEquals("testA.json", out.getNameOrIndex().getValue().toString());
   }
 
   @Test
@@ -110,7 +110,7 @@ public class IntegrationTests {
     var num =
         Assertions.assertInstanceOf(
             TreeNumber.class, scanResult.getContext().getBinding("idx_who_match"));
-    Assertions.assertEquals(2, num.nativeValue().intValue());
+    Assertions.assertEquals(2, num.getValue().intValue());
   }
 
   @Test

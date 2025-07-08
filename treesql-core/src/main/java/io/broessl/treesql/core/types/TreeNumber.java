@@ -8,7 +8,7 @@ public final class TreeNumber extends TreeNodeIdentifier {
   private BigDecimal value;
 
   @Override
-  public BigDecimal nativeValue() {
+  public BigDecimal getValue() {
     return value;
   }
 

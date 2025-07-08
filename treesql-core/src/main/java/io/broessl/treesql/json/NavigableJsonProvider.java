@@ -17,7 +17,7 @@ public class NavigableJsonProvider implements NavigableTreeProvider {
   @Override
   public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
     if (fromContent instanceof TreeString tString) {
-      return Optional.ofNullable(NavigableJsonNode.fromContent(tString.nativeValue()));
+      return Optional.ofNullable(NavigableJsonNode.fromContent(tString.getValue()));
     }
     return Optional.empty();
   }
@@ -27,7 +27,7 @@ public class NavigableJsonProvider implements NavigableTreeProvider {
       TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       return Optional.ofNullable(
-          NavigableJsonNode.fromContent(tString.nativeValue(), parentNode, "!!JSON"));
+          NavigableJsonNode.fromContent(tString.getValue(), parentNode, "!!JSON"));
     }
     return Optional.empty();
   }

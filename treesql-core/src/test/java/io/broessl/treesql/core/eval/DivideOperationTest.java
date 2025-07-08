@@ -16,7 +16,7 @@ public class DivideOperationTest {
     TreePrimitive b = new TreeNumber(2.5);
     TreePrimitive result = divOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeNumber);
-    assertEquals(BigDecimal.valueOf(4), ((TreeNumber) result).nativeValue().stripTrailingZeros());
+    assertEquals(BigDecimal.valueOf(4), ((TreeNumber) result).getValue().stripTrailingZeros());
   }
 
   @Test

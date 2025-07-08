@@ -17,7 +17,7 @@ public class NotEqualsOperationTest {
     TreePrimitive b = new TreeNumber(7);
     TreePrimitive result = notEqualsOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertTrue(((TreeBool) result).nativeValue());
+    assertTrue(((TreeBool) result).getValue());
   }
 
   @Test
@@ -26,7 +26,7 @@ public class NotEqualsOperationTest {
     TreePrimitive b = new TreeNumber(5);
     TreePrimitive result = notEqualsOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertFalse(((TreeBool) result).nativeValue());
+    assertFalse(((TreeBool) result).getValue());
   }
 
   @Test
@@ -35,7 +35,7 @@ public class NotEqualsOperationTest {
     TreePrimitive b = new TreeString("bar");
     TreePrimitive result = notEqualsOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertTrue(((TreeBool) result).nativeValue());
+    assertTrue(((TreeBool) result).getValue());
   }
 
   @Test
@@ -44,7 +44,7 @@ public class NotEqualsOperationTest {
     TreePrimitive b = new TreeString("foo");
     TreePrimitive result = notEqualsOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertFalse(((TreeBool) result).nativeValue());
+    assertFalse(((TreeBool) result).getValue());
   }
 
   @Test
@@ -53,7 +53,7 @@ public class NotEqualsOperationTest {
     TreePrimitive b = new TreeString("1");
     TreePrimitive result = notEqualsOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertTrue(((TreeBool) result).nativeValue());
+    assertTrue(((TreeBool) result).getValue());
   }
 
   @Test

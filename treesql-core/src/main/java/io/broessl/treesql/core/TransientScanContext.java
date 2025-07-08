@@ -85,9 +85,9 @@ public class TransientScanContext implements ScanContext {
 
   public String getEvaluationPath() {
     if (parentContext == null) {
-      return stepName.nativeValue().toString();
+      return stepName.getValue().toString();
     } else {
-      return parentContext.getEvaluationPath() + "/" + stepName.nativeValue().toString();
+      return parentContext.getEvaluationPath() + "/" + stepName.getValue().toString();
     }
   }
 

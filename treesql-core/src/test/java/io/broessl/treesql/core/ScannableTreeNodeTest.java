@@ -41,7 +41,7 @@ class ScannableTreeNodeTest extends TestWithJsonData {
     Assertions.assertEquals(1, scanResult.size());
     Assertions.assertEquals("{\"objects\":true}", scanResult.get(0).toString());
     Assertions.assertEquals("/highly/nested", scanResult.get(0).getContext().getEvaluationPath());
-    Assertions.assertEquals("nested", scanResult.get(0).getNameOrIndex().nativeValue());
+    Assertions.assertEquals("nested", scanResult.get(0).getNameOrIndex().getValue());
   }
 
   @Test
@@ -171,7 +171,7 @@ class ScannableTreeNodeTest extends TestWithJsonData {
     NavigableTreeNode ntn =
         Assertions.assertInstanceOf(
             NavigableTreeNode.class, scanResult.get(0).getContext().getBinding("@level_3"));
-    Assertions.assertEquals(true, ntn.getValue().nativeValue());
+    Assertions.assertEquals(true, ntn.getValue().getValue());
   }
 
   @Test

@@ -25,11 +25,11 @@ public class AddOperation extends StackOperation {
     TreePrimitive b = arguments[1];
     if (a instanceof TreeNumber numA && b instanceof TreeNumber numB) {
       // Add numbers using BigDecimal's add method
-      BigDecimal result = numA.nativeValue().add(numB.nativeValue());
+      BigDecimal result = numA.getValue().add(numB.getValue());
       return new TreeNumber(result);
     } else if (a instanceof TreeString || b instanceof TreeString) {
       // Concatenate strings
-      String result = a.nativeValue().toString() + b.nativeValue().toString();
+      String result = a.getValue().toString() + b.getValue().toString();
       return new TreeString(result);
     } else {
       throw new IllegalArgumentException("AddOperation only supports numbers or strings");

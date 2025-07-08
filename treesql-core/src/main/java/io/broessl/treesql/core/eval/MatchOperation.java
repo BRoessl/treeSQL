@@ -23,7 +23,7 @@ public class MatchOperation extends StackOperation {
     TreePrimitive a = arguments[0];
     TreePrimitive b = arguments[1];
     if (a instanceof TreeString strA && b instanceof TreeString strB) {
-      boolean result = strA.nativeValue().matches(strB.nativeValue());
+      boolean result = strA.getValue().matches(strB.getValue());
       return new TreeBool(result);
     } else {
       throw new IllegalArgumentException("MatchOperation requires two strings (value, regex)");

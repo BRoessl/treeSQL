@@ -16,7 +16,7 @@ public class MultiplyOperationTest {
     TreePrimitive b = new TreeNumber(5);
     TreePrimitive result = mulOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeNumber);
-    assertEquals(BigDecimal.valueOf(20), ((TreeNumber) result).nativeValue());
+    assertEquals(BigDecimal.valueOf(20), ((TreeNumber) result).getValue());
   }
 
   @Test

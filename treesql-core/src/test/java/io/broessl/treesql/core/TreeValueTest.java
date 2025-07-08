@@ -17,7 +17,7 @@ class TreeValueTest {
   @Test
   void testParseNumberValid() {
     TreeNumber num = TreeValue.parseNumber("123.45");
-    Assertions.assertEquals("123.45", num.nativeValue().toString());
+    Assertions.assertEquals("123.45", num.getValue().toString());
   }
 
   @Test
@@ -28,13 +28,13 @@ class TreeValueTest {
   @Test
   void testParseStringValid() {
     TreeString str = TreeValue.parseString("'hello'");
-    Assertions.assertEquals("hello", str.nativeValue());
+    Assertions.assertEquals("hello", str.getValue());
   }
 
   @Test
   void testParseStringEscapedQuotes() {
     TreeString str = TreeValue.parseString("''");
-    Assertions.assertEquals("", str.nativeValue());
+    Assertions.assertEquals("", str.getValue());
   }
 
   @Test
@@ -47,13 +47,13 @@ class TreeValueTest {
   @Test
   void testParseBooleanTrue() {
     TreeBool bool = TreeValue.parseBoolean("TRUE");
-    Assertions.assertTrue(bool.nativeValue());
+    Assertions.assertTrue(bool.getValue());
   }
 
   @Test
   void testParseBooleanFalse() {
     TreeBool bool = TreeValue.parseBoolean("FALSE");
-    Assertions.assertFalse(bool.nativeValue());
+    Assertions.assertFalse(bool.getValue());
   }
 
   @Test

@@ -16,7 +16,7 @@ public class AddOperationTest {
     TreePrimitive b = new TreeNumber(3);
     TreePrimitive result = addOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeNumber);
-    assertEquals(5.0, ((TreeNumber) result).nativeValue().doubleValue());
+    assertEquals(5.0, ((TreeNumber) result).getValue().doubleValue());
   }
 
   @Test
@@ -25,7 +25,7 @@ public class AddOperationTest {
     TreePrimitive b = new TreeString("bar");
     TreePrimitive result = addOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeString);
-    assertEquals("foobar", ((TreeString) result).nativeValue());
+    assertEquals("foobar", ((TreeString) result).getValue());
   }
 
   @Test
@@ -34,7 +34,7 @@ public class AddOperationTest {
     TreePrimitive b = new TreeString(" apples");
     TreePrimitive result = addOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeString);
-    assertEquals("7 apples", ((TreeString) result).nativeValue());
+    assertEquals("7 apples", ((TreeString) result).getValue());
   }
 
   @Test
@@ -43,7 +43,7 @@ public class AddOperationTest {
     TreePrimitive b = new TreeNumber(42);
     TreePrimitive result = addOp.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeString);
-    assertEquals("Count: 42", ((TreeString) result).nativeValue());
+    assertEquals("Count: 42", ((TreeString) result).getValue());
   }
 
   @Test

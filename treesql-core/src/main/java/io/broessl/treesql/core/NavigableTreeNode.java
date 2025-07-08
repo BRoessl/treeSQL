@@ -70,7 +70,7 @@ public interface NavigableTreeNode {
     }
     return getParentNode().orElseThrow().absolutePath()
         + "/"
-        + getSelfName().nativeValue().toString().replaceAll("~", "~0").replaceAll("/", "~1");
+        + getSelfName().getValue().toString().replaceAll("~", "~0").replaceAll("/", "~1");
   }
 
   /**

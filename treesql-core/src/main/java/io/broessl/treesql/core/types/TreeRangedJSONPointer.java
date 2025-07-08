@@ -46,12 +46,12 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
       String context;
       if (this.selection.contains("/")) {
         context = selection.substring(0, selection.indexOf("/"));
-        String pathToContext = expectAsString(stn, context).nativeValue();
+        String pathToContext = expectAsString(stn, context).getValue();
         pointer = pathToContext + selection.substring(selection.indexOf("/"));
         return new TreeRangedJSONPointer(pointer);
       } else {
         context = selection;
-        String pathToContext = expectAsString(stn, context).nativeValue();
+        String pathToContext = expectAsString(stn, context).getValue();
         pointer = pathToContext;
         return new TreeRangedJSONPointer(pointer);
       }

@@ -19,8 +19,8 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
   private List<TreePrimitive> value = new ArrayList<>();
 
   @Override
-  public List<Object> nativeValue() {
-    return value.stream().map(p -> p.nativeValue()).toList();
+  public List<Object> getValue() {
+    return value.stream().map(p -> p.getValue()).toList();
   }
 
   @Override

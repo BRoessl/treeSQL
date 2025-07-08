@@ -16,7 +16,7 @@ public class ModuloOperationTest {
     TreePrimitive b = new TreeNumber(3);
     TreePrimitive result = op.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeNumber);
-    assertEquals(BigDecimal.valueOf(1), ((TreeNumber) result).nativeValue());
+    assertEquals(BigDecimal.valueOf(1), ((TreeNumber) result).getValue());
   }
 
   @Test

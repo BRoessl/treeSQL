@@ -11,29 +11,25 @@ public class OrOperationTest {
   @Test
   void testOrTrueTrue() {
     assertTrue(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(true)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(true)})).getValue());
   }
 
   @Test
   void testOrTrueFalse() {
     assertTrue(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(false)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(false)})).getValue());
   }
 
   @Test
   void testOrFalseTrue() {
     assertTrue(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(true)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(true)})).getValue());
   }
 
   @Test
   void testOrFalseFalse() {
     assertFalse(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(false)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(false)})).getValue());
   }
 
   @Test

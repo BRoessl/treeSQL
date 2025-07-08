@@ -20,7 +20,7 @@ public class InOperationTest {
         new TreeList(List.of(new TreeNumber(1), new TreeNumber(5), new TreeNumber(10)));
     TreePrimitive result = op.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertTrue(((TreeBool) result).nativeValue());
+    assertTrue(((TreeBool) result).getValue());
   }
 
   @Test
@@ -29,7 +29,7 @@ public class InOperationTest {
     TreePrimitive b = new TreeList(List.of(new TreeString("bar"), new TreeString("baz")));
     TreePrimitive result = op.call(new TreePrimitive[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertFalse(((TreeBool) result).nativeValue());
+    assertFalse(((TreeBool) result).getValue());
   }
 
   @Test

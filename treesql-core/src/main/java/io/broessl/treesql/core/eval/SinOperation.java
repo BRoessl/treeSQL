@@ -25,7 +25,7 @@ public class SinOperation extends StackOperation {
     if (!(arg instanceof TreeNumber)) {
       throw new IllegalArgumentException("SinOperation requires a numeric argument");
     }
-    BigDecimal value = ((TreeNumber) arg).nativeValue();
+    BigDecimal value = ((TreeNumber) arg).getValue();
     return new TreeNumber(Math.sin(value.doubleValue()));
   }
 }

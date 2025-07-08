@@ -28,7 +28,7 @@ public class NavigableRegexProvider implements NavigableTreeProvider {
 
     if (argument != null && !argument.isEmpty() && fromContent instanceof TreeString tString) {
       Pattern pattern = Pattern.compile(argument.get(0));
-      var matcher = pattern.matcher(tString.nativeValue());
+      var matcher = pattern.matcher(tString.getValue());
       if (!matcher.find()) {
         return Optional.empty();
       }

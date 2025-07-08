@@ -23,7 +23,7 @@ public class SubtractOperation extends StackOperation {
     TreePrimitive a = arguments[0];
     TreePrimitive b = arguments[1];
     if (a instanceof TreeNumber numA && b instanceof TreeNumber numB) {
-      BigDecimal result = numA.nativeValue().subtract(numB.nativeValue());
+      BigDecimal result = numA.getValue().subtract(numB.getValue());
       return new TreeNumber(result);
     } else {
       throw new IllegalArgumentException("SubtractOperation only supports numbers");

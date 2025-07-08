@@ -75,7 +75,7 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
     var builder = CSVFormat.DEFAULT.builder();
     builder = settings.delimiter() != null ? builder.setDelimiter(settings.delimiter()) : builder;
     builder = settings.quote() != null ? builder.setQuote(settings.quote().charAt(0)) : builder;
-    try (var parsedCsv = builder.setHeader().get().parse(new StringReader(tString.nativeValue()))) {
+    try (var parsedCsv = builder.setHeader().get().parse(new StringReader(tString.getValue()))) {
       var array = NavigableJsonNode.OM.createArrayNode();
       List<String> names = parsedCsv.getHeaderNames();
       for (String expectedHeader : settings.hasNamedColumns()) {
@@ -103,11 +103,7 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
 
   private ArrayNode defaultParse(TreeString tString) throws IOException {
     try (var parsedCsv =
-        CSVFormat.DEFAULT
-            .builder()
-            .setHeader()
-            .get()
-            .parse(new StringReader(tString.nativeValue()))) {
+        CSVFormat.DEFAULT.builder().setHeader().get().parse(new StringReader(tString.getValue()))) {
       var array = NavigableJsonNode.OM.createArrayNode();
       List<String> names = parsedCsv.getHeaderNames();
       parsedCsv.forEach(

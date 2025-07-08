@@ -5,7 +5,7 @@ public final class TreeBool extends TreePrimitive {
   private boolean value;
 
   @Override
-  public Boolean nativeValue() {
+  public Boolean getValue() {
     return value;
   }
 

@@ -23,10 +23,10 @@ public class DivideOperation extends StackOperation {
     TreePrimitive a = arguments[0];
     TreePrimitive b = arguments[1];
     if (a instanceof TreeNumber numA && b instanceof TreeNumber numB) {
-      if (numB.nativeValue().compareTo(BigDecimal.ZERO) == 0) {
+      if (numB.getValue().compareTo(BigDecimal.ZERO) == 0) {
         throw new ArithmeticException("Division by zero");
       }
-      BigDecimal result = numA.nativeValue().divide(numB.nativeValue());
+      BigDecimal result = numA.getValue().divide(numB.getValue());
       return new TreeNumber(result);
     } else {
       throw new IllegalArgumentException("DivideOperation only supports numbers");

@@ -43,10 +43,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -190,25 +190,28 @@ public class Main extends JFrame {
 
     // Add Enter key to execute query as well
     queryTextArea.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "executeQuery");
-    
+
     // Add document listener for real-time syntax validation
-    queryTextArea.getDocument().addDocumentListener(new DocumentListener() {
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        Main.this.validateQuerySyntax();
-      }
-      
-      @Override
-      public void removeUpdate(DocumentEvent e) {
-        Main.this.validateQuerySyntax();
-      }
-      
-      @Override
-      public void changedUpdate(DocumentEvent e) {
-        Main.this.validateQuerySyntax();
-      }
-    });
-    
+    queryTextArea
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                Main.this.validateQuerySyntax();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                Main.this.validateQuerySyntax();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                Main.this.validateQuerySyntax();
+              }
+            });
+
     // Perform initial validation
     validateQuerySyntax();
 
@@ -464,23 +467,23 @@ public class Main extends JFrame {
   }
 
   /**
-   * Validates the current query syntax and updates the background color accordingly.
-   * Light green for valid queries, light red for invalid queries.
+   * Validates the current query syntax and updates the background color accordingly. Light green
+   * for valid queries, light red for invalid queries.
    */
   private void validateQuerySyntax() {
     String query = queryTextArea.getText().trim();
-    
+
     // Define colors for validation feedback
     Color validColor = new Color(230, 255, 230); // Light green
     Color invalidColor = new Color(255, 230, 230); // Light red
     Color defaultColor = Color.WHITE; // Default white
-    
+
     if (query.isEmpty()) {
       // Empty query - use default background
       queryTextArea.setBackground(defaultColor);
       return;
     }
-    
+
     try {
       // Try to parse the query
       QueryParser.parseStatement(query);

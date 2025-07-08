@@ -23,7 +23,7 @@ public class NavigableDirectoryTest {
             .getChildNode("subFolder")
             .get()
             .children()
-            .map(tn -> tn.getSelfName().nativeValue().toString())
+            .map(tn -> tn.getSelfName().getValue().toString())
             .toList();
     Assertions.assertEquals(12, list.size());
     Assertions.assertTrue(list.contains("sub~SubFolder"));
@@ -49,7 +49,7 @@ public class NavigableDirectoryTest {
     Assertions.assertTrue(squealableFileSystem.getChildNode("testA.json").isPresent());
     TreePrimitive tPrim = squealableFileSystem.getValue();
     TreeList tList = Assertions.assertInstanceOf(TreeList.class, tPrim);
-    List<Object> nativeValues = tList.nativeValue();
+    List<Object> nativeValues = tList.getValue();
     Assertions.assertTrue(nativeValues.contains("subFolder"));
     Assertions.assertTrue(nativeValues.contains("testA.json"));
   }

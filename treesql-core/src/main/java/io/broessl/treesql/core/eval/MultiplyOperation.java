@@ -23,7 +23,7 @@ public class MultiplyOperation extends StackOperation {
     TreePrimitive a = arguments[0];
     TreePrimitive b = arguments[1];
     if (a instanceof TreeNumber numA && b instanceof TreeNumber numB) {
-      BigDecimal result = numA.nativeValue().multiply(numB.nativeValue());
+      BigDecimal result = numA.getValue().multiply(numB.getValue());
       return new TreeNumber(result);
     } else {
       throw new IllegalArgumentException("MultiplyOperation only supports numbers");

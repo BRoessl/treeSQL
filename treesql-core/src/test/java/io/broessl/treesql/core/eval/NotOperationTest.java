@@ -10,12 +10,12 @@ public class NotOperationTest {
 
   @Test
   void testNotTrue() {
-    assertFalse(((TreeBool) op.call(new TreeBool[] {new TreeBool(true)})).nativeValue());
+    assertFalse(((TreeBool) op.call(new TreeBool[] {new TreeBool(true)})).getValue());
   }
 
   @Test
   void testNotFalse() {
-    assertTrue(((TreeBool) op.call(new TreeBool[] {new TreeBool(false)})).nativeValue());
+    assertTrue(((TreeBool) op.call(new TreeBool[] {new TreeBool(false)})).getValue());
   }
 
   @Test
