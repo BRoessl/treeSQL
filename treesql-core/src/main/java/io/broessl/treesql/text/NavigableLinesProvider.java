@@ -1,8 +1,8 @@
 package io.broessl.treesql.text;
 
 import io.broessl.treesql.core.NavigableTreeNode;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.json.NavigableJsonNode;
 import io.broessl.treesql.spi.NavigableTreeProvider;
 import java.util.List;
@@ -15,7 +15,7 @@ public class NavigableLinesProvider implements NavigableTreeProvider {
   }
 
   @Override
-  public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
+  public Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent) {
     if (fromContent instanceof TreeString tString) {
       var array = NavigableJsonNode.OM.createArrayNode();
       tString.getValue().lines().forEach(array::add);
@@ -27,7 +27,7 @@ public class NavigableLinesProvider implements NavigableTreeProvider {
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       var array = NavigableJsonNode.OM.createArrayNode();
       tString.getValue().lines().forEach(array::add);

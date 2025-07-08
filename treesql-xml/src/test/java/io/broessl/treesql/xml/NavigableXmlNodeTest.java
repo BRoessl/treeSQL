@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNumber;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -345,7 +345,7 @@ public class NavigableXmlNodeTest {
     NavigableXmlNode attributeNode =
         new NavigableXmlNode(personElement.attribute("name"), rootNode, "@name");
 
-    TreePrimitive value = attributeNode.getValue();
+    TreeValue value = attributeNode.getValue();
     assertTrue(value instanceof TreeString);
     assertEquals("John", value.getValue());
   }
@@ -354,14 +354,14 @@ public class NavigableXmlNodeTest {
   void testGetValueForTextNode() {
     NavigableXmlNode textNode = new NavigableXmlNode("test content", rootNode);
 
-    TreePrimitive value = textNode.getValue();
+    TreeValue value = textNode.getValue();
     assertTrue(value instanceof TreeString);
     assertEquals("test content", value.getValue());
   }
 
   @Test
   void testGetValueForElementNode() {
-    TreePrimitive value = rootNode.getValue();
+    TreeValue value = rootNode.getValue();
     assertTrue(value instanceof TreeList);
 
     TreeList list = (TreeList) value;
@@ -381,7 +381,7 @@ public class NavigableXmlNodeTest {
     List<Element> personElements = rootElement.elements("person");
     NavigableXmlNode listNode = new NavigableXmlNode(personElements, rootNode, "person");
 
-    TreePrimitive value = listNode.getValue();
+    TreeValue value = listNode.getValue();
     assertTrue(value instanceof TreeList);
 
     TreeList list = (TreeList) value;

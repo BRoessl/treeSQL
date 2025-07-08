@@ -3,8 +3,8 @@ package io.broessl.treesql.core.eval;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.broessl.treesql.core.types.TreeBool;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import org.junit.jupiter.api.Test;
 
 public class MatchOperationTest {
@@ -12,28 +12,28 @@ public class MatchOperationTest {
 
   @Test
   void testMatchTrue() {
-    TreePrimitive a = new TreeString("hello123");
-    TreePrimitive b = new TreeString("hello\\d+");
-    TreePrimitive result = op.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeString("hello123");
+    TreeValue b = new TreeString("hello\\d+");
+    TreeValue result = op.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
     assertTrue(((TreeBool) result).getValue());
   }
 
   @Test
   void testMatchFalse() {
-    TreePrimitive a = new TreeString("hello");
-    TreePrimitive b = new TreeString("\\d+");
-    TreePrimitive result = op.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeString("hello");
+    TreeValue b = new TreeString("\\d+");
+    TreeValue result = op.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
     assertFalse(((TreeBool) result).getValue());
   }
 
   @Test
   void testInvalidArguments() {
-    assertThrows(IllegalArgumentException.class, () -> op.call(new TreePrimitive[] {}));
+    assertThrows(IllegalArgumentException.class, () -> op.call(new TreeValue[] {}));
     assertThrows(IllegalArgumentException.class, () -> op.call(null));
     assertThrows(
         IllegalArgumentException.class,
-        () -> op.call(new TreePrimitive[] {new TreeString("foo"), null}));
+        () -> op.call(new TreeValue[] {new TreeString("foo"), null}));
   }
 }

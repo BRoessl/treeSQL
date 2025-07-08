@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import io.broessl.treesql.core.NavigableTreeNode;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.json.NavigableJsonNode;
 import io.broessl.treesql.spi.NavigableTreeProvider;
 import java.io.IOException;
@@ -22,14 +22,14 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
   }
 
   @Override
-  public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
+  public Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent) {
     throw new UnsupportedOperationException(
         "NavigableCsvProvider does only support building attached tree nodes.");
   }
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       if (argument.isEmpty()) {
         try {

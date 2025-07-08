@@ -22,7 +22,7 @@ public final class TreeString extends TreeNodeIdentifier {
   }
 
   @Override
-  public int compareTo(TreePrimitive o) {
+  public int compareTo(TreeValue o) {
     return value.compareTo(((TreeString) o).value);
   }
 

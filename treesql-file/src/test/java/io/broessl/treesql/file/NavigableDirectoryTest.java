@@ -1,7 +1,7 @@
 package io.broessl.treesql.file;
 
 import io.broessl.treesql.core.types.TreeList;
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeValue;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -47,7 +47,7 @@ public class NavigableDirectoryTest {
     Assertions.assertTrue(squealableFileSystem.getChildNode("nope").isEmpty());
     Assertions.assertTrue(squealableFileSystem.getChildNode("subFolder").isPresent());
     Assertions.assertTrue(squealableFileSystem.getChildNode("testA.json").isPresent());
-    TreePrimitive tPrim = squealableFileSystem.getValue();
+    TreeValue tPrim = squealableFileSystem.getValue();
     TreeList tList = Assertions.assertInstanceOf(TreeList.class, tPrim);
     List<Object> nativeValues = tList.getValue();
     Assertions.assertTrue(nativeValues.contains("subFolder"));

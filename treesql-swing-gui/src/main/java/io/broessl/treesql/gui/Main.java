@@ -2,8 +2,8 @@ package io.broessl.treesql.gui;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import io.broessl.treesql.core.NavigableTreeNode;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.file.NavigableDirectory;
 import io.broessl.treesql.json.NavigableJsonProvider;
 import io.broessl.treesql.sql.QueryParser;
@@ -444,11 +444,11 @@ public class Main extends JFrame {
       setupResultTable(tableHeader);
 
       // Execute query and populate results
-      List<List<TreePrimitive>> results = parsedQuery.execute(rootAsNavigableTree).toList();
+      List<List<TreeValue>> results = parsedQuery.execute(rootAsNavigableTree).toList();
 
       SwingUtilities.invokeLater(
           () -> {
-            for (List<TreePrimitive> row : results) {
+            for (List<TreeValue> row : results) {
               // Convert each result row to string values
               List<String> rowData =
                   row.stream()

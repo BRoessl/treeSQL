@@ -4,8 +4,8 @@ import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeNull;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -94,9 +94,9 @@ public class NavigableDirectory implements NavigableTreeNode {
   }
 
   @Override
-  public TreePrimitive getValue() {
+  public TreeValue getValue() {
     if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-      List<TreePrimitive> list = new ArrayList<TreePrimitive>();
+      List<TreeValue> list = new ArrayList<TreeValue>();
       try {
         Files.list(path)
             .forEach(

@@ -14,9 +14,9 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class TreeList extends TreePrimitive implements List<TreePrimitive> {
+public final class TreeList extends TreeValue implements List<TreeValue> {
 
-  private List<TreePrimitive> value = new ArrayList<>();
+  private List<TreeValue> value = new ArrayList<>();
 
   @Override
   public List<Object> getValue() {
@@ -28,7 +28,7 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return "[" + value.stream().map(i -> i.toString()).collect(Collectors.joining(", ")) + "]";
   }
 
-  public TreeList(List<TreePrimitive> value) {
+  public TreeList(List<TreeValue> value) {
     if (value != null) {
       this.value = value;
     } else {
@@ -57,11 +57,11 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
   }
 
   @Override
-  public int compareTo(TreePrimitive o) {
+  public int compareTo(TreeValue o) {
     return Integer.compare(value.size(), ((TreeList) o).value.size());
   }
 
-  public void forEach(Consumer<? super TreePrimitive> action) {
+  public void forEach(Consumer<? super TreeValue> action) {
     value.forEach(action);
   }
 
@@ -77,7 +77,7 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return value.contains(o);
   }
 
-  public Iterator<TreePrimitive> iterator() {
+  public Iterator<TreeValue> iterator() {
     return value.iterator();
   }
 
@@ -89,7 +89,7 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return value.toArray(a);
   }
 
-  public boolean add(TreePrimitive e) {
+  public boolean add(TreeValue e) {
     return value.add(e);
   }
 
@@ -101,11 +101,11 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return value.containsAll(c);
   }
 
-  public boolean addAll(Collection<? extends TreePrimitive> c) {
+  public boolean addAll(Collection<? extends TreeValue> c) {
     return value.addAll(c);
   }
 
-  public boolean addAll(int index, Collection<? extends TreePrimitive> c) {
+  public boolean addAll(int index, Collection<? extends TreeValue> c) {
     return value.addAll(index, c);
   }
 
@@ -117,7 +117,7 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return value.retainAll(c);
   }
 
-  public void replaceAll(UnaryOperator<TreePrimitive> operator) {
+  public void replaceAll(UnaryOperator<TreeValue> operator) {
     value.replaceAll(operator);
   }
 
@@ -125,7 +125,7 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return value.toArray(generator);
   }
 
-  public void sort(Comparator<? super TreePrimitive> c) {
+  public void sort(Comparator<? super TreeValue> c) {
     value.sort(c);
   }
 
@@ -133,23 +133,23 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     value.clear();
   }
 
-  public TreePrimitive get(int index) {
+  public TreeValue get(int index) {
     return value.get(index);
   }
 
-  public TreePrimitive set(int index, TreePrimitive element) {
+  public TreeValue set(int index, TreeValue element) {
     return value.set(index, element);
   }
 
-  public void add(int index, TreePrimitive element) {
+  public void add(int index, TreeValue element) {
     value.add(index, element);
   }
 
-  public boolean removeIf(Predicate<? super TreePrimitive> filter) {
+  public boolean removeIf(Predicate<? super TreeValue> filter) {
     return value.removeIf(filter);
   }
 
-  public TreePrimitive remove(int index) {
+  public TreeValue remove(int index) {
     return value.remove(index);
   }
 
@@ -161,55 +161,55 @@ public final class TreeList extends TreePrimitive implements List<TreePrimitive>
     return value.lastIndexOf(o);
   }
 
-  public ListIterator<TreePrimitive> listIterator() {
+  public ListIterator<TreeValue> listIterator() {
     return value.listIterator();
   }
 
-  public ListIterator<TreePrimitive> listIterator(int index) {
+  public ListIterator<TreeValue> listIterator(int index) {
     return value.listIterator(index);
   }
 
-  public List<TreePrimitive> subList(int fromIndex, int toIndex) {
+  public List<TreeValue> subList(int fromIndex, int toIndex) {
     return value.subList(fromIndex, toIndex);
   }
 
-  public Spliterator<TreePrimitive> spliterator() {
+  public Spliterator<TreeValue> spliterator() {
     return value.spliterator();
   }
 
-  public void addFirst(TreePrimitive e) {
+  public void addFirst(TreeValue e) {
     value.addFirst(e);
   }
 
-  public void addLast(TreePrimitive e) {
+  public void addLast(TreeValue e) {
     value.addLast(e);
   }
 
-  public TreePrimitive getFirst() {
+  public TreeValue getFirst() {
     return value.getFirst();
   }
 
-  public Stream<TreePrimitive> stream() {
+  public Stream<TreeValue> stream() {
     return value.stream();
   }
 
-  public TreePrimitive getLast() {
+  public TreeValue getLast() {
     return value.getLast();
   }
 
-  public Stream<TreePrimitive> parallelStream() {
+  public Stream<TreeValue> parallelStream() {
     return value.parallelStream();
   }
 
-  public TreePrimitive removeFirst() {
+  public TreeValue removeFirst() {
     return value.removeFirst();
   }
 
-  public TreePrimitive removeLast() {
+  public TreeValue removeLast() {
     return value.removeLast();
   }
 
-  public List<TreePrimitive> reversed() {
+  public List<TreeValue> reversed() {
     return value.reversed();
   }
 }

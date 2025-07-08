@@ -1,70 +1,128 @@
 package io.broessl.treesql.core.types;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.broessl.treesql.core.eval.stack.Stackable;
-import java.math.BigDecimal;
-import java.util.Locale;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract sealed class TreeValue implements Stackable
-    permits TreeContextualPrimitive, TreePrimitive {
+public abstract sealed class TreeValue extends TreeStackableValue implements Comparable<TreeValue>
+    permits TreeNull, TreeBool, TreeList, TreeNodeIdentifier {
 
-  public static TreeNumber parseNumber(String text) {
-    return new TreeNumber(new BigDecimal(text));
-  }
+  public abstract Object getValue();
 
-  public static TreeString parseString(String text) {
-    if (text.length() >= 2 && text.startsWith("'") && text.endsWith("'")) {
-      String parsedString = text.substring(1, text.length() - 1).replaceAll("''", "''");
-      return new TreeString(parsedString);
+  public static TreeValue createTreePrimitive(Object o) {
+
+    if (o instanceof TreeValue prim) {
+      return prim;
     }
-    throw new IllegalArgumentException("String must be enclosed in single quotes");
-  }
 
-  public static TreeBool parseBoolean(String text) {
-    if ("TRUE".equals(text)) return new TreeBool(true);
-    if ("FALSE".equals(text)) return new TreeBool(false);
-    throw new IllegalArgumentException(
-        "Boolean must be either TRUE or FALSE, got: " + text.toUpperCase());
-  }
+    // consolidate JsonNode input
+    if (o != null && o instanceof JsonNode jsonValue) {
+      o = jsonValue.isNull() || jsonValue.isMissingNode() ? null : o;
+      o = jsonValue.isTextual() ? jsonValue.textValue() : o;
+      o = jsonValue.isBoolean() ? jsonValue.booleanValue() : o;
+      o = jsonValue.isNumber() ? jsonValue.numberValue() : o;
+      o = jsonValue instanceof ArrayNode arrNode ? arrNode.valueStream().toList() : o;
+    }
 
-  public static TreeNull parseNull(String text) {
-    if ("NULL".equals(text)) {
+    if (o == null) {
       return TreeNull.INSTANCE;
     }
-    throw new IllegalArgumentException("Null must be the keyword NULL, got: " + text);
-  }
 
-  public static TreeRangedLiteral parseRangedLiteral(String text) {
-    return new TreeRangedLiteral(text);
-  }
+    if (o instanceof Boolean b) {
+      return new TreeBool(b);
+    }
 
-  static ObjectMapper objectMapper = new ObjectMapper();
+    if (o instanceof String s) {
+      return new TreeString(s);
+    }
 
-  public static TreeRangedJSONPointer parseRangedJSONPointer(String jsonText) {
-    String value;
-    try {
-      value = objectMapper.readTree(jsonText).textValue();
-      if (value == null) {
-        throw new IllegalArgumentException(jsonText + " is not a valid JSON Pointer");
+    if (o instanceof Number n) {
+      return new TreeNumber(n);
+    }
+
+    if (o instanceof List<?> list) {
+      List<TreeValue> treePrimitives = new ArrayList<>();
+      for (Object item : list) {
+        treePrimitives.add(createTreePrimitive(item));
       }
-      return new TreeRangedJSONPointer(value);
-    } catch (JsonProcessingException e) {
-      throw new IllegalArgumentException(jsonText + " is not a valid JSON Pointer");
+      return new TreeList(treePrimitives);
     }
+
+    throw new IllegalArgumentException("Unsupported type: " + o.getClass().getName());
   }
 
-  public static TreeValueAt parseValueAt(String text) {
-    if (text.startsWith("@")) {
-      return new TreeValueAt(text);
-    }
-    throw new IllegalArgumentException("ValueAt must start with '@', got: " + text);
-  }
+  public static <T extends TreeValue> T convert(Object o, Class<T> targetType) {
 
-  public static TreeFullPath parsePathVariable(String text) {
-    if (text.toLowerCase(Locale.ENGLISH).equals(text)) {
-      return new TreeFullPath(text);
+    // consolidate JsonNode input
+    if (o != null && o instanceof JsonNode jsonValue) {
+      o = jsonValue.isNull() || jsonValue.isMissingNode() ? null : o;
+      o = jsonValue.isTextual() ? jsonValue.textValue() : o;
+      o = jsonValue.isBoolean() ? jsonValue.booleanValue() : o;
+      o = jsonValue.isNumber() ? jsonValue.numberValue() : o;
     }
-    throw new IllegalArgumentException("Path variable must be all lowercase, got: " + text);
+
+    // consolidate TreePrimitive input
+    o = o instanceof TreeValue prim ? prim.getValue() : o;
+
+    if (targetType == TreeNull.class && (o == null || "null".equals(o) || "NULL".equals(o))) {
+      return targetType.cast(TreeNull.INSTANCE);
+    }
+
+    if (o == null) {
+      throw new IllegalArgumentException("null can only get converted to TreeNull");
+    }
+
+    if (targetType == TreeBool.class) {
+      if (o instanceof Boolean b) {
+        return targetType.cast(new TreeBool(b));
+      }
+      if (o instanceof String s) {
+        return targetType.cast(new TreeBool(Boolean.parseBoolean(s)));
+      }
+      if (o instanceof Number n) {
+        return targetType.cast(new TreeBool(n.doubleValue() != 0.0));
+      }
+      throw new IllegalArgumentException(
+          "Cannot convert " + o.getClass().getName() + " to TreeBool");
+    }
+
+    if (targetType == TreeString.class) {
+      return targetType.cast(new TreeString(o.toString()));
+    }
+
+    if (targetType == TreeNumber.class) {
+      if (o instanceof Number n) {
+        return targetType.cast(new TreeNumber(n));
+      }
+      if (o instanceof String s) {
+        try {
+          return targetType.cast(new TreeNumber(Double.parseDouble(s)));
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Cannot parse '" + s + "' as a number", e);
+        }
+      }
+      if (o instanceof Boolean b) {
+        return targetType.cast(new TreeNumber(b ? 1 : 0));
+      }
+      throw new IllegalArgumentException(
+          "Cannot convert " + o.getClass().getName() + " to TreeNumber");
+    }
+
+    if (targetType == TreeList.class) {
+      if (o instanceof Iterable<?> list) {
+        List<TreeValue> treePrimitives = new ArrayList<>();
+        for (Object item : list) {
+          treePrimitives.add(createTreePrimitive(item));
+        }
+        return targetType.cast(new TreeList(treePrimitives));
+      }
+      // Convert single object to single-element list
+      List<TreeValue> singleItemList = new ArrayList<>();
+      singleItemList.add(createTreePrimitive(o));
+      return targetType.cast(new TreeList(singleItemList));
+    }
+
+    throw new IllegalArgumentException("Unsupported target type: " + targetType.getName());
   }
 }

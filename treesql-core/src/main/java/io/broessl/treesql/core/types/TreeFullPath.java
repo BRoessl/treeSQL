@@ -2,7 +2,7 @@ package io.broessl.treesql.core.types;
 
 import io.broessl.treesql.core.ScannableTreeNode;
 
-public final class TreeFullPath extends TreeContextualPrimitive {
+public final class TreeFullPath extends TreeContextValue {
 
   String pathLiteral;
 
@@ -16,7 +16,7 @@ public final class TreeFullPath extends TreeContextualPrimitive {
   }
 
   @Override
-  public TreePrimitive getPrimitiveValue(ScannableTreeNode stn) {
+  public TreeValue getPrimitiveValue(ScannableTreeNode stn) {
     return expectAsString(stn, pathLiteral);
   }
 }

@@ -3,7 +3,7 @@ package io.broessl.treesql.cli;
 import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciithemes.a7.A7_Grids;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -42,7 +42,7 @@ public class ResultPrinter {
     asciiTable.getContext().setGrid(A7_Grids.minusBarPlusEquals());
   }
 
-  public void printRow(List<TreePrimitive> row) {
+  public void printRow(List<TreeValue> row) {
     List<String> rowValues = row.stream().map(Object::toString).toList();
     var valueTable = new AsciiTable();
     configureUniform(valueTable);

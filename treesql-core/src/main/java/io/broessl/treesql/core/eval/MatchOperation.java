@@ -1,8 +1,8 @@
 package io.broessl.treesql.core.eval;
 
 import io.broessl.treesql.core.types.TreeBool;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 
 public class MatchOperation extends StackOperation {
   @Override
@@ -16,12 +16,12 @@ public class MatchOperation extends StackOperation {
   }
 
   @Override
-  public TreePrimitive call(TreePrimitive[] arguments) {
+  public TreeValue call(TreeValue[] arguments) {
     if (arguments == null || arguments.length != 2) {
       throw new IllegalArgumentException("MatchOperation requires exactly 2 arguments");
     }
-    TreePrimitive a = arguments[0];
-    TreePrimitive b = arguments[1];
+    TreeValue a = arguments[0];
+    TreeValue b = arguments[1];
     if (a instanceof TreeString strA && b instanceof TreeString strB) {
       boolean result = strA.getValue().matches(strB.getValue());
       return new TreeBool(result);

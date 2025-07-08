@@ -3,7 +3,7 @@ package io.broessl.treesql.core.types;
 import io.broessl.treesql.core.ScannableTreeNode;
 import java.util.List;
 
-public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
+public final class TreeRangedJSONPointer extends TreeContextValue {
 
   private final String selection;
 
@@ -22,7 +22,7 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
       return this.contextAware(stn).getPrimitiveValue(stn);
     }
     stn.getNavigableTreeNode().getRoot();
-    List<TreePrimitive> resultOfPointer =
+    List<TreeValue> resultOfPointer =
         ScannableTreeNode.forRoot(stn.getNavigableTreeNode().getRoot())
             .scan(this.selection)
             .map(s -> s.getNavigableTreeNode().getValue())

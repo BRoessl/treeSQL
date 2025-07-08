@@ -5,8 +5,8 @@ import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeNull;
 import io.broessl.treesql.core.types.TreeNumber;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -195,7 +195,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
   }
 
   @Override
-  public TreePrimitive getValue() {
+  public TreeValue getValue() {
     if (attribute != null) {
       return new TreeString(attribute.getValue());
     }
@@ -203,7 +203,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
       return new TreeString(textNode);
     }
     if (element instanceof Element elem) {
-      List<TreePrimitive> childrenList = new ArrayList<>();
+      List<TreeValue> childrenList = new ArrayList<>();
       elem.elements().stream()
           .map(e -> e.getName())
           .distinct()
@@ -218,9 +218,9 @@ public class NavigableXmlNode implements NavigableTreeNode {
       return new TreeList(childrenList);
     }
     if (nodes != null) {
-      List<TreePrimitive> childNames =
+      List<TreeValue> childNames =
           IntStream.range(0, nodes.size())
-              .mapToObj(i -> (TreePrimitive) new TreeNumber((Integer) i))
+              .mapToObj(i -> (TreeValue) new TreeNumber((Integer) i))
               .toList();
       return new TreeList(childNames);
     }

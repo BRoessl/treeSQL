@@ -2,8 +2,8 @@ package io.broessl.treesql.text;
 
 import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeList;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.json.NavigableJsonNode;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -37,7 +37,7 @@ class NavigableLinesProviderTest {
     Assertions.assertEquals(1, node.getSize().orElse(0));
 
     // Verify the content
-    TreePrimitive value = node.getValue();
+    TreeValue value = node.getValue();
     Assertions.assertInstanceOf(TreeList.class, value);
     TreeList list = (TreeList) value;
     Assertions.assertEquals(1, list.size());

@@ -8,8 +8,8 @@ import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeNull;
 import io.broessl.treesql.core.types.TreeNumber;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -256,7 +256,7 @@ public class NavigableJsonNode implements NavigableTreeNode {
   }
 
   @Override
-  public TreePrimitive getValue() {
+  public TreeValue getValue() {
     if (delegated == null || delegated.isNull() || delegated.isMissingNode()) {
       return TreeNull.INSTANCE;
     }
@@ -267,14 +267,14 @@ public class NavigableJsonNode implements NavigableTreeNode {
       return new TreeBool(delegated.booleanValue());
     }
     if (delegated.isObject()) {
-      var internalList = new ArrayList<TreePrimitive>();
+      var internalList = new ArrayList<TreeValue>();
       delegated.fieldNames().forEachRemaining(s -> internalList.add(new TreeString(s)));
       return new TreeList(internalList);
     }
     if (delegated.isArray()) {
-      List<TreePrimitive> list =
+      List<TreeValue> list =
           IntStream.range(0, delegated.size())
-              .mapToObj(i -> (TreePrimitive) new TreeNumber(i))
+              .mapToObj(i -> (TreeValue) new TreeNumber(i))
               .toList();
       return new TreeList(list);
     }

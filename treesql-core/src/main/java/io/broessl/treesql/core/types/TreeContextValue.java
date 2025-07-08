@@ -3,10 +3,10 @@ package io.broessl.treesql.core.types;
 import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.ScannableTreeNode;
 
-public abstract sealed class TreeContextualPrimitive extends TreeValue
+public abstract sealed class TreeContextValue extends TreeStackableValue
     permits TreeRangedLiteral, TreeValueAt, TreeRangedJSONPointer, TreeFullPath {
 
-  public abstract TreePrimitive getPrimitiveValue(ScannableTreeNode stn);
+  public abstract TreeValue getPrimitiveValue(ScannableTreeNode stn);
 
   static TreeString expectAsString(ScannableTreeNode stn, String context) {
     Object binding = stn.getContext().getBinding(context);
@@ -16,7 +16,7 @@ public abstract sealed class TreeContextualPrimitive extends TreeValue
     return new TreeString((String) binding);
   }
 
-  static TreePrimitive expectAsStringOrInteger(ScannableTreeNode stn, String context) {
+  static TreeValue expectAsStringOrInteger(ScannableTreeNode stn, String context) {
     Object binding = stn.getContext().getBinding(context);
     if (binding instanceof TreeNodeIdentifier treePrimitive) {
       return treePrimitive;

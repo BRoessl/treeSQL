@@ -4,8 +4,8 @@ import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.ScannableTreeNode;
 import io.broessl.treesql.core.eval.stack.StackEvaluation;
 import io.broessl.treesql.core.types.TreeBool;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeRangedJSONPointer;
+import io.broessl.treesql.core.types.TreeStackableValue;
 import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.grammar.TreeSQLBaseListener;
 import io.broessl.treesql.grammar.TreeSQLLexer;
@@ -64,7 +64,7 @@ public class QueryParser extends TreeSQLBaseListener {
         "WHERE condition did not evaluate to a boolean: " + evalCondition);
   }
 
-  public Stream<List<TreePrimitive>> execute(NavigableTreeNode root) {
+  public Stream<List<TreeValue>> execute(NavigableTreeNode root) {
     if (rangedJsonPointers.isEmpty()) {
       if (conditionOkay(null)) {
         return Stream.of(
@@ -100,8 +100,8 @@ public class QueryParser extends TreeSQLBaseListener {
         orderedStream =
             filteredStream.sorted(
                 (stn1, stn2) -> {
-                  TreePrimitive value1 = ordering.get().evaluate(stn1);
-                  TreePrimitive value2 = ordering.get().evaluate(stn2);
+                  TreeValue value1 = ordering.get().evaluate(stn1);
+                  TreeValue value2 = ordering.get().evaluate(stn2);
                   int order = value1.compareTo(value2);
                   return orderDescending ? -order : order;
                 });
@@ -134,7 +134,8 @@ public class QueryParser extends TreeSQLBaseListener {
                   new StackEvaluation(ExpressionParser.parseExpressionStack(column.expr())));
             } else if (child instanceof TreeSQLParser.JsonTextValueContext rJsonPointer) {
               TreeRangedJSONPointer rJSONPtr =
-                  TreeValue.parseRangedJSONPointer(rJsonPointer.JSON_TEXT_VALUE().getText());
+                  TreeStackableValue.parseRangedJSONPointer(
+                      rJsonPointer.JSON_TEXT_VALUE().getText());
               rangedJsonPointers.add(rJSONPtr);
             }
           }

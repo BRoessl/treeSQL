@@ -1,7 +1,7 @@
 package io.broessl.treesql.sql;
 
 import io.broessl.testutils.TestWithJsonData;
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.json.NavigableJsonNode;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -75,7 +75,7 @@ public class QueryParserTest {
         SELECT foo, bar FROM "/~foo" JOIN "~foo/~bar" WHERE TRUE""";
     QueryParser parsedQuery = QueryParser.parseStatement(query);
 
-    List<List<TreePrimitive>> result =
+    List<List<TreeValue>> result =
         parsedQuery
             .execute(NavigableJsonNode.linkRoot(TestWithJsonData.testDataPattern()))
             .sequential()

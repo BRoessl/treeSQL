@@ -22,41 +22,41 @@ class TreePrimitiveTest {
     @Test
     void shouldReturnSamePrimitiveWhenAlreadyTreePrimitive() {
       TreeString original = new TreeString("test");
-      TreePrimitive result = TreePrimitive.createTreePrimitive(original);
+      TreeValue result = TreeValue.createTreePrimitive(original);
       assertSame(original, result);
     }
 
     @Test
     void shouldCreateTreeNullForNull() {
-      TreePrimitive result = TreePrimitive.createTreePrimitive(null);
+      TreeValue result = TreeValue.createTreePrimitive(null);
       assertSame(TreeNull.INSTANCE, result);
     }
 
     @Test
     void shouldCreateTreeBoolForBoolean() {
-      TreePrimitive result = TreePrimitive.createTreePrimitive(true);
+      TreeValue result = TreeValue.createTreePrimitive(true);
       assertInstanceOf(TreeBool.class, result);
       assertEquals(true, result.getValue());
 
-      result = TreePrimitive.createTreePrimitive(false);
+      result = TreeValue.createTreePrimitive(false);
       assertInstanceOf(TreeBool.class, result);
       assertEquals(false, result.getValue());
     }
 
     @Test
     void shouldCreateTreeStringForString() {
-      TreePrimitive result = TreePrimitive.createTreePrimitive("hello");
+      TreeValue result = TreeValue.createTreePrimitive("hello");
       assertInstanceOf(TreeString.class, result);
       assertEquals("hello", result.getValue());
     }
 
     @Test
     void shouldCreateTreeNumberForNumbers() {
-      TreePrimitive result = TreePrimitive.createTreePrimitive(42);
+      TreeValue result = TreeValue.createTreePrimitive(42);
       assertInstanceOf(TreeNumber.class, result);
       assertEquals(42, ((TreeNumber) result).getValue().intValue());
 
-      result = TreePrimitive.createTreePrimitive(3.14);
+      result = TreeValue.createTreePrimitive(3.14);
       assertInstanceOf(TreeNumber.class, result);
       assertEquals(3.14, ((TreeNumber) result).getValue().doubleValue(), 0.001);
     }
@@ -64,7 +64,7 @@ class TreePrimitiveTest {
     @Test
     void shouldCreateTreeListForList() {
       List<Object> input = Arrays.asList("hello", 42, true);
-      TreePrimitive result = TreePrimitive.createTreePrimitive(input);
+      TreeValue result = TreeValue.createTreePrimitive(input);
 
       assertInstanceOf(TreeList.class, result);
       TreeList list = (TreeList) result;
@@ -83,21 +83,21 @@ class TreePrimitiveTest {
     @Test
     void shouldHandleJsonNodeNull() {
       JsonNode nullNode = nodeFactory.nullNode();
-      TreePrimitive result = TreePrimitive.createTreePrimitive(nullNode);
+      TreeValue result = TreeValue.createTreePrimitive(nullNode);
       assertSame(TreeNull.INSTANCE, result);
     }
 
     @Test
     void shouldHandleJsonNodeMissing() {
       JsonNode missingNode = nodeFactory.missingNode();
-      TreePrimitive result = TreePrimitive.createTreePrimitive(missingNode);
+      TreeValue result = TreeValue.createTreePrimitive(missingNode);
       assertSame(TreeNull.INSTANCE, result);
     }
 
     @Test
     void shouldHandleJsonNodeText() {
       JsonNode textNode = nodeFactory.textNode("test");
-      TreePrimitive result = TreePrimitive.createTreePrimitive(textNode);
+      TreeValue result = TreeValue.createTreePrimitive(textNode);
       assertInstanceOf(TreeString.class, result);
       assertEquals("test", result.getValue());
     }
@@ -105,7 +105,7 @@ class TreePrimitiveTest {
     @Test
     void shouldHandleJsonNodeBoolean() {
       JsonNode boolNode = nodeFactory.booleanNode(true);
-      TreePrimitive result = TreePrimitive.createTreePrimitive(boolNode);
+      TreeValue result = TreeValue.createTreePrimitive(boolNode);
       assertInstanceOf(TreeBool.class, result);
       assertEquals(true, result.getValue());
     }
@@ -113,7 +113,7 @@ class TreePrimitiveTest {
     @Test
     void shouldHandleJsonNodeNumber() {
       JsonNode numberNode = nodeFactory.numberNode(42);
-      TreePrimitive result = TreePrimitive.createTreePrimitive(numberNode);
+      TreeValue result = TreeValue.createTreePrimitive(numberNode);
       assertInstanceOf(TreeNumber.class, result);
       assertEquals(42, ((TreeNumber) result).getValue().intValue());
     }
@@ -123,7 +123,7 @@ class TreePrimitiveTest {
       String jsonArray = "[\"hello\", 42, true]";
       ArrayNode arrayNode = (ArrayNode) objectMapper.readTree(jsonArray);
 
-      TreePrimitive result = TreePrimitive.createTreePrimitive(arrayNode);
+      TreeValue result = TreeValue.createTreePrimitive(arrayNode);
       assertInstanceOf(TreeList.class, result);
 
       TreeList list = (TreeList) result;
@@ -137,7 +137,7 @@ class TreePrimitiveTest {
     void shouldThrowForUnsupportedType() {
       Object unsupported = new Object();
       assertThrows(
-          IllegalArgumentException.class, () -> TreePrimitive.createTreePrimitive(unsupported));
+          IllegalArgumentException.class, () -> TreeValue.createTreePrimitive(unsupported));
     }
   }
 
@@ -146,93 +146,91 @@ class TreePrimitiveTest {
 
     @Test
     void shouldConvertToTreeNull() {
-      TreeNull result = TreePrimitive.convert(null, TreeNull.class);
+      TreeNull result = TreeValue.convert(null, TreeNull.class);
       assertSame(TreeNull.INSTANCE, result);
 
-      result = TreePrimitive.convert("null", TreeNull.class);
+      result = TreeValue.convert("null", TreeNull.class);
       assertSame(TreeNull.INSTANCE, result);
 
-      result = TreePrimitive.convert("NULL", TreeNull.class);
+      result = TreeValue.convert("NULL", TreeNull.class);
       assertSame(TreeNull.INSTANCE, result);
     }
 
     @Test
     void shouldThrowWhenConvertingNullToNonTreeNull() {
-      assertThrows(
-          IllegalArgumentException.class, () -> TreePrimitive.convert(null, TreeString.class));
+      assertThrows(IllegalArgumentException.class, () -> TreeValue.convert(null, TreeString.class));
     }
 
     @Test
     void shouldConvertToTreeBool() {
       // From Boolean
-      TreeBool result = TreePrimitive.convert(true, TreeBool.class);
+      TreeBool result = TreeValue.convert(true, TreeBool.class);
       assertEquals(true, result.getValue());
 
       // From String
-      result = TreePrimitive.convert("true", TreeBool.class);
+      result = TreeValue.convert("true", TreeBool.class);
       assertEquals(true, result.getValue());
 
-      result = TreePrimitive.convert("false", TreeBool.class);
+      result = TreeValue.convert("false", TreeBool.class);
       assertEquals(false, result.getValue());
 
-      result = TreePrimitive.convert("invalid", TreeBool.class);
+      result = TreeValue.convert("invalid", TreeBool.class);
       assertEquals(
           false, result.getValue()); // Boolean.parseBoolean returns false for invalid strings
 
       // From Number
-      result = TreePrimitive.convert(0, TreeBool.class);
+      result = TreeValue.convert(0, TreeBool.class);
       assertEquals(false, result.getValue());
 
-      result = TreePrimitive.convert(1, TreeBool.class);
+      result = TreeValue.convert(1, TreeBool.class);
       assertEquals(true, result.getValue());
 
-      result = TreePrimitive.convert(0.0, TreeBool.class);
+      result = TreeValue.convert(0.0, TreeBool.class);
       assertEquals(false, result.getValue());
 
-      result = TreePrimitive.convert(3.14, TreeBool.class);
+      result = TreeValue.convert(3.14, TreeBool.class);
       assertEquals(true, result.getValue());
     }
 
     @Test
     void shouldThrowWhenConvertingUnsupportedTypeToTreeBool() {
       assertThrows(
-          IllegalArgumentException.class,
-          () -> TreePrimitive.convert(new Object(), TreeBool.class));
+          IllegalArgumentException.class, () -> TreeValue.convert(new Object(), TreeBool.class));
     }
 
     @Test
     void shouldConvertToTreeString() {
-      TreeString result = TreePrimitive.convert(42, TreeString.class);
+      TreeString result = TreeValue.convert(42, TreeString.class);
       assertEquals("42", result.getValue());
 
-      result = TreePrimitive.convert(true, TreeString.class);
+      result = TreeValue.convert(true, TreeString.class);
       assertEquals("true", result.getValue());
 
-      result = TreePrimitive.convert(3.14, TreeString.class);
+      result = TreeValue.convert(3.14, TreeString.class);
       assertEquals("3.14", result.getValue());
     }
 
     @Test
     void shouldConvertToTreeNumber() {
       // From Number
-      TreeNumber result = TreePrimitive.convert(42, TreeNumber.class);
+      TreeNumber result = TreeValue.convert(42, TreeNumber.class);
       assertEquals(42, result.getValue().intValue());
 
-      result = TreePrimitive.convert(3.14, TreeNumber.class);
+      result = TreeValue.convert(3.14, TreeNumber.class);
       assertEquals(3.14, result.getValue().doubleValue(), 0.001);
 
       // From String
-      result = TreePrimitive.convert("42", TreeNumber.class);
+      result = TreeValue.convert("42", TreeNumber.class);
       assertEquals(42, result.getValue().intValue());
 
-      result = TreePrimitive.convert("3.14", TreeNumber.class);
+      result = TreeValue.convert("3.14", TreeNumber.class);
       assertEquals(3.14, result.getValue().doubleValue(), 0.001);
 
       // From Boolean
-      result = TreePrimitive.convert(true, TreeNumber.class);
+      result = TreeValue.convert(true, TreeNumber.class);
       assertEquals(1, result.getValue().intValue());
 
-      result = TreePrimitive.convert(false, TreeNumber.class);
+      result = TreeValue.convert(false, TreeNumber.class);
       assertEquals(0, result.getValue().intValue());
     }
 
@@ -240,21 +238,20 @@ class TreePrimitiveTest {
     void shouldThrowWhenConvertingInvalidStringToTreeNumber() {
       assertThrows(
           IllegalArgumentException.class,
-          () -> TreePrimitive.convert("not-a-number", TreeNumber.class));
+          () -> TreeValue.convert("not-a-number", TreeNumber.class));
     }
 
     @Test
     void shouldThrowWhenConvertingUnsupportedTypeToTreeNumber() {
       assertThrows(
-          IllegalArgumentException.class,
-          () -> TreePrimitive.convert(new Object(), TreeNumber.class));
+          IllegalArgumentException.class, () -> TreeValue.convert(new Object(), TreeNumber.class));
     }
 
     @Test
     void shouldConvertToTreeList() {
       // From Iterable
       List<Object> input = Arrays.asList("hello", 42, true);
-      TreeList result = TreePrimitive.convert(input, TreeList.class);
+      TreeList result = TreeValue.convert(input, TreeList.class);
 
       assertEquals(3, result.size());
       assertEquals("hello", result.get(0).getValue());
@@ -262,7 +259,7 @@ class TreePrimitiveTest {
       assertEquals(true, result.get(2).getValue());
 
       // From single object
-      result = TreePrimitive.convert("single", TreeList.class);
+      result = TreeValue.convert("single", TreeList.class);
       assertEquals(1, result.size());
       assertEquals("single", result.get(0).getValue());
     }
@@ -272,29 +269,29 @@ class TreePrimitiveTest {
       // Since TreeNodeIdentifier is abstract, we can't convert to it directly
       assertThrows(
           IllegalArgumentException.class,
-          () -> TreePrimitive.convert("test", TreeNodeIdentifier.class));
+          () -> TreeValue.convert("test", TreeNodeIdentifier.class));
     }
 
     @Test
     void shouldHandleJsonNodeInConvert() {
       JsonNode textNode = nodeFactory.textNode("test");
-      TreeString result = TreePrimitive.convert(textNode, TreeString.class);
+      TreeString result = TreeValue.convert(textNode, TreeString.class);
       assertEquals("test", result.getValue());
 
       JsonNode numberNode = nodeFactory.numberNode(42);
-      TreeNumber numberResult = TreePrimitive.convert(numberNode, TreeNumber.class);
+      TreeNumber numberResult = TreeValue.convert(numberNode, TreeNumber.class);
       assertEquals(42, numberResult.getValue().intValue());
     }
 
     @Test
     void shouldHandleTreePrimitiveInputInConvert() {
       TreeString input = new TreeString("test");
-      TreeString result = TreePrimitive.convert(input, TreeString.class);
+      TreeString result = TreeValue.convert(input, TreeString.class);
       assertEquals("test", result.getValue());
 
       // Convert TreeString to TreeNumber
       TreeString stringInput = new TreeString("42");
-      TreeNumber numberResult = TreePrimitive.convert(stringInput, TreeNumber.class);
+      TreeNumber numberResult = TreeValue.convert(stringInput, TreeNumber.class);
       assertEquals(42, numberResult.getValue().intValue());
     }
   }
@@ -307,7 +304,7 @@ class TreePrimitiveTest {
       List<Object> nestedList =
           Arrays.asList(Arrays.asList("nested", 1), "top-level", Arrays.asList(true, false));
 
-      TreePrimitive result = TreePrimitive.createTreePrimitive(nestedList);
+      TreeValue result = TreeValue.createTreePrimitive(nestedList);
       assertInstanceOf(TreeList.class, result);
 
       TreeList list = (TreeList) result;
@@ -324,7 +321,7 @@ class TreePrimitiveTest {
     @Test
     void shouldHandleEmptyListInConvert() {
       List<Object> emptyList = Arrays.asList();
-      TreeList result = TreePrimitive.convert(emptyList, TreeList.class);
+      TreeList result = TreeValue.convert(emptyList, TreeList.class);
       assertEquals(0, result.size());
     }
 
@@ -344,19 +341,19 @@ class TreePrimitiveTest {
       JsonNode jsonNode = objectMapper.readTree(complexJson);
 
       // Test individual fields
-      TreeString stringResult = TreePrimitive.convert(jsonNode.get("string"), TreeString.class);
+      TreeString stringResult = TreeValue.convert(jsonNode.get("string"), TreeString.class);
       assertEquals("test", stringResult.getValue());
 
-      TreeNumber numberResult = TreePrimitive.convert(jsonNode.get("number"), TreeNumber.class);
+      TreeNumber numberResult = TreeValue.convert(jsonNode.get("number"), TreeNumber.class);
       assertEquals(42, numberResult.getValue().intValue());
 
-      TreeBool boolResult = TreePrimitive.convert(jsonNode.get("boolean"), TreeBool.class);
+      TreeBool boolResult = TreeValue.convert(jsonNode.get("boolean"), TreeBool.class);
       assertEquals(true, boolResult.getValue());
 
-      TreeNull nullResult = TreePrimitive.convert(jsonNode.get("null"), TreeNull.class);
+      TreeNull nullResult = TreeValue.convert(jsonNode.get("null"), TreeNull.class);
       assertSame(TreeNull.INSTANCE, nullResult);
 
-      TreeList arrayResult = TreePrimitive.convert(jsonNode.get("array"), TreeList.class);
+      TreeList arrayResult = TreeValue.convert(jsonNode.get("array"), TreeList.class);
       assertEquals(3, arrayResult.size());
     }
   }

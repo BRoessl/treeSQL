@@ -1,8 +1,8 @@
 package io.broessl.treesql.text;
 
 import io.broessl.treesql.core.NavigableTreeNode;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.json.NavigableJsonNode;
 import io.broessl.treesql.spi.NavigableTreeProvider;
 import java.util.List;
@@ -17,14 +17,14 @@ public class NavigableRegexProvider implements NavigableTreeProvider {
   }
 
   @Override
-  public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
+  public Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent) {
     throw new UnsupportedOperationException(
         "NavigableRegexProvider does only support building attached tree nodes.");
   }
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
 
     if (argument != null && !argument.isEmpty() && fromContent instanceof TreeString tString) {
       Pattern pattern = Pattern.compile(argument.get(0));

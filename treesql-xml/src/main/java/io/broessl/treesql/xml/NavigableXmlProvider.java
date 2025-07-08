@@ -1,8 +1,8 @@
 package io.broessl.treesql.xml;
 
 import io.broessl.treesql.core.NavigableTreeNode;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.spi.NavigableTreeProvider;
 import java.io.StringReader;
 import java.util.List;
@@ -18,7 +18,7 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
   }
 
   @Override
-  public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
+  public Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent) {
     if (fromContent instanceof TreeString tString) {
       try {
         SAXReader reader = new SAXReader();
@@ -33,7 +33,7 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       try {
         SAXReader reader = new SAXReader();

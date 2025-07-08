@@ -3,8 +3,8 @@ package io.broessl.treesql.core;
 import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeNull;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -98,10 +98,10 @@ public interface NavigableTreeNode {
 
   /**
    * This method returns the value this node is pointing at. Every node must return a valid {@link
-   * TreePrimitive} but could return {@link TreeNull}. A map node should return a {@link TreeList}
+   * TreeValue} but could return {@link TreeNull}. A map node should return a {@link TreeList}
    * containing children names. A list node should return a {@link TreeList} with all indices.
    *
    * @return a TreePrimitive, never null but possible TreeNull
    */
-  TreePrimitive getValue();
+  TreeValue getValue();
 }
