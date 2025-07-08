@@ -167,6 +167,53 @@ public class QueryParser extends TreeSQLBaseListener {
 
   @Override
   public void exitSelectStmt(SelectStmtContext ctx) {
-    //doing assertions?
+    List<String> rangedLiteralsProvided =
+        rangedJsonPointers.stream()
+            .map(rjp -> rjp.getUsedRangedLiterals())
+            .flatMap(l -> l.stream())
+            .distinct()
+            .toList();
+    this.columnExpressions.forEach(
+        se -> {
+          se.getUsedRangedLiterals()
+              .forEach(
+                  literalUsed -> {
+                    if (!rangedLiteralsProvided.contains(literalUsed)) {
+                      throw new IllegalArgumentException(
+                          "literal '"
+                              + literalUsed
+                              + "' is used in SELECT clause but only "
+                              + rangedLiteralsProvided.toString()
+                              + " are provided in FROM statement.");
+                    }
+                  });
+        });
+    this.whereCondition
+        .getUsedRangedLiterals()
+        .forEach(
+            literalUsed -> {
+              if (!rangedLiteralsProvided.contains(literalUsed)) {
+                throw new IllegalArgumentException(
+                    "literal '"
+                        + literalUsed
+                        + "' is used in WHERE clause but only "
+                        + rangedLiteralsProvided.toString()
+                        + " are provided in FROM statement.");
+              }
+            });
+    this.ordering.ifPresent(
+        se ->
+            se.getUsedRangedLiterals()
+                .forEach(
+                    literalUsed -> {
+                      if (!rangedLiteralsProvided.contains(literalUsed)) {
+                        throw new IllegalArgumentException(
+                            "literal '"
+                                + literalUsed
+                                + "' is used in ORDER clause but only "
+                                + rangedLiteralsProvided.toString()
+                                + " are provided in FROM statement.");
+                      }
+                    }));
   }
 }

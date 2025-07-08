@@ -80,8 +80,11 @@
 				<version>2.27</version>
 				<executions>
 					<execution>
+						<!-- if validation fails, use: mvn com.spotify.fmt:fmt-maven-plugin:format -->
+						<?m2e execute onConfiguration?>
+						<phase>validate</phase>
 						<goals>
-							<goal>format</goal>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>

@@ -169,8 +169,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
       }
       return childrenList.stream();
     }
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'children'");
+    throw new IllegalStateException("Code should be unreachable.");
   }
 
   @Override

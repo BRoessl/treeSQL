@@ -2,6 +2,7 @@ package io.broessl.treesql.core.types;
 
 import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.ScannableTreeNode;
+import java.util.List;
 
 public abstract sealed class TreeContextValue extends TreeStackableValue
     permits TreeRangedLiteral, TreeValueAt, TreeRangedJSONPointer, TreeFullPath {
@@ -37,4 +38,6 @@ public abstract sealed class TreeContextValue extends TreeStackableValue
     }
     return (NavigableTreeNode) binding;
   }
+
+  public abstract List<String> getUsedRangedLiterals();
 }

@@ -18,22 +18,29 @@ public abstract sealed class TreeScanStep {
   private static final Pattern NAMED_BACK = Pattern.compile("^~([a-z][a-z0-9_]*)\\.\\.$");
 
   private static final Pattern ANON_SIBLING = Pattern.compile("^~\\[(0|[+-][\\d]+)\\]$");
-  private static final Pattern NAMED_SIBLING = Pattern.compile("^~([a-z][a-z0-9_]*)\\[(0|[+-][\\d]+)\\]$");
+  private static final Pattern NAMED_SIBLING =
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\[(0|[+-][\\d]+)\\]$");
 
-  private static final Pattern ANON_DEPTH_RANGED_SCAN = Pattern.compile("^~\\{(-?\\d+),(-?\\d+)\\}$");
-  private static final Pattern NAMED_DEPTH_RANGED_SCAN = Pattern.compile("^~([a-z][a-z0-9_]*)\\{(-?\\d+),(-?\\d+)\\}$");
+  private static final Pattern ANON_DEPTH_RANGED_SCAN =
+      Pattern.compile("^~\\{(-?\\d+),(-?\\d+)\\}$");
+  private static final Pattern NAMED_DEPTH_RANGED_SCAN =
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\{(-?\\d+),(-?\\d+)\\}$");
 
   private static final Pattern ANON_DEPTH_SCAN = Pattern.compile("~^\\{(-?\\d+)\\}$");
-  private static final Pattern NAMED_DEPTH_SCAN = Pattern.compile("^~([a-z][a-z0-9_]*)\\{(-?\\d+)\\}$");
+  private static final Pattern NAMED_DEPTH_SCAN =
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\{(-?\\d+)\\}$");
 
-  private static final Pattern ANON_LEVEL_SCAN = Pattern.compile("^~\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]$");
-  private static final Pattern NAMED_LEVEL_SCAN = Pattern
-      .compile("^~([a-z][a-z0-9_]*)\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]$");
+  private static final Pattern ANON_LEVEL_SCAN =
+      Pattern.compile("^~\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]$");
+  private static final Pattern NAMED_LEVEL_SCAN =
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]$");
 
   private static final Pattern ANON_REGEX_CHILDREN_SCAN = Pattern.compile("^~(\\(.*\\))$");
-  private static final Pattern NAMED_REGEX_CHILDREN_SCAN = Pattern.compile("^~([a-z][a-z0-9_]*)(\\(.*\\))$");
+  private static final Pattern NAMED_REGEX_CHILDREN_SCAN =
+      Pattern.compile("^~([a-z][a-z0-9_]*)(\\(.*\\))$");
 
-  private static final Pattern SPECIAL_DIRECTIVE = Pattern.compile("^~([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
+  private static final Pattern SPECIAL_DIRECTIVE =
+      Pattern.compile("^~([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
 
   private String raw;
 
@@ -44,9 +51,10 @@ public abstract sealed class TreeScanStep {
   }
 
   protected void setRangeLiteral(String rangeLiteral) {
-    this.rangeLiteral = rangeLiteral == null || rangeLiteral.isBlank()
-        ? Optional.empty()
-        : Optional.of(rangeLiteral);
+    this.rangeLiteral =
+        rangeLiteral == null || rangeLiteral.isBlank()
+            ? Optional.empty()
+            : Optional.of(rangeLiteral);
   }
 
   public final String getRaw() {
@@ -72,9 +80,10 @@ public abstract sealed class TreeScanStep {
 
   TreeScanStep(String raw, String rangeLiteral) {
     this.raw = raw;
-    this.rangeLiteral = rangeLiteral == null || rangeLiteral.isBlank()
-        ? Optional.empty()
-        : Optional.of(rangeLiteral);
+    this.rangeLiteral =
+        rangeLiteral == null || rangeLiteral.isBlank()
+            ? Optional.empty()
+            : Optional.of(rangeLiteral);
   }
 
   public static TreeScanStep literal(String literal) {
@@ -115,17 +124,20 @@ public abstract sealed class TreeScanStep {
     }
     matcher = NAMED_DEPTH_RANGED_SCAN.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(2), matcher.group(3), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(2), matcher.group(3), matcher.group(0));
       return new DepthScan(raw, boundaries, matcher.group(1));
     }
     matcher = NAMED_DEPTH_SCAN.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(2), matcher.group(2), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(2), matcher.group(2), matcher.group(0));
       return new DepthScan(raw, boundaries, matcher.group(1));
     }
     matcher = NAMED_SIBLING.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(2), matcher.group(2), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(2), matcher.group(2), matcher.group(0));
       String rangeLiteral = matcher.group(1);
       return new SingleSideStep(raw, rangeLiteral, boundaries.startInclusive);
     }
@@ -138,7 +150,8 @@ public abstract sealed class TreeScanStep {
 
     matcher = NAMED_LEVEL_SCAN.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(2), matcher.group(3), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(2), matcher.group(3), matcher.group(0));
       String rangeLiteral = matcher.group(1);
       return new LevelScan(raw, rangeLiteral, boundaries);
     }
@@ -157,17 +170,20 @@ public abstract sealed class TreeScanStep {
 
     matcher = ANON_DEPTH_RANGED_SCAN.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
       return new DepthScan(raw, boundaries);
     }
     matcher = ANON_DEPTH_SCAN.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
       return new DepthScan(raw, boundaries);
     }
     matcher = ANON_SIBLING.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
       return new SingleSideStep(raw, null, boundaries.startInclusive);
     }
     matcher = ANON_REGEX_CHILDREN_SCAN.matcher(raw);
@@ -176,7 +192,8 @@ public abstract sealed class TreeScanStep {
     }
     matcher = ANON_LEVEL_SCAN.matcher(raw);
     if (matcher.matches()) {
-      ScanBoundaries boundaries = new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
+      ScanBoundaries boundaries =
+          new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
       return new LevelScan(raw, null, boundaries);
     }
     throw new IllegalArgumentException(
@@ -338,8 +355,9 @@ public abstract sealed class TreeScanStep {
           .filter(c -> pattern.matcher(c.getName().getValue().toString()).matches())
           .map(
               c -> {
-                TreeScanStep step = new TreeScanStep.LiteralForwardStep(
-                    c.getName().getValue().toString(), getRangeLiteral().orElse(null));
+                TreeScanStep step =
+                    new TreeScanStep.LiteralForwardStep(
+                        c.getName().getValue().toString(), getRangeLiteral().orElse(null));
                 return List.of(step);
               })
           .toList();
@@ -374,11 +392,12 @@ public abstract sealed class TreeScanStep {
         return List.of(List.of());
       }
 
-      Integer size = contextNode
-          .getParent()
-          .orElseThrow()
-          .getSize()
-          .orElseThrow(() -> new IllegalStateException());
+      Integer size =
+          contextNode
+              .getParent()
+              .orElseThrow()
+              .getSize()
+              .orElseThrow(() -> new IllegalStateException());
       List<List<TreeScanStep>> result = new LinkedList<>();
       int fromIndexOffset;
       int toIndexOffset;

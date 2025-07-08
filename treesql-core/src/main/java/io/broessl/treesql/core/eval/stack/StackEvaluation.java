@@ -20,6 +20,14 @@ public class StackEvaluation {
 
   private final List<Stackable> stackables;
 
+  public List<String> getUsedRangedLiterals() {
+    return stackables.stream()
+        .filter(e -> e instanceof TreeContextValue)
+        .flatMap(e -> ((TreeContextValue) e).getUsedRangedLiterals().stream())
+        .distinct()
+        .toList();
+  }
+
   public TreeValue evaluate(ScannableTreeNode ctx) {
     List<TreeValue> evalStack = new ArrayList<>();
     for (Stackable stackable : stackables) {
