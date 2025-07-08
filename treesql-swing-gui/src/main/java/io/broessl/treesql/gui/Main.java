@@ -5,7 +5,7 @@ import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeString;
 import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.file.NavigableDirectory;
-import io.broessl.treesql.json.NavigableJsonProvider;
+import io.broessl.treesql.spi.NavigableTree;
 import io.broessl.treesql.sql.QueryParser;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -67,6 +68,11 @@ public class Main extends JFrame {
   // Supported text file extensions for content display
   private static final Set<String> SUPPORTED_TEXT_EXTENSIONS =
       new HashSet<>(Arrays.asList("json", "yaml", "yml", "csv", "txt", "log", "xml"));
+
+  private static final Map<String, String> EXTENSION_TO_DIRECTIVE_MAP =
+      Map.of(
+          "json", "~JSON", "yaml", "~YAML", "yml", "~YAML", "csv", "~CSV", "txt", "~LINES", "log",
+          "~LINES", "xml", "~XML");
 
   private RSyntaxTextArea queryTextArea;
   private JTable resultTable;
@@ -263,7 +269,8 @@ public class Main extends JFrame {
     // Create directory tree
     setupDirectoryTree();
 
-    // Create horizontal split pane with tree on left and results on right (no query area here)
+    // Create horizontal split pane with tree on left and results on right (no query
+    // area here)
     rightSplitPane =
         new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createDirectoryTreePanel(), resultScrollPane);
     rightSplitPane.setDividerLocation(250);
@@ -419,11 +426,12 @@ public class Main extends JFrame {
     NavigableTreeNode rootAsNavigableTree = null;
     if (selectedRoot.isDirectory()) {
       rootAsNavigableTree = new NavigableDirectory(selectedRoot.toPath(), null);
-    } else if (selectedRoot.getName().endsWith(".json")) {
+    } else if (EXTENSION_TO_DIRECTIVE_MAP.containsKey(getFileExtension(selectedRoot))) {
       try {
-        NavigableJsonProvider navigableJsonProvider = new NavigableJsonProvider();
+        String directive = EXTENSION_TO_DIRECTIVE_MAP.get(getFileExtension(selectedRoot));
+        var provider = NavigableTree.providerFor(directive);
         rootAsNavigableTree =
-            navigableJsonProvider
+            provider
                 .buildTreeRoot(new TreeString(Files.readString(selectedRoot.toPath())))
                 .orElseThrow();
       } catch (IOException e) {
@@ -432,7 +440,7 @@ public class Main extends JFrame {
         return;
       }
     } else {
-      setResultTableError("Unsupported file type for query execution.");
+      setResultTableError("Unknown provider for file type.");
       statusLabel.setText("Error: Unsupported file type");
       return;
     }
@@ -670,7 +678,6 @@ public class Main extends JFrame {
         this,
         "TreeSQL GUI v0.0.1-SNAPSHOT\n\n"
             + "A graphical user interface for TreeSQL operations.\n"
-            + "Built with Java Swing and modern UI libraries.\n\n"
             + "© 2025 TreeSQL Project",
         "About TreeSQL GUI",
         javax.swing.JOptionPane.INFORMATION_MESSAGE);
@@ -861,9 +868,6 @@ public class Main extends JFrame {
   /** Custom cell renderer for alternating row and column colors */
   private static class AlternatingColorRenderer extends DefaultTableCellRenderer {
     // Define colors for alternating pattern
-    private static final Color NOT_SO_LIGHT_GRAY = new Color(225, 225, 225);
-    private static final Color WHITE = Color.WHITE;
-    private static final Color VERY_LIGHT_GRAY = new Color(240, 240, 240);
 
     @Override
     public Component getTableCellRendererComponent(
@@ -878,13 +882,13 @@ public class Main extends JFrame {
         boolean evenColumn = (column % 2 == 0);
 
         if (evenRow && evenColumn) {
-          c.setBackground(WHITE);
+          c.setBackground(Color.WHITE);
         } else if (evenRow && !evenColumn) {
-          c.setBackground(VERY_LIGHT_GRAY);
+          c.setBackground(Color.LIGHT_GRAY);
         } else if (!evenRow && evenColumn) {
-          c.setBackground(VERY_LIGHT_GRAY);
+          c.setBackground(Color.LIGHT_GRAY);
         } else {
-          c.setBackground(NOT_SO_LIGHT_GRAY);
+          c.setBackground(Color.GRAY);
         }
       }
 

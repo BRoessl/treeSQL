@@ -14,7 +14,7 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
 
   @Override
   public String getDirective() {
-    return "~AS_XML";
+    return "~XML";
   }
 
   @Override
@@ -23,7 +23,7 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
       try {
         SAXReader reader = new SAXReader();
         Element root = reader.read(new StringReader(tString.getValue())).getRootElement();
-        new NavigableXmlNode(root, null, (String) null);
+        return Optional.of(new NavigableXmlNode(root, null, (String) null));
       } catch (Exception e) {
         // log and ignore
       }
@@ -38,7 +38,15 @@ public class NavigableXmlProvider implements NavigableTreeProvider {
       try {
         SAXReader reader = new SAXReader();
         Element root = reader.read(new StringReader(tString.getValue())).getRootElement();
-        return Optional.of(new NavigableXmlNode(root, parentNode, "!!XML<" + root.getName() + ">"));
+        if (argument == null || argument.isEmpty()) {
+          return Optional.of(new NavigableXmlNode(root, parentNode, "!!XML"));
+        }
+        if (argument.size() == 1) {
+          String expectedRootName = argument.get(0);
+          if (root.getName().equals(expectedRootName)) {
+            return Optional.of(new NavigableXmlNode(root, parentNode, "!!XML"));
+          }
+        }
       } catch (Exception e) {
         // log and ignore
       }

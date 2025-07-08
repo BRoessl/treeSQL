@@ -16,7 +16,7 @@ public class NavigableYamlProvider implements NavigableTreeProvider {
 
   @Override
   public String getDirective() {
-    return "~AS_YAML";
+    return "~YAML";
   }
 
   @Override

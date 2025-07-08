@@ -14,8 +14,7 @@ public class IntegrationTests {
     NavigableDirectory squealableFileSystem =
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
-    List<String> scanResult =
-        fileScan.scan("/~{0,3}/~AS_JSON/0").map(t -> t.absolutePath()).toList();
+    List<String> scanResult = fileScan.scan("/~{0,3}/~JSON/0").map(t -> t.absolutePath()).toList();
     Assertions.assertEquals(7, scanResult.size());
     Assertions.assertTrue(scanResult.contains("/testA.json/!!JSON/0"));
     Assertions.assertTrue(scanResult.contains("/subFolder/1.json/!!JSON/0"));
@@ -31,7 +30,7 @@ public class IntegrationTests {
     NavigableDirectory squealableFileSystem =
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
-    ScannableTreeNode into = fileScan.scan("/testA.json/~AS_JSON/0").findFirst().orElseThrow();
+    ScannableTreeNode into = fileScan.scan("/testA.json/~JSON/0").findFirst().orElseThrow();
     Assertions.assertEquals("0", into.getName().getValue().toString());
     ScannableTreeNode out = into.scan("/~../~..").findFirst().orElseThrow();
     Assertions.assertEquals("testA.json", out.getName().getValue().toString());
@@ -43,7 +42,7 @@ public class IntegrationTests {
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode scanResult =
-        fileScan.scan("/subFolder/sub~0SubFolder/testA.json/~AS_JSON/0").findFirst().get();
+        fileScan.scan("/subFolder/sub~0SubFolder/testA.json/~JSON/0").findFirst().get();
     Assertions.assertEquals(
         "/subFolder/sub~0SubFolder/testA.json/!!JSON/0", scanResult.absolutePath());
   }
@@ -118,8 +117,7 @@ public class IntegrationTests {
     NavigableDirectory squealableFileSystem =
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
-    ScannableTreeNode scanResult =
-        fileScan.scan("/subFolder/csv.csv/~AS_CSV/1/bar").findFirst().get();
+    ScannableTreeNode scanResult = fileScan.scan("/subFolder/csv.csv/~CSV/1/bar").findFirst().get();
     Assertions.assertEquals("/subFolder/csv.csv/!!CSV/1/bar", scanResult.absolutePath());
     Assertions.assertEquals("4", scanResult.getNavigableTreeNode().getValue().toString());
   }
@@ -131,7 +129,7 @@ public class IntegrationTests {
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode scanResult =
         fileScan
-            .scan("/subFolder/csv_special_A.csv/~AS_CSV(delimiter=;\nquote='\nhas=a)/1/foo")
+            .scan("/subFolder/csv_special_A.csv/~CSV(delimiter=;\nquote='\nhas=a)/1/foo")
             .findFirst()
             .get();
     Assertions.assertEquals("/subFolder/csv_special_A.csv/!!CSV/1/foo", scanResult.absolutePath());
@@ -145,7 +143,7 @@ public class IntegrationTests {
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     Optional<ScannableTreeNode> scanResult =
         fileScan
-            .scan("/subFolder/csv_special_A.csv/~AS_CSV(delimiter=;\nquote='\nhas=b)/1/foo")
+            .scan("/subFolder/csv_special_A.csv/~CSV(delimiter=;\nquote='\nhas=b)/1/foo")
             .findFirst();
     Assertions.assertTrue(scanResult.isEmpty());
   }
@@ -156,9 +154,9 @@ public class IntegrationTests {
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode scanResult =
-        fileScan.scan("/subFolder/catalog.xml/~AS_XML/product/0/@id").findFirst().get();
+        fileScan.scan("/subFolder/catalog.xml/~XML(catalog)/product/0/@id").findFirst().get();
     Assertions.assertEquals(
-        "/subFolder/catalog.xml/!!XML<catalog>/product/0/@id", scanResult.absolutePath());
+        "/subFolder/catalog.xml/!!XML/product/0/@id", scanResult.absolutePath());
     Assertions.assertEquals("p001", scanResult.getNavigableTreeNode().getValue().toString());
   }
 
@@ -169,11 +167,11 @@ public class IntegrationTests {
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     ScannableTreeNode scanResult =
         fileScan
-            .scan("/subFolder/catalog.xml/~AS_XML/product/0/specifications/0/memory/0/ram/0/text()")
+            .scan("/subFolder/catalog.xml/~XML/product/0/specifications/0/memory/0/ram/0/text()")
             .findFirst()
             .get();
     Assertions.assertEquals(
-        "/subFolder/catalog.xml/!!XML<catalog>/product/0/specifications/0/memory/0/ram/0/text()",
+        "/subFolder/catalog.xml/!!XML/product/0/specifications/0/memory/0/ram/0/text()",
         scanResult.absolutePath());
     Assertions.assertEquals("8GB", scanResult.getNavigableTreeNode().getValue().toString());
   }
@@ -184,11 +182,9 @@ public class IntegrationTests {
         new NavigableDirectory(NavigableDirectoryTest.TEST_DIR.toPath());
     ScannableTreeNode fileScan = ScannableTreeNode.forRoot(squealableFileSystem);
     List<ScannableTreeNode> scanResult =
-        fileScan
-            .scan("/subFolder/catalog.xml/~AS_XML/product/~/reviews/~/review/~/text()")
-            .toList();
+        fileScan.scan("/subFolder/catalog.xml/~XML/product/~/reviews/~/review/~/text()").toList();
     Assertions.assertEquals(
-        "/subFolder/catalog.xml/!!XML<catalog>/product/0/reviews/0/review/0/text()",
+        "/subFolder/catalog.xml/!!XML/product/0/reviews/0/review/0/text()",
         scanResult.get(0).absolutePath());
     Assertions.assertEquals(
         "Excellent phone, great battery life!",

@@ -11,7 +11,7 @@ public class NavigableJsonProvider implements NavigableTreeProvider {
 
   @Override
   public String getDirective() {
-    return "~AS_JSON";
+    return "~JSON";
   }
 
   @Override

@@ -18,13 +18,20 @@ import org.apache.commons.csv.CSVFormat;
 public class NavigableCsvProvider implements NavigableTreeProvider {
   @Override
   public String getDirective() {
-    return "~AS_CSV";
+    return "~CSV";
   }
 
   @Override
   public Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent) {
-    throw new UnsupportedOperationException(
-        "NavigableCsvProvider does only support building attached tree nodes.");
+    if (fromContent instanceof TreeString tString) {
+      try {
+        ArrayNode array = defaultParse(tString);
+        return Optional.of(new NavigableJsonNode(array, null, null));
+      } catch (IOException e) {
+        return Optional.empty();
+      }
+    }
+    return Optional.empty();
   }
 
   @Override
