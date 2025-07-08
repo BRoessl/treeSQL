@@ -41,7 +41,7 @@ class ScannableTreeNodeTest extends TestWithJsonData {
     Assertions.assertEquals(1, scanResult.size());
     Assertions.assertEquals("{\"objects\":true}", scanResult.get(0).toString());
     Assertions.assertEquals("/highly/nested", scanResult.get(0).getContext().getEvaluationPath());
-    Assertions.assertEquals("nested", scanResult.get(0).getNameOrIndex().getValue());
+    Assertions.assertEquals("nested", scanResult.get(0).getName().getValue());
   }
 
   @Test

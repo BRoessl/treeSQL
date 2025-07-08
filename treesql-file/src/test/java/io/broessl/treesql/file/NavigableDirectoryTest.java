@@ -14,16 +14,16 @@ public class NavigableDirectoryTest {
   @Test
   void test() {
     NavigableDirectory squealableFileSystem = new NavigableDirectory(TEST_DIR.toPath());
-    Assertions.assertTrue(squealableFileSystem.getParentNode().isEmpty());
-    Assertions.assertTrue(squealableFileSystem.getChildNode("nope").isEmpty());
-    Assertions.assertTrue(squealableFileSystem.getChildNode("subFolder").isPresent());
-    Assertions.assertTrue(squealableFileSystem.getChildNode("testA.json").isPresent());
+    Assertions.assertTrue(squealableFileSystem.getParent().isEmpty());
+    Assertions.assertTrue(squealableFileSystem.getChild("nope").isEmpty());
+    Assertions.assertTrue(squealableFileSystem.getChild("subFolder").isPresent());
+    Assertions.assertTrue(squealableFileSystem.getChild("testA.json").isPresent());
     List<String> list =
         squealableFileSystem
-            .getChildNode("subFolder")
+            .getChild("subFolder")
             .get()
             .children()
-            .map(tn -> tn.getSelfName().getValue().toString())
+            .map(tn -> tn.getName().getValue().toString())
             .toList();
     Assertions.assertEquals(12, list.size());
     Assertions.assertTrue(list.contains("sub~SubFolder"));
@@ -43,10 +43,10 @@ public class NavigableDirectoryTest {
   @Test
   void testList() {
     NavigableDirectory squealableFileSystem = new NavigableDirectory(TEST_DIR.toPath());
-    Assertions.assertTrue(squealableFileSystem.getParentNode().isEmpty());
-    Assertions.assertTrue(squealableFileSystem.getChildNode("nope").isEmpty());
-    Assertions.assertTrue(squealableFileSystem.getChildNode("subFolder").isPresent());
-    Assertions.assertTrue(squealableFileSystem.getChildNode("testA.json").isPresent());
+    Assertions.assertTrue(squealableFileSystem.getParent().isEmpty());
+    Assertions.assertTrue(squealableFileSystem.getChild("nope").isEmpty());
+    Assertions.assertTrue(squealableFileSystem.getChild("subFolder").isPresent());
+    Assertions.assertTrue(squealableFileSystem.getChild("testA.json").isPresent());
     TreeValue tPrim = squealableFileSystem.getValue();
     TreeList tList = Assertions.assertInstanceOf(TreeList.class, tPrim);
     List<Object> nativeValues = tList.getValue();

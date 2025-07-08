@@ -58,7 +58,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
   }
 
   @Override
-  public TreeNodeIdentifier getSelfName() {
+  public TreeNodeIdentifier getName() {
     if (textNode != null) {
       return new TreeString("text()");
     }
@@ -79,12 +79,12 @@ public class NavigableXmlNode implements NavigableTreeNode {
   }
 
   @Override
-  public Optional<NavigableTreeNode> getParentNode() {
+  public Optional<NavigableTreeNode> getParent() {
     return Optional.ofNullable(parent);
   }
 
   @Override
-  public Optional<NavigableTreeNode> getChildNode(String nameOrIndex) {
+  public Optional<NavigableTreeNode> getChild(String nameOrIndex) {
     if (element instanceof Element elem) {
       if (nameOrIndex.startsWith("@")) {
         Attribute att = elem.attribute(nameOrIndex.substring(1));
@@ -127,7 +127,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
     if (element != null && !element.isRootElement()) {
       int siblingIndex = this.index + indexOffset;
       try {
-        NavigableXmlNode parentNode = (NavigableXmlNode) getParentNode().orElseThrow();
+        NavigableXmlNode parentNode = (NavigableXmlNode) getParent().orElseThrow();
         return Optional.of(
             new NavigableXmlNode(parentNode.nodes.get(siblingIndex), parentNode, siblingIndex));
       } catch (IndexOutOfBoundsException e) {

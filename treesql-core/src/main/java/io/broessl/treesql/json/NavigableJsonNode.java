@@ -131,7 +131,7 @@ public class NavigableJsonNode implements NavigableTreeNode {
   }
 
   @Override
-  public TreeNodeIdentifier getSelfName() {
+  public TreeNodeIdentifier getName() {
     if (parent == null) {
       return null;
     }
@@ -187,12 +187,12 @@ public class NavigableJsonNode implements NavigableTreeNode {
   }
 
   @Override
-  public Optional<NavigableTreeNode> getParentNode() {
+  public Optional<NavigableTreeNode> getParent() {
     return Optional.ofNullable(parent);
   }
 
   @Override
-  public Optional<NavigableTreeNode> getChildNode(String nameOrIndex) {
+  public Optional<NavigableTreeNode> getChild(String nameOrIndex) {
     if (!delegated.isContainerNode()) {
       return Optional.empty();
     }

@@ -22,19 +22,19 @@ public interface NavigableTreeNode {
    * @return The name as {@link TreeString} or - in case of nodes inside an indexable list - the
    *     index as {@link TreeNumber}.
    */
-  TreeNodeIdentifier getSelfName();
+  TreeNodeIdentifier getName();
 
   /**
    * @return The parent node. Only the root node should return {@link Optional#empty()}.
    */
-  Optional<NavigableTreeNode> getParentNode();
+  Optional<NavigableTreeNode> getParent();
 
   /**
    * @param nameOrIndex The name of the requested child node. Might be interpreted as integer
    *     ([0-9]*) in case of list nodes.
    * @return The {@link NavigableTreeNode} matching the name or index.
    */
-  Optional<NavigableTreeNode> getChildNode(String nameOrIndex);
+  Optional<NavigableTreeNode> getChild(String nameOrIndex);
 
   /**
    * This method is only applicable on nodes placed inside a list.
@@ -65,25 +65,25 @@ public interface NavigableTreeNode {
    * @return A String representing the JSONPointer up to and including this node.
    */
   default String absolutePath() {
-    if (getParentNode().isEmpty()) {
+    if (getParent().isEmpty()) {
       return "";
     }
-    return getParentNode().orElseThrow().absolutePath()
+    return getParent().orElseThrow().absolutePath()
         + "/"
-        + getSelfName().getValue().toString().replaceAll("~", "~0").replaceAll("/", "~1");
+        + getName().getValue().toString().replaceAll("~", "~0").replaceAll("/", "~1");
   }
 
   /**
-   * The default implementation checks for empty {@link #getParentNode()} to figure out if itself is
-   * the root. Otherwise the request is delegated to {@link #getParentNode()}.
+   * The default implementation checks for empty {@link #getParent()} to figure out if itself is the
+   * root. Otherwise the request is delegated to {@link #getParent()}.
    *
    * @return The root node.
    */
   default NavigableTreeNode getRoot() {
-    if (getParentNode().isEmpty()) {
+    if (getParent().isEmpty()) {
       return this;
     }
-    return getParentNode().orElseThrow().getRoot();
+    return getParent().orElseThrow().getRoot();
   }
 
   /**

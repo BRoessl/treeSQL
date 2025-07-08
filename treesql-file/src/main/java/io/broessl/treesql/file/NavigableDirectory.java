@@ -36,7 +36,7 @@ public class NavigableDirectory implements NavigableTreeNode {
   }
 
   @Override
-  public TreeNodeIdentifier getSelfName() {
+  public TreeNodeIdentifier getName() {
     if (parent == null) {
       return null;
     }
@@ -44,12 +44,12 @@ public class NavigableDirectory implements NavigableTreeNode {
   }
 
   @Override
-  public Optional<NavigableTreeNode> getParentNode() {
+  public Optional<NavigableTreeNode> getParent() {
     return Optional.ofNullable(this.parent);
   }
 
   @Override
-  public Optional<NavigableTreeNode> getChildNode(String nameOrIndex) {
+  public Optional<NavigableTreeNode> getChild(String nameOrIndex) {
     Path nextPath = this.path.resolve(nameOrIndex);
     if (Files.exists(nextPath, LinkOption.NOFOLLOW_LINKS)) {
       return Optional.of(new NavigableDirectory(nextPath, this));

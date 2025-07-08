@@ -33,21 +33,13 @@ public class NavigableYamlProviderTest {
     var result = new NavigableYamlProvider().buildTreeRoot(new TreeString(yamlExample));
 
     Assertions.assertTrue(result.isPresent());
-    Assertions.assertEquals(
-        "John Doe", result.get().getChildNode("name").get().getValue().toString());
-    Assertions.assertEquals("30", result.get().getChildNode("age").get().getValue().toString());
+    Assertions.assertEquals("John Doe", result.get().getChild("name").get().getValue().toString());
+    Assertions.assertEquals("30", result.get().getChild("age").get().getValue().toString());
     Assertions.assertEquals(
         "123 Main St",
-        result
-            .get()
-            .getChildNode("address")
-            .get()
-            .getChildNode("street")
-            .get()
-            .getValue()
-            .toString());
+        result.get().getChild("address").get().getChild("street").get().getValue().toString());
     Assertions.assertEquals(
         "reading",
-        result.get().getChildNode("hobbies").get().getChildNode("0").get().getValue().toString());
+        result.get().getChild("hobbies").get().getChild("0").get().getValue().toString());
   }
 }

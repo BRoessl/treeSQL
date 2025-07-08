@@ -43,7 +43,7 @@ class NavigableLinesProviderTest {
     Assertions.assertEquals(1, list.size());
 
     // Get the first line and verify it
-    Optional<NavigableTreeNode> firstLine = node.getChildNode("0");
+    Optional<NavigableTreeNode> firstLine = node.getChild("0");
     Assertions.assertTrue(firstLine.isPresent());
     Assertions.assertEquals("Hello World", firstLine.get().getValue().getValue());
   }
@@ -61,15 +61,15 @@ class NavigableLinesProviderTest {
     Assertions.assertEquals(3, node.getSize().orElse(0));
 
     // Verify each line
-    Optional<NavigableTreeNode> line1 = node.getChildNode("0");
+    Optional<NavigableTreeNode> line1 = node.getChild("0");
     Assertions.assertTrue(line1.isPresent());
     Assertions.assertEquals("Line 1", line1.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> line2 = node.getChildNode("1");
+    Optional<NavigableTreeNode> line2 = node.getChild("1");
     Assertions.assertTrue(line2.isPresent());
     Assertions.assertEquals("Line 2", line2.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> line3 = node.getChildNode("2");
+    Optional<NavigableTreeNode> line3 = node.getChild("2");
     Assertions.assertTrue(line3.isPresent());
     Assertions.assertEquals("Line 3", line3.get().getValue().getValue());
   }
@@ -87,7 +87,7 @@ class NavigableLinesProviderTest {
     Assertions.assertEquals(0, node.getSize().orElse(0));
 
     // No lines should be present
-    Optional<NavigableTreeNode> firstLine = node.getChildNode("0");
+    Optional<NavigableTreeNode> firstLine = node.getChild("0");
     Assertions.assertTrue(firstLine.isEmpty());
   }
 
@@ -105,7 +105,7 @@ class NavigableLinesProviderTest {
 
     // All lines should be empty
     for (int i = 0; i < 3; i++) {
-      Optional<NavigableTreeNode> line = node.getChildNode(String.valueOf(i));
+      Optional<NavigableTreeNode> line = node.getChild(String.valueOf(i));
       Assertions.assertTrue(line.isPresent());
       Assertions.assertEquals("", line.get().getValue().getValue());
     }
@@ -122,10 +122,10 @@ class NavigableLinesProviderTest {
     Assertions.assertEquals(5, node.getSize().orElse(0));
 
     // Verify specific lines
-    Assertions.assertEquals("First line", node.getChildNode("0").get().getValue().getValue());
-    Assertions.assertEquals("", node.getChildNode("1").get().getValue().getValue());
-    Assertions.assertEquals("Third line", node.getChildNode("2").get().getValue().getValue());
-    Assertions.assertEquals("", node.getChildNode("3").get().getValue().getValue());
-    Assertions.assertEquals("Fifth line", node.getChildNode("4").get().getValue().getValue());
+    Assertions.assertEquals("First line", node.getChild("0").get().getValue().getValue());
+    Assertions.assertEquals("", node.getChild("1").get().getValue().getValue());
+    Assertions.assertEquals("Third line", node.getChild("2").get().getValue().getValue());
+    Assertions.assertEquals("", node.getChild("3").get().getValue().getValue());
+    Assertions.assertEquals("Fifth line", node.getChild("4").get().getValue().getValue());
   }
 }

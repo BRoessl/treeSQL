@@ -37,51 +37,51 @@ public class NavigableXmlNodeIntegrationTest {
     NavigableXmlNode libraryNode = new NavigableXmlNode(document.getRootElement(), null, "library");
 
     // Navigate to first book
-    Optional<NavigableTreeNode> booksNode = libraryNode.getChildNode("book");
+    Optional<NavigableTreeNode> booksNode = libraryNode.getChild("book");
     assertTrue(booksNode.isPresent());
     assertTrue(booksNode.get().isListNode());
     assertEquals(2, booksNode.get().getSize().orElse(-1));
 
     // Get first book
-    Optional<NavigableTreeNode> firstBook = booksNode.get().getChildNode("0");
+    Optional<NavigableTreeNode> firstBook = booksNode.get().getChild("0");
     assertTrue(firstBook.isPresent());
 
     // Check book attributes
-    Optional<NavigableTreeNode> bookId = firstBook.get().getChildNode("@id");
+    Optional<NavigableTreeNode> bookId = firstBook.get().getChild("@id");
     assertTrue(bookId.isPresent());
     assertEquals("book1", bookId.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> category = firstBook.get().getChildNode("@category");
+    Optional<NavigableTreeNode> category = firstBook.get().getChild("@category");
     assertTrue(category.isPresent());
     assertEquals("fiction", category.get().getValue().getValue());
 
     // Navigate to title
-    Optional<NavigableTreeNode> titleNode = firstBook.get().getChildNode("title");
+    Optional<NavigableTreeNode> titleNode = firstBook.get().getChild("title");
     assertTrue(titleNode.isPresent());
 
     Optional<NavigableTreeNode> titleText =
-        titleNode.get().getChildNode("0").flatMap(t -> t.getChildNode("text()"));
+        titleNode.get().getChild("0").flatMap(t -> t.getChild("text()"));
     assertTrue(titleText.isPresent());
     assertEquals("The Great Gatsby", titleText.get().getValue().getValue());
 
     // Navigate to reviews
-    Optional<NavigableTreeNode> reviewsNode = firstBook.get().getChildNode("reviews");
+    Optional<NavigableTreeNode> reviewsNode = firstBook.get().getChild("reviews");
     assertTrue(reviewsNode.isPresent());
 
     Optional<NavigableTreeNode> reviewsList =
-        reviewsNode.get().getChildNode("0").flatMap(r -> r.getChildNode("review"));
+        reviewsNode.get().getChild("0").flatMap(r -> r.getChild("review"));
     assertTrue(reviewsList.isPresent());
     assertEquals(2, reviewsList.get().getSize().orElse(-1));
 
     // Get first review
-    Optional<NavigableTreeNode> firstReview = reviewsList.get().getChildNode("0");
+    Optional<NavigableTreeNode> firstReview = reviewsList.get().getChild("0");
     assertTrue(firstReview.isPresent());
 
-    Optional<NavigableTreeNode> rating = firstReview.get().getChildNode("@rating");
+    Optional<NavigableTreeNode> rating = firstReview.get().getChild("@rating");
     assertTrue(rating.isPresent());
     assertEquals("5", rating.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> reviewText = firstReview.get().getChildNode("text()");
+    Optional<NavigableTreeNode> reviewText = firstReview.get().getChild("text()");
     assertTrue(reviewText.isPresent());
     assertEquals("Excellent classic", reviewText.get().getValue().getValue());
 
@@ -89,7 +89,7 @@ public class NavigableXmlNodeIntegrationTest {
     Optional<NavigableTreeNode> secondReview = firstReview.get().getSibling(1);
     assertTrue(secondReview.isPresent());
 
-    Optional<NavigableTreeNode> secondRating = secondReview.get().getChildNode("@rating");
+    Optional<NavigableTreeNode> secondRating = secondReview.get().getChild("@rating");
     assertTrue(secondRating.isPresent());
     assertEquals("4", secondRating.get().getValue().getValue());
   }
@@ -114,22 +114,22 @@ public class NavigableXmlNodeIntegrationTest {
     // Test various absolute paths
     assertEquals("", catalogNode.absolutePath());
 
-    NavigableTreeNode productList = catalogNode.getChildNode("product").orElseThrow();
+    NavigableTreeNode productList = catalogNode.getChild("product").orElseThrow();
     assertEquals("/product", productList.absolutePath());
 
-    NavigableTreeNode firstProduct = productList.getChildNode("0").orElseThrow();
+    NavigableTreeNode firstProduct = productList.getChild("0").orElseThrow();
     assertEquals("/product/0", firstProduct.absolutePath());
 
-    NavigableTreeNode productId = firstProduct.getChildNode("@id").orElseThrow();
+    NavigableTreeNode productId = firstProduct.getChild("@id").orElseThrow();
     assertEquals("/product/0/@id", productId.absolutePath());
 
-    NavigableTreeNode nameList = firstProduct.getChildNode("name").orElseThrow();
+    NavigableTreeNode nameList = firstProduct.getChild("name").orElseThrow();
     assertEquals("/product/0/name", nameList.absolutePath());
 
-    NavigableTreeNode nameElement = nameList.getChildNode("0").orElseThrow();
+    NavigableTreeNode nameElement = nameList.getChild("0").orElseThrow();
     assertEquals("/product/0/name/0", nameElement.absolutePath());
 
-    NavigableTreeNode nameText = nameElement.getChildNode("text()").orElseThrow();
+    NavigableTreeNode nameText = nameElement.getChild("text()").orElseThrow();
     assertEquals("/product/0/name/0/text()", nameText.absolutePath());
   }
 
@@ -143,11 +143,11 @@ public class NavigableXmlNodeIntegrationTest {
     assertEquals(rootNode, rootNode.getRoot());
 
     // Child should have root as its root
-    NavigableTreeNode child = rootNode.getChildNode("child").orElseThrow();
+    NavigableTreeNode child = rootNode.getChild("child").orElseThrow();
     assertEquals(rootNode, child.getRoot());
 
     // Nested child should also have root as its root
-    NavigableTreeNode nestedChild = child.getChildNode("0").orElseThrow();
+    NavigableTreeNode nestedChild = child.getChild("0").orElseThrow();
     assertEquals(rootNode, nestedChild.getRoot());
   }
 }

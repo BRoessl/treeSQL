@@ -351,12 +351,12 @@ public abstract sealed class TreeScanStep {
     public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
       return contextNode
           .children()
-          .filter(c -> pattern.matcher(c.getSelfName().getValue().toString()).matches())
+          .filter(c -> pattern.matcher(c.getName().getValue().toString()).matches())
           .map(
               c -> {
                 TreeScanStep step =
                     new TreeScanStep.LiteralForwardStep(
-                        c.getSelfName().getValue().toString(), getRangeLiteral().orElse(null));
+                        c.getName().getValue().toString(), getRangeLiteral().orElse(null));
                 return List.of(step);
               })
           .toList();
@@ -384,7 +384,7 @@ public abstract sealed class TreeScanStep {
 
     public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
       Integer index;
-      if (contextNode.getSelfName() instanceof TreeNumber idx) {
+      if (contextNode.getName() instanceof TreeNumber idx) {
         index = idx.getValue().intValue();
       } else {
         // this is bad introduce new ImpossibleStep
@@ -393,7 +393,7 @@ public abstract sealed class TreeScanStep {
 
       Integer size =
           contextNode
-              .getParentNode()
+              .getParent()
               .orElseThrow()
               .getSize()
               .orElseThrow(() -> new IllegalStateException());

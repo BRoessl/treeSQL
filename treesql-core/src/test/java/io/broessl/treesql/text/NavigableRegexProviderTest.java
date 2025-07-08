@@ -48,7 +48,7 @@ class NavigableRegexProviderTest {
     Assertions.assertFalse(node.isListNode());
     Assertions.assertFalse(node.isMapNode());
     Assertions.assertEquals("Hello", node.getValue().getValue());
-    Assertions.assertEquals(parentNode, node.getParentNode().orElse(null));
+    Assertions.assertEquals(parentNode, node.getParent().orElse(null));
   }
 
   @Test
@@ -79,15 +79,15 @@ class NavigableRegexProviderTest {
     Assertions.assertEquals(3, node.getSize().orElse(0));
 
     // Verify each group
-    Optional<NavigableTreeNode> group1 = node.getChildNode("0");
+    Optional<NavigableTreeNode> group1 = node.getChild("0");
     Assertions.assertTrue(group1.isPresent());
     Assertions.assertEquals("John", group1.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> group2 = node.getChildNode("1");
+    Optional<NavigableTreeNode> group2 = node.getChild("1");
     Assertions.assertTrue(group2.isPresent());
     Assertions.assertEquals("Doe", group2.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> group3 = node.getChildNode("2");
+    Optional<NavigableTreeNode> group3 = node.getChild("2");
     Assertions.assertTrue(group3.isPresent());
     Assertions.assertEquals("30", group3.get().getValue().getValue());
   }
@@ -110,15 +110,15 @@ class NavigableRegexProviderTest {
     Assertions.assertEquals(3, node.getSize().orElse(0));
 
     // Verify each named group
-    Optional<NavigableTreeNode> firstname = node.getChildNode("firstname");
+    Optional<NavigableTreeNode> firstname = node.getChild("firstname");
     Assertions.assertTrue(firstname.isPresent());
     Assertions.assertEquals("John", firstname.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> lastname = node.getChildNode("lastname");
+    Optional<NavigableTreeNode> lastname = node.getChild("lastname");
     Assertions.assertTrue(lastname.isPresent());
     Assertions.assertEquals("Doe", lastname.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> age = node.getChildNode("age");
+    Optional<NavigableTreeNode> age = node.getChild("age");
     Assertions.assertTrue(age.isPresent());
     Assertions.assertEquals("30", age.get().getValue().getValue());
   }
@@ -197,11 +197,11 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isListNode());
     Assertions.assertEquals(2, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> email = node.getChildNode("0");
+    Optional<NavigableTreeNode> email = node.getChild("0");
     Assertions.assertTrue(email.isPresent());
     Assertions.assertEquals("john.doe@example.com", email.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> phone = node.getChildNode("1");
+    Optional<NavigableTreeNode> phone = node.getChild("1");
     Assertions.assertTrue(phone.isPresent());
     Assertions.assertEquals("+1-555-123-4567", phone.get().getValue().getValue());
   }
@@ -221,11 +221,11 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isMapNode());
     Assertions.assertEquals(2, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> email = node.getChildNode("email");
+    Optional<NavigableTreeNode> email = node.getChild("email");
     Assertions.assertTrue(email.isPresent());
     Assertions.assertEquals("john.doe@example.com", email.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> phone = node.getChildNode("phone");
+    Optional<NavigableTreeNode> phone = node.getChild("phone");
     Assertions.assertTrue(phone.isPresent());
     Assertions.assertEquals("+1-555-123-4567", phone.get().getValue().getValue());
   }
@@ -244,7 +244,7 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isListNode());
     Assertions.assertEquals(1, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> group = node.getChildNode("0");
+    Optional<NavigableTreeNode> group = node.getChild("0");
     Assertions.assertTrue(group.isPresent());
     Assertions.assertEquals("fox", group.get().getValue().getValue());
   }
@@ -263,7 +263,7 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isListNode());
     Assertions.assertEquals(1, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> group = node.getChildNode("0");
+    Optional<NavigableTreeNode> group = node.getChild("0");
     Assertions.assertTrue(group.isPresent());
     Assertions.assertEquals("123", group.get().getValue().getValue());
   }
@@ -283,17 +283,17 @@ class NavigableRegexProviderTest {
     Assertions.assertEquals(3, node.getSize().orElse(0));
 
     // First group should be "e"
-    Optional<NavigableTreeNode> group1 = node.getChildNode("0");
+    Optional<NavigableTreeNode> group1 = node.getChild("0");
     Assertions.assertTrue(group1.isPresent());
     Assertions.assertEquals("e", group1.get().getValue().getValue());
 
     // Second group should be "s"
-    Optional<NavigableTreeNode> group2 = node.getChildNode("1");
+    Optional<NavigableTreeNode> group2 = node.getChild("1");
     Assertions.assertTrue(group2.isPresent());
     Assertions.assertEquals("s", group2.get().getValue().getValue());
 
     // Third group should be "t"
-    Optional<NavigableTreeNode> group3 = node.getChildNode("2");
+    Optional<NavigableTreeNode> group3 = node.getChild("2");
     Assertions.assertTrue(group3.isPresent());
     Assertions.assertEquals("t", group3.get().getValue().getValue());
   }
@@ -309,7 +309,7 @@ class NavigableRegexProviderTest {
     NavigableTreeNode node = result.get();
 
     // Should work with null parent
-    Assertions.assertTrue(node.getParentNode().isEmpty());
+    Assertions.assertTrue(node.getParent().isEmpty());
     Assertions.assertEquals("test", node.getValue().getValue());
   }
 
@@ -327,7 +327,7 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isListNode());
     Assertions.assertEquals(1, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> group = node.getChildNode("0");
+    Optional<NavigableTreeNode> group = node.getChild("0");
     Assertions.assertTrue(group.isPresent());
     Assertions.assertEquals("WORLD", group.get().getValue().getValue());
   }
@@ -346,11 +346,11 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isListNode());
     Assertions.assertEquals(2, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> price = node.getChildNode("0");
+    Optional<NavigableTreeNode> price = node.getChild("0");
     Assertions.assertTrue(price.isPresent());
     Assertions.assertEquals("19.99", price.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> tax = node.getChildNode("1");
+    Optional<NavigableTreeNode> tax = node.getChild("1");
     Assertions.assertTrue(tax.isPresent());
     Assertions.assertEquals("8.5", tax.get().getValue().getValue());
   }
@@ -370,11 +370,11 @@ class NavigableRegexProviderTest {
     Assertions.assertTrue(node.isListNode());
     Assertions.assertEquals(2, node.getSize().orElse(0));
 
-    Optional<NavigableTreeNode> name = node.getChildNode("0");
+    Optional<NavigableTreeNode> name = node.getChild("0");
     Assertions.assertTrue(name.isPresent());
     Assertions.assertEquals("José García", name.get().getValue().getValue());
 
-    Optional<NavigableTreeNode> age = node.getChildNode("1");
+    Optional<NavigableTreeNode> age = node.getChild("1");
     Assertions.assertTrue(age.isPresent());
     Assertions.assertEquals("25", age.get().getValue().getValue());
   }
@@ -394,18 +394,18 @@ class NavigableRegexProviderTest {
     Assertions.assertEquals(3, node.getSize().orElse(0));
 
     // Test child navigation
-    Optional<NavigableTreeNode> child1 = node.getChildNode("0");
-    Optional<NavigableTreeNode> child2 = node.getChildNode("1");
-    Optional<NavigableTreeNode> child3 = node.getChildNode("2");
+    Optional<NavigableTreeNode> child1 = node.getChild("0");
+    Optional<NavigableTreeNode> child2 = node.getChild("1");
+    Optional<NavigableTreeNode> child3 = node.getChild("2");
 
     Assertions.assertTrue(child1.isPresent());
     Assertions.assertTrue(child2.isPresent());
     Assertions.assertTrue(child3.isPresent());
 
     // Test parent navigation
-    Assertions.assertEquals(node, child1.get().getParentNode().orElse(null));
-    Assertions.assertEquals(node, child2.get().getParentNode().orElse(null));
-    Assertions.assertEquals(node, child3.get().getParentNode().orElse(null));
+    Assertions.assertEquals(node, child1.get().getParent().orElse(null));
+    Assertions.assertEquals(node, child2.get().getParent().orElse(null));
+    Assertions.assertEquals(node, child3.get().getParent().orElse(null));
 
     // Test sibling navigation
     Optional<NavigableTreeNode> nextSibling = child1.get().getSibling(1);
