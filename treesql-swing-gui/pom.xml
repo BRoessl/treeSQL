@@ -41,14 +41,28 @@
 			<groupId>io.broessl</groupId>
 			<version>${treesql.version}</version>
 		</dependency>
-		
+		<dependency>
+			<artifactId>commons-csv</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<version>1.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.3.0</version>
+		</dependency>
 		<!-- Swing UI Enhancement Libraries -->
 		<dependency>
 			<groupId>com.formdev</groupId>
 			<artifactId>flatlaf</artifactId>
 			<version>3.5.4</version>
 		</dependency>
-		
+
 		<!-- RSyntaxTextArea for code highlighting -->
 		<dependency>
 			<groupId>com.fifesoft</groupId>
@@ -70,7 +84,7 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-			
+
 			<!-- Maven Assembly Plugin for creating executable JAR -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -95,7 +109,7 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
-			
+
 			<!-- Maven Shade Plugin (alternative to assembly) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -109,7 +123,8 @@
 						</goals>
 						<configuration>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>${mainClass}</mainClass>
 								</transformer>
 							</transformers>

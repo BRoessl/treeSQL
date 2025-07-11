@@ -50,9 +50,15 @@ public class NavigableDirectory implements NavigableTreeNode {
 
   @Override
   public Optional<NavigableTreeNode> getChild(String nameOrIndex) {
-    Path nextPath = this.path.resolve(nameOrIndex);
-    if (Files.exists(nextPath, LinkOption.NOFOLLOW_LINKS)) {
-      return Optional.of(new NavigableDirectory(nextPath, this));
+    try {
+
+      Path nextPath = this.path.resolve(nameOrIndex);
+      if (Files.exists(nextPath, LinkOption.NOFOLLOW_LINKS)) {
+        return Optional.of(new NavigableDirectory(nextPath, this));
+      }
+    } catch (Exception e) {
+      // ignore
+      // might get an exception for directives containing '?'
     }
     return Optional.empty();
   }

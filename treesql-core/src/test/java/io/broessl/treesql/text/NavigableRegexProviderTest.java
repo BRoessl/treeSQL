@@ -39,7 +39,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("Hello World");
     List<String> regex = List.of("Hello");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -56,7 +57,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("Hello World");
     List<String> regex = List.of("xyz");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isEmpty());
   }
@@ -66,7 +68,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("John Doe, age 30");
     List<String> regex = List.of("(\\w+) (\\w+), age (\\d+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -97,7 +100,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("John Doe, age 30");
     List<String> regex = List.of("(?<firstname>\\w+) (?<lastname>\\w+), age (?<age>\\d+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -127,7 +131,7 @@ class NavigableRegexProviderTest {
   void testAttachTreeNodeWithNullArgument() {
     TreeString content = new TreeString("test");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, null);
+    Optional<NavigableTreeNode> result = provider.attachTreeNode("root", content, parentNode, null);
 
     Assertions.assertTrue(result.isEmpty());
   }
@@ -136,7 +140,8 @@ class NavigableRegexProviderTest {
   void testAttachTreeNodeWithEmptyArgument() {
     TreeString content = new TreeString("test");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, List.of());
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, List.of());
 
     Assertions.assertTrue(result.isEmpty());
   }
@@ -146,7 +151,8 @@ class NavigableRegexProviderTest {
     TreeNumber content = new TreeNumber(42);
     List<String> regex = List.of("\\d+");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isEmpty());
   }
@@ -156,7 +162,7 @@ class NavigableRegexProviderTest {
     List<String> regex = List.of("test");
 
     Optional<NavigableTreeNode> result =
-        provider.attachTreeNode(TreeNull.INSTANCE, parentNode, regex);
+        provider.attachTreeNode("root", TreeNull.INSTANCE, parentNode, regex);
 
     Assertions.assertTrue(result.isEmpty());
   }
@@ -166,7 +172,8 @@ class NavigableRegexProviderTest {
     TreeBool content = new TreeBool(true);
     List<String> regex = List.of("true");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isEmpty());
   }
@@ -179,7 +186,7 @@ class NavigableRegexProviderTest {
     Assertions.assertThrows(
         PatternSyntaxException.class,
         () -> {
-          provider.attachTreeNode(content, parentNode, invalidRegex);
+          provider.attachTreeNode("root", content, parentNode, invalidRegex);
         });
   }
 
@@ -188,7 +195,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("Email: john.doe@example.com, Phone: +1-555-123-4567");
     List<String> regex = List.of("Email: ([\\w\\.]+@[\\w\\.]+), Phone: (\\+?[\\d\\-]+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -212,7 +220,8 @@ class NavigableRegexProviderTest {
     List<String> regex =
         List.of("Email: (?<email>[\\w\\.]+@[\\w\\.]+), Phone: (?<phone>\\+?[\\d\\-]+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -235,7 +244,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("The quick brown fox jumps over the lazy dog");
     List<String> regex = List.of("brown (\\w+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -254,7 +264,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("abc123def456ghi789");
     List<String> regex = List.of("(\\d+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -273,7 +284,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("test");
     List<String> regex = List.of("t(e?)(s?)(t?)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -303,7 +315,7 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("test");
     List<String> regex = List.of("test");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, null, regex);
+    Optional<NavigableTreeNode> result = provider.attachTreeNode("root", content, null, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -318,7 +330,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("Hello WORLD");
     List<String> regex = List.of("(?i)hello (world)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -337,7 +350,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("Price: $19.99, Tax: 8.5%");
     List<String> regex = List.of("Price: \\$([\\d\\.]+), Tax: ([\\d\\.]+)%");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -361,7 +375,8 @@ class NavigableRegexProviderTest {
     // Use a more inclusive pattern that works with Unicode characters
     List<String> regex = List.of("Name: ([^,]+), Age: (\\d+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();
@@ -384,7 +399,8 @@ class NavigableRegexProviderTest {
     TreeString content = new TreeString("First Second Third");
     List<String> regex = List.of("(\\w+) (\\w+) (\\w+)");
 
-    Optional<NavigableTreeNode> result = provider.attachTreeNode(content, parentNode, regex);
+    Optional<NavigableTreeNode> result =
+        provider.attachTreeNode("root", content, parentNode, regex);
 
     Assertions.assertTrue(result.isPresent());
     NavigableTreeNode node = result.get();

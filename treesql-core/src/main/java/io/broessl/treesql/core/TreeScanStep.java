@@ -2,6 +2,7 @@ package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNumber;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,7 @@ public abstract sealed class TreeScanStep {
       Pattern.compile("^~([a-z][a-z0-9_]*)(\\(.*\\))$");
 
   private static final Pattern SPECIAL_DIRECTIVE =
-      Pattern.compile("^~([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\?([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
 
   private String raw;
 
@@ -100,11 +101,7 @@ public abstract sealed class TreeScanStep {
       // must be anonymous step
       return anonymousStep(raw);
     }
-    // special directive "~MY_DIRECTIVE"
-    Matcher matcher = SPECIAL_DIRECTIVE.matcher(raw);
-    if (matcher.matches()) {
-      return new DirectiveStep("~" + matcher.group(1), matcher.group(2));
-    }
+
     // is not a ranged step, but might be a literal step
     if (fallback == null) {
       throw new IllegalArgumentException("Unknown pattern for '" + raw + "'.");
@@ -155,6 +152,13 @@ public abstract sealed class TreeScanStep {
       String rangeLiteral = matcher.group(1);
       return new LevelScan(raw, rangeLiteral, boundaries);
     }
+
+    // special directive "~foo?MY_DIRECTIVE" must always be named
+    matcher = SPECIAL_DIRECTIVE.matcher(raw);
+    if (matcher.matches()) {
+      return new DirectiveStep(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+
     throw new IllegalArgumentException("Unknown pattern for an named ranged step: '" + raw + "'.");
   }
 
@@ -471,12 +475,12 @@ public abstract sealed class TreeScanStep {
 
     private List<String> arguments;
 
-    DirectiveStep(String directive, String argument) {
-      super(directive, null);
+    DirectiveStep(String nameForDirective, String directive, String argument) {
+      super(directive, nameForDirective);
       if (argument == null || argument.trim().isEmpty()) {
         arguments = List.of();
       } else {
-        this.arguments = argument.lines().toList();
+        this.arguments = Arrays.stream(argument.split("&")).toList();
       }
     }
 

@@ -18,7 +18,7 @@ public final class TreeValueAt extends TreeContextValue {
 
   @Override
   public TreeValue getPrimitiveValue(ScannableTreeNode stn) {
-    return expectAsNavigableTreeNode(stn, atExpression).getValue();
+    return expectTreeValue(stn, atExpression);
   }
 
   @Override

@@ -32,6 +32,9 @@ public class OperationRegistry {
     registerOperation(new NotMatchOperation());
     registerOperation(new MaxOperation());
     registerOperation(new SinOperation());
+    registerOperation(new IsOperation());
+    registerOperation(new AsNumberFunction());
+    registerOperation(new AsStringFunction());
   }
 
   private final Map<String, StackOperation> operations = new HashMap<>();

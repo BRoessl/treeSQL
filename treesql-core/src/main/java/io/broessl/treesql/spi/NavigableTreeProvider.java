@@ -12,5 +12,5 @@ public interface NavigableTreeProvider {
   Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent);
 
   Optional<NavigableTreeNode> attachTreeNode(
-      TreeValue fromContent, NavigableTreeNode parentNode, List<String> arguments);
+      String rootName, TreeValue fromContent, NavigableTreeNode parentNode, List<String> arguments);
 }

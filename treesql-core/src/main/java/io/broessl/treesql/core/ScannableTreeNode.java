@@ -16,24 +16,23 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
   private final NavigableTreeNode navigableNode;
 
   public ScannableTreeNode(NavigableTreeNode node, ScanContext bindings) {
-    this.bindings = bindings;
+    this.bindings = new ScanContext(bindings);
     this.navigableNode = node;
   }
 
   public ScannableTreeNode(
       NavigableTreeNode node, ScanContext bindings, TreeScanExpression scanExpression) {
-    this.bindings = bindings;
+    this.bindings = new ScanContext(bindings);
     this.navigableNode = node;
     this.scanExpression = scanExpression;
   }
 
   public static ScannableTreeNode forRoot(NavigableTreeNode rootNode) {
-    return new ScannableTreeNode(rootNode, new TransientScanContext());
+    return new ScannableTreeNode(rootNode, new ScanContext());
   }
 
   public Stream<ScannableTreeNode> scan(String expression) {
     this.scanExpression = TreeScanExpression.parse(expression);
-    this.bindings = this.bindings.asMutable();
     return StreamSupport.stream(this.spliterator(), false);
   }
 
@@ -79,7 +78,7 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
   }
 
   public void setContext(ScanContext bindings) {
-    this.bindings = bindings.asMutable();
+    this.bindings = new ScanContext(bindings);
   }
 
   public String absolutePath() {

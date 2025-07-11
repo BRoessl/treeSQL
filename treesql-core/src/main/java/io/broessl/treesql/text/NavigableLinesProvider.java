@@ -11,7 +11,7 @@ import java.util.Optional;
 public class NavigableLinesProvider implements NavigableTreeProvider {
   @Override
   public String getDirective() {
-    return "~LINES";
+    return "LINES";
   }
 
   @Override
@@ -27,13 +27,12 @@ public class NavigableLinesProvider implements NavigableTreeProvider {
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      String rootName, TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       var array = NavigableJsonNode.OM.createArrayNode();
       tString.getValue().lines().forEach(array::add);
       return Optional.of(
-          new NavigableJsonNode(
-              array, parentNode, "!!LINES")); // Create a new instance for the root
+          new NavigableJsonNode(array, parentNode, rootName)); // Create a new instance for the root
     }
     return Optional.empty();
   }

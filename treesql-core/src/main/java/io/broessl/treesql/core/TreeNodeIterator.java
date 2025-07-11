@@ -83,6 +83,6 @@ class TreeNodeIterator implements Iterator<ScannableTreeNode> {
       throw new NoSuchElementException();
     }
     ScannableTreeNode next = deeperScans.getFirst().next();
-    return new ScannableTreeNode(next.getNavigableTreeNode(), next.getContext().asImmutable());
+    return new ScannableTreeNode(next.getNavigableTreeNode(), new ScanContext(next.getContext()));
   }
 }

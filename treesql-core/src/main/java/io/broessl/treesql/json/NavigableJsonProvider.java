@@ -11,7 +11,7 @@ public class NavigableJsonProvider implements NavigableTreeProvider {
 
   @Override
   public String getDirective() {
-    return "~JSON";
+    return "JSON";
   }
 
   @Override
@@ -24,10 +24,10 @@ public class NavigableJsonProvider implements NavigableTreeProvider {
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      String rootName, TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       return Optional.ofNullable(
-          NavigableJsonNode.fromContent(tString.getValue(), parentNode, "!!JSON"));
+          NavigableJsonNode.fromContent(tString.getValue(), parentNode, rootName));
     }
     return Optional.empty();
   }

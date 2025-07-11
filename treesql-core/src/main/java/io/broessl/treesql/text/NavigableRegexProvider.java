@@ -13,7 +13,7 @@ public class NavigableRegexProvider implements NavigableTreeProvider {
 
   @Override
   public String getDirective() {
-    return "~REGEX";
+    return "REGEX";
   }
 
   @Override
@@ -24,7 +24,7 @@ public class NavigableRegexProvider implements NavigableTreeProvider {
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      String rootName, TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
 
     if (argument != null && !argument.isEmpty() && fromContent instanceof TreeString tString) {
       Pattern pattern = Pattern.compile(argument.get(0));
@@ -36,7 +36,7 @@ public class NavigableRegexProvider implements NavigableTreeProvider {
         // no groups specified, just the matching string gets returned (working as
         // filter)
         var matchText = NavigableJsonNode.OM.getNodeFactory().textNode(matcher.group(0));
-        return Optional.of(new NavigableJsonNode(matchText, parentNode, "!!REGEX"));
+        return Optional.of(new NavigableJsonNode(matchText, parentNode, rootName));
       }
       var namedGroups = pattern.namedGroups();
       if (namedGroups.isEmpty()) {
@@ -47,12 +47,12 @@ public class NavigableRegexProvider implements NavigableTreeProvider {
         for (int i = 1; i <= groups; i++) {
           array.add(matcher.group(i));
         }
-        return Optional.of(new NavigableJsonNode(array, parentNode, "!!REGEX"));
+        return Optional.of(new NavigableJsonNode(array, parentNode, rootName));
       } else {
         // groups are named, handle as object
         var object = NavigableJsonNode.OM.createObjectNode();
         namedGroups.keySet().forEach(key -> object.put(key, matcher.group(key)));
-        return Optional.of(new NavigableJsonNode(object, parentNode, "!!REGEX"));
+        return Optional.of(new NavigableJsonNode(object, parentNode, rootName));
       }
     }
     return Optional.empty();

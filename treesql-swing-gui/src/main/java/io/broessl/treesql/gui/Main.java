@@ -3,28 +3,36 @@ package io.broessl.treesql.gui;
 import com.formdev.flatlaf.FlatLightLaf;
 import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeString;
-import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.file.NavigableDirectory;
 import io.broessl.treesql.spi.NavigableTree;
 import io.broessl.treesql.sql.QueryParser;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -33,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -48,6 +57,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -55,9 +65,17 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableStyleInfo;
 
 /**
  * Main entry point for the TreeSQL Swing GUI application. This application provides a graphical
@@ -71,8 +89,8 @@ public class Main extends JFrame {
 
   private static final Map<String, String> EXTENSION_TO_DIRECTIVE_MAP =
       Map.of(
-          "json", "~JSON", "yaml", "~YAML", "yml", "~YAML", "csv", "~CSV", "txt", "~LINES", "log",
-          "~LINES", "xml", "~XML");
+          "json", "JSON", "yaml", "YAML", "yml", "YAML", "csv", "CSV", "txt", "LINES", "log",
+          "LINES", "xml", "XML");
 
   private RSyntaxTextArea queryTextArea;
   private JTable resultTable;
@@ -85,7 +103,7 @@ public class Main extends JFrame {
   private JLabel statusLabel;
   private JTree directoryTree;
   private DefaultTreeModel treeModel;
-  private File currentDirectory;
+  private File workingDirectory;
   private File selectedRoot; // Currently selected root file or directory
   private DefaultMutableTreeNode selectedRootNode; // Tree node representing the selected root
   private boolean isShowingFileContent = false;
@@ -111,24 +129,7 @@ public class Main extends JFrame {
     // File menu
     JMenu fileMenu = new JMenu("File");
     JMenuItem openFolderItem = new JMenuItem("Open Folder...");
-    JMenuItem saveAsItem = new JMenuItem("Save As...");
-    JMenuItem showSelectedRootItem = new JMenuItem("Show Selected Root");
-    JMenuItem exitItem = new JMenuItem("Exit");
-
     fileMenu.add(openFolderItem);
-    fileMenu.add(saveAsItem);
-    fileMenu.addSeparator();
-    fileMenu.add(showSelectedRootItem);
-    fileMenu.addSeparator();
-    fileMenu.add(exitItem);
-
-    // Query menu
-    JMenu queryMenu = new JMenu("Query");
-    JMenuItem executeItem = new JMenuItem("Execute Query (Ctrl+Enter)");
-    JMenuItem clearResultsItem = new JMenuItem("Clear Results");
-
-    queryMenu.add(executeItem);
-    queryMenu.add(clearResultsItem);
 
     // Help menu
     JMenu helpMenu = new JMenu("Help");
@@ -136,18 +137,12 @@ public class Main extends JFrame {
     helpMenu.add(aboutItem);
 
     menuBar.add(fileMenu);
-    menuBar.add(queryMenu);
     menuBar.add(helpMenu);
-
     setJMenuBar(menuBar);
 
     // Setup exit action
-    exitItem.addActionListener(e -> System.exit(0));
     aboutItem.addActionListener(e -> showAboutDialog());
     openFolderItem.addActionListener(e -> openFolder());
-    showSelectedRootItem.addActionListener(e -> showSelectedRootInfo());
-    executeItem.addActionListener(e -> executeQuery());
-    clearResultsItem.addActionListener(e -> clearResults());
   }
 
   private void setupComponents() {
@@ -253,6 +248,7 @@ public class Main extends JFrame {
 
     // Set initial empty state
     clearResultTable("Query results will appear here...");
+    setupResultTableContextMenu();
 
     resultScrollPane = new JScrollPane(resultTable);
 
@@ -401,16 +397,202 @@ public class Main extends JFrame {
     tableModel.addRow(row);
   }
 
+  private void setupResultTableContextMenu() {
+    JPopupMenu contextMenu = new JPopupMenu();
+
+    JMenuItem copyToClipboardItem = new JMenuItem("Copy");
+    copyToClipboardItem.addActionListener(e -> copyTableToClipboard());
+
+    JMenuItem exportToCsvItem = new JMenuItem("Save to...");
+    exportToCsvItem.addActionListener(e -> exportTableToCsv());
+
+    JMenuItem openInExcel = new JMenuItem("Open in Excel...");
+    openInExcel.addActionListener(e -> exportXslxAndOpen());
+
+    contextMenu.add(copyToClipboardItem);
+    contextMenu.add(exportToCsvItem);
+    contextMenu.add(openInExcel);
+
+    resultTable.addMouseListener(
+        new MouseAdapter() {
+          @Override
+          public void mousePressed(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+              showResultTableContextMenu(e, contextMenu);
+            }
+          }
+
+          @Override
+          public void mouseReleased(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+              showResultTableContextMenu(e, contextMenu);
+            }
+          }
+        });
+  }
+
+  private void exportXslxAndOpen() {
+    try {
+      XSSFWorkbook workbook = new XSSFWorkbook();
+      XSSFSheet sheet = workbook.createSheet("treeSQL");
+      var header = sheet.createRow(0);
+      for (int col = 0; col < tableModel.getColumnCount(); col++) {
+        header.createCell(col).setCellValue(tableModel.getColumnName(col));
+      }
+      // Add data rows
+      for (int row = 0; row < tableModel.getRowCount(); row++) {
+        var valueRow = sheet.createRow(row + 1);
+        for (int col = 0; col < tableModel.getColumnCount(); col++) {
+          valueRow
+              .createCell(col)
+              .setCellValue(
+                  tableModel.getValueAt(row, col) != null
+                      ? tableModel.getValueAt(row, col).toString()
+                      : "");
+        }
+      }
+      var areaRef =
+          new AreaReference(
+              new CellReference(0, 0),
+              new CellReference(tableModel.getRowCount(), tableModel.getColumnCount() - 1),
+              SpreadsheetVersion.EXCEL2007);
+      XSSFTable xTable = sheet.createTable(areaRef);
+      xTable.getCTTable().addNewAutoFilter().setRef(areaRef.formatAsString());
+      CTTableStyleInfo style = xTable.getCTTable().addNewTableStyleInfo();
+      style.setName("TableStyleMedium2");
+      style.setShowFirstColumn(false);
+      style.setShowLastColumn(false);
+      style.setShowRowStripes(true);
+      style.setShowColumnStripes(false);
+
+      final Path tmpFile = Files.createTempFile("treeSQL", ".xlsx");
+      var os = new FileOutputStream(tmpFile.toFile());
+      workbook.write(os);
+      os.flush();
+      os.close();
+      workbook.close();
+
+      new Thread(
+              () -> {
+                try {
+                  Desktop.getDesktop().open(tmpFile.toFile());
+                } catch (Exception e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Error opening Excel file: " + e.getMessage(),
+                            "Open Error",
+                            JOptionPane.ERROR_MESSAGE);
+                      });
+                }
+              })
+          .start();
+    } catch (IOException e) {
+      JOptionPane.showMessageDialog(
+          this,
+          "Error exporting to Excel: " + e.getMessage(),
+          "Export Error",
+          JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+  }
+
+  private void showResultTableContextMenu(MouseEvent e, JPopupMenu contextMenu) {
+    if (tableModel.getRowCount() > 0 && tableModel.getColumnCount() > 0) {
+      contextMenu.show(resultTable, e.getX(), e.getY());
+    }
+  }
+
+  private void copyTableToClipboard() {
+    String csvData = generateCsvFromTable();
+    if (csvData != null && !csvData.isEmpty()) {
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      StringSelection selection = new StringSelection(csvData);
+      clipboard.setContents(selection, null);
+    }
+  }
+
+  private void exportTableToCsv() {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Export Table to CSV");
+    fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files (*.csv)", "csv"));
+
+    // Set default filename based on current timestamp
+    String defaultFilename = "treesql_results_" + System.currentTimeMillis() + ".csv";
+    fileChooser.setSelectedFile(new File(defaultFilename));
+
+    if (workingDirectory != null) {
+      fileChooser.setCurrentDirectory(workingDirectory);
+    }
+
+    int result = fileChooser.showSaveDialog(this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+      File selectedFile = fileChooser.getSelectedFile();
+
+      // Ensure .csv extension
+      if (!selectedFile.getName().toLowerCase().endsWith(".csv")) {
+        selectedFile = new File(selectedFile.getAbsolutePath() + ".csv");
+      }
+
+      String csvData = generateCsvFromTable();
+      if (csvData != null && !csvData.isEmpty()) {
+        try (FileWriter writer = new FileWriter(selectedFile, StandardCharsets.UTF_8)) {
+          writer.write(csvData);
+        } catch (IOException e) {
+          JOptionPane.showMessageDialog(
+              this,
+              "Error writing CSV file: " + e.getMessage(),
+              "Export Error",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }
+
+  private String generateCsvFromTable() {
+    try {
+      StringBuilder stringResult = new StringBuilder();
+
+      // Add headers
+      String[] header = new String[tableModel.getColumnCount()];
+      for (int col = 0; col < tableModel.getColumnCount(); col++) {
+        header[col] = tableModel.getColumnName(col);
+      }
+      CSVFormat csvFormat = CSVFormat.MONGODB_TSV.builder().setHeader(header).get();
+
+      var csvWriter = csvFormat.print(stringResult);
+
+      // Add data rows
+      for (int row = 0; row < tableModel.getRowCount(); row++) {
+        Object[] stringRow = new String[tableModel.getColumnCount()];
+        for (int col = 0; col < tableModel.getColumnCount(); col++) {
+          stringRow[col] = tableModel.getValueAt(row, col);
+        }
+        csvWriter.printRecord(stringRow);
+      }
+      return stringResult.toString();
+    } catch (Exception e) {
+      JOptionPane.showMessageDialog(
+          this,
+          "Error generating CSV: " + e.getMessage(),
+          "CSV Generation Error",
+          JOptionPane.ERROR_MESSAGE);
+      return e.getMessage();
+    }
+  }
+
   private void executeQuery() {
     String query = queryTextArea.getText().trim();
+    switchToQueryResults();
 
     if (query.isEmpty()) {
-      showQueryResults();
       clearResultTable("Please enter a query to execute.");
       statusLabel.setText("Error: Empty query");
       return;
     }
 
+    statusLabel.setText("Parsing query and setting up root object...");
     QueryParser parsedQuery = null;
     try {
       parsedQuery = QueryParser.parseStatement(query);
@@ -420,22 +602,19 @@ public class Main extends JFrame {
       return;
     }
 
-    showQueryResults();
-    statusLabel.setText("Executing query...");
-
     NavigableTreeNode rootAsNavigableTree = null;
     if (selectedRoot.isDirectory()) {
       rootAsNavigableTree = new NavigableDirectory(selectedRoot.toPath(), null);
     } else if (EXTENSION_TO_DIRECTIVE_MAP.containsKey(getFileExtension(selectedRoot))) {
+      String directive = EXTENSION_TO_DIRECTIVE_MAP.get(getFileExtension(selectedRoot));
       try {
-        String directive = EXTENSION_TO_DIRECTIVE_MAP.get(getFileExtension(selectedRoot));
         var provider = NavigableTree.providerFor(directive);
         rootAsNavigableTree =
             provider
                 .buildTreeRoot(new TreeString(Files.readString(selectedRoot.toPath())))
                 .orElseThrow();
       } catch (IOException e) {
-        setResultTableError("Error reading JSON file: " + e.getMessage());
+        setResultTableError("Error reading file as " + directive);
         statusLabel.setText("Error: " + e.getMessage());
         return;
       }
@@ -447,27 +626,70 @@ public class Main extends JFrame {
 
     try {
       List<String> tableHeader = parsedQuery.getColumnNames();
-
-      // Setup table with headers
       setupResultTable(tableHeader);
 
-      // Execute query and populate results
-      List<List<TreeValue>> results = parsedQuery.execute(rootAsNavigableTree).toList();
+      var resultStream = parsedQuery.execute(rootAsNavigableTree);
 
-      SwingUtilities.invokeLater(
-          () -> {
-            for (List<TreeValue> row : results) {
-              // Convert each result row to string values
-              List<String> rowData =
-                  row.stream()
-                      .map(primitive -> primitive != null ? primitive.toString() : "")
-                      .toList();
+      statusLabel.setText(String.format("Collecting results... %d row(s) so far", 0));
+      queryScrollPane.setEnabled(false);
 
-              addResultTableRow(rowData);
-            }
+      // async processing of results
+      Thread streamProcessor =
+          new Thread(
+              () -> {
+                try {
+                  long startTime = System.currentTimeMillis();
 
-            statusLabel.setText("Query executed successfully - " + results.size() + " row(s)");
-          });
+                  final AtomicInteger rowCount = new AtomicInteger(0);
+
+                  resultStream.forEach(
+                      row -> {
+                        List<String> rowData =
+                            row.stream()
+                                .map(primitive -> primitive != null ? primitive.toString() : "")
+                                .toList();
+                        rowCount.incrementAndGet();
+
+                        // Update UI on EDT
+                        SwingUtilities.invokeLater(
+                            () -> {
+                              addResultTableRow(rowData);
+                              statusLabel.setText(
+                                  String.format(
+                                      "Collecting results... %d row(s) so far", rowCount.get()));
+                            });
+                      });
+                  Duration duration = Duration.ofMillis(System.currentTimeMillis() - startTime);
+
+                  // Final status update
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        statusLabel.setText(
+                            "Query finished - "
+                                + rowCount.get()
+                                + " row(s) in "
+                                + duration.toMillis()
+                                + " ms");
+                      });
+
+                } catch (Exception e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        setResultTableError("Error executing query: " + e.getMessage());
+                        statusLabel.setText("Error: " + e.getMessage());
+                      });
+                } finally {
+                  // Re-enable the query input area
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        queryScrollPane.setEnabled(true);
+                      });
+                }
+              });
+
+      streamProcessor.setDaemon(true);
+      streamProcessor.start();
+
     } catch (Exception e) {
       setResultTableError("Error executing query: " + e.getMessage());
       statusLabel.setText("Error: " + e.getMessage());
@@ -503,13 +725,7 @@ public class Main extends JFrame {
     }
   }
 
-  private void clearResults() {
-    showQueryResults();
-    clearResultTable("Query results will appear here...");
-    statusLabel.setText("Results cleared");
-  }
-
-  private void showQueryResults() {
+  private void switchToQueryResults() {
     if (isShowingFileContent) {
       // Switch back to query results view
       rightSplitPane.setRightComponent(resultScrollPane);
@@ -648,11 +864,9 @@ public class Main extends JFrame {
             // Check if this node is the selected root
             if (value == selectedRootNode) {
               // Much more prominent highlighting for selected root
-              setBackgroundSelectionColor(
-                  new Color(255, 165, 0, 200)); // Bright orange background when selected
-              setBackgroundNonSelectionColor(
-                  new Color(255, 140, 0, 150)); // Orange background when not selected
-              setTextSelectionColor(Color.WHITE); // White text when selected
+              setBackgroundSelectionColor(UIManager.getColor("Tree.selectionBackground"));
+              setBackgroundNonSelectionColor(UIManager.getColor("Tree.selectionBackground"));
+              setTextSelectionColor(Color.BLACK); // White text when selected
               setTextNonSelectionColor(Color.BLACK); // Black text when not selected
               setBorderSelectionColor(new Color(255, 100, 0)); // Dark orange border
               setFont(getFont().deriveFont(Font.BOLD)); // Bold font for selected root
@@ -683,42 +897,6 @@ public class Main extends JFrame {
         javax.swing.JOptionPane.INFORMATION_MESSAGE);
   }
 
-  private void showSelectedRootInfo() {
-    if (selectedRoot != null) {
-      String fileType = selectedRoot.isDirectory() ? "Directory" : "File";
-      String additionalInfo =
-          selectedRoot.isDirectory()
-              ? "Right-click on any directory or file in the tree to select it as root, or simply double-click."
-              : "Right-click on any directory or file in the tree to select it as root, or simply double-click.";
-
-      javax.swing.JOptionPane.showMessageDialog(
-          this,
-          "Currently Selected Root "
-              + fileType
-              + ":\n\n"
-              + "Path: "
-              + selectedRoot.getAbsolutePath()
-              + "\n"
-              + "Name: "
-              + selectedRoot.getName()
-              + "\n"
-              + "Type: "
-              + fileType
-              + "\n\n"
-              + additionalInfo,
-          "Selected Root Information",
-          javax.swing.JOptionPane.INFORMATION_MESSAGE);
-    } else {
-      javax.swing.JOptionPane.showMessageDialog(
-          this,
-          "No root selected.\n\n"
-              + "Open a folder first, then right-click on any directory or file\n"
-              + "in the tree to select it as root, or simply double-click on it.",
-          "No Root Selected",
-          javax.swing.JOptionPane.INFORMATION_MESSAGE);
-    }
-  }
-
   private void setupDirectoryTree() {
     // Create empty tree model initially
     DefaultMutableTreeNode root = new DefaultMutableTreeNode("No folder selected");
@@ -746,16 +924,16 @@ public class Main extends JFrame {
     fileChooser.setDialogTitle("Select Directory");
 
     // Set current directory if one was previously selected
-    if (currentDirectory != null) {
-      fileChooser.setCurrentDirectory(currentDirectory);
+    if (workingDirectory != null) {
+      fileChooser.setCurrentDirectory(workingDirectory);
     }
 
     int result = fileChooser.showOpenDialog(this);
     if (result == JFileChooser.APPROVE_OPTION) {
-      currentDirectory = fileChooser.getSelectedFile();
-      loadDirectoryTree(currentDirectory);
+      workingDirectory = fileChooser.getSelectedFile();
+      loadDirectoryTree(workingDirectory);
       statusLabel.setText(
-          "Loaded directory and selected as root: " + currentDirectory.getAbsolutePath());
+          "Loaded directory and selected as root: " + workingDirectory.getAbsolutePath());
     }
   }
 
@@ -906,7 +1084,11 @@ public class Main extends JFrame {
 
     SwingUtilities.invokeLater(
         () -> {
-          new Main().setVisible(true);
+          var gui = new Main();
+          gui.setIconImage(
+              Toolkit.getDefaultToolkit()
+                  .getImage(Main.class.getResource("/io/broessl/treesql/gui/icon.png")));
+          gui.setVisible(true);
         });
   }
 }

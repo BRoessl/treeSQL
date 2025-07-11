@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.broessl.testutils.TestWithJsonData;
 import io.broessl.treesql.core.NavigableTreeNode;
+import io.broessl.treesql.core.ScanContext;
 import io.broessl.treesql.core.ScannableTreeNode;
-import io.broessl.treesql.core.TransientScanContext;
 import io.broessl.treesql.json.NavigableJsonNode;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -148,7 +148,7 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
   @Test
   void testContextAwareWithMissingContext() {
     // Test what happens when context binding is missing
-    TransientScanContext emptyContext = new TransientScanContext();
+    ScanContext emptyContext = new ScanContext();
     ScannableTreeNode nodeWithEmptyContext =
         new ScannableTreeNode(NavigableJsonNode.linkRoot(testDataSimpleDataTree()), emptyContext);
 
@@ -174,7 +174,7 @@ class TreeRangedJSONPointerTest extends TestWithJsonData {
   @Test
   void testGetPrimitiveValueWithNonContextAwarePathInContextNode() {
     // Test that even when using a node with context, regular paths work
-    TransientScanContext context = new TransientScanContext();
+    ScanContext context = new ScanContext();
     ScannableTreeNode nodeWithContext =
         new ScannableTreeNode(NavigableJsonNode.linkRoot(testDataSimpleDataTree()), context);
 

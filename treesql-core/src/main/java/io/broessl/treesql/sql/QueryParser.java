@@ -67,35 +67,34 @@ public class QueryParser extends TreeSQLBaseListener {
 
   public Stream<List<TreeValue>> execute(NavigableTreeNode root) {
     if (rangedJsonPointers.isEmpty()) {
-      if (conditionOkay(null)) {
+      if (conditionOkay(ScannableTreeNode.forRoot(root))) {
         return Stream.of(
-            columnExpressions.stream().sequential().map(stack -> stack.evaluate(null)).toList());
+            columnExpressions.stream()
+                .sequential()
+                .map(stack -> stack.evaluate(ScannableTreeNode.forRoot(root)))
+                .toList());
       } else {
         return Stream.empty();
       }
     } else {
-      Stream<ScannableTreeNode> allFromStream;
-      Stream<ScannableTreeNode> oneFromStream =
+      Stream<ScannableTreeNode> joinedStreams =
           ScannableTreeNode.forRoot(root).scan(this.rangedJsonPointers.get(0).toString());
-      allFromStream = oneFromStream;
-      if (rangedJsonPointers.size() == 2) {
-        allFromStream =
-            oneFromStream.flatMap(
+      for (int i = 1; i < this.rangedJsonPointers.size(); i++) {
+        final int forRJP = i;
+        Stream<ScannableTreeNode> currentStream = joinedStreams;
+        joinedStreams =
+            currentStream.flatMap(
                 new Function<ScannableTreeNode, Stream<ScannableTreeNode>>() {
                   @Override
                   public Stream<ScannableTreeNode> apply(ScannableTreeNode t) {
                     var nextScan = ScannableTreeNode.forRoot(root);
                     nextScan.setContext(t.getContext());
-                    return nextScan.scan(rangedJsonPointers.get(1).contextAware(t).toString());
+                    return nextScan.scan(rangedJsonPointers.get(forRJP).contextAware(t).toString());
                   }
                 });
       }
-      if (rangedJsonPointers.size() > 2) {
-        throw new IllegalArgumentException(
-            "Only two RANGED_JSON_POINTERs are supported in a query.");
-      }
 
-      Stream<ScannableTreeNode> filteredStream = allFromStream.filter(this::conditionOkay);
+      Stream<ScannableTreeNode> filteredStream = joinedStreams.filter(this::conditionOkay);
       Stream<ScannableTreeNode> orderedStream = filteredStream;
       if (ordering.isPresent()) {
         orderedStream =
@@ -169,10 +168,25 @@ public class QueryParser extends TreeSQLBaseListener {
   public void exitSelectStmt(SelectStmtContext ctx) {
     List<String> rangedLiteralsProvided =
         rangedJsonPointers.stream()
-            .map(rjp -> rjp.getUsedRangedLiterals())
+            .map(rjp -> rjp.getProvidedRangedLiterals())
             .flatMap(l -> l.stream())
             .distinct()
             .toList();
+    rangedJsonPointers.forEach(
+        rjp -> {
+          rjp.getUsedRangedLiterals()
+              .forEach(
+                  literalUsed -> {
+                    if (!rangedLiteralsProvided.contains(literalUsed)) {
+                      throw new IllegalArgumentException(
+                          "literal '"
+                              + literalUsed
+                              + "' is used in FROM clause for a context-aware (relative) rJP, but only "
+                              + rangedLiteralsProvided.toString()
+                              + " are provided in FROM statement.");
+                    }
+                  });
+        });
     this.columnExpressions.forEach(
         se -> {
           se.getUsedRangedLiterals()

@@ -16,7 +16,7 @@ public class NavigableYamlProvider implements NavigableTreeProvider {
 
   @Override
   public String getDirective() {
-    return "~YAML";
+    return "YAML";
   }
 
   @Override
@@ -34,11 +34,11 @@ public class NavigableYamlProvider implements NavigableTreeProvider {
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      String rootName, TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       try {
         return Optional.of(
-            new NavigableJsonNode(YAML_MAPPER.readTree(tString.getValue()), parentNode, "!!YAML"));
+            new NavigableJsonNode(YAML_MAPPER.readTree(tString.getValue()), parentNode, rootName));
       } catch (Exception e) {
         // log and ignore
       }

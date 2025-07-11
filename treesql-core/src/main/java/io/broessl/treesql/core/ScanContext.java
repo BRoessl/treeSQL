@@ -1,28 +1,48 @@
 package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
+import io.broessl.treesql.core.types.TreeValue;
+import java.util.HashMap;
 import java.util.Map;
 
-public interface ScanContext {
+public class ScanContext {
 
-  String getEvaluationPath();
+  final Map<String, Object> bindings = new HashMap<>();
 
-  public Object getBinding(String bindingName);
+  public ScanContext() {
+    // Initialize with empty bindings
+  }
 
-  public Map<String, Object> getPathBindings();
+  public ScanContext(Map<String, Object> initialBindings) {
+    bindings.putAll(initialBindings);
+  }
 
-  ScanContext asImmutable();
+  public ScanContext(ScanContext initialContext) {
+    bindings.putAll(initialContext.bindings);
+  }
 
-  ScanContext asMutable();
+  public String getAbsolutePath(String bindingName) {
+    String key = bindingName.startsWith("~") ? bindingName : "~" + bindingName;
+    return (String) bindings.get(key);
+  }
 
-  ScanContext chain(TreeNodeIdentifier forNodeName);
+  public TreeValue getValueAt(String bindingName) {
+    String key = bindingName.startsWith("@") ? bindingName : "@" + bindingName;
+    return (TreeValue) bindings.get(key);
+  }
 
-  ScanContext chainWithPathBinding(
-      TreeNodeIdentifier forNodeName, String bindingName, NavigableTreeNode valueAt);
+  public TreeNodeIdentifier getNodeName(String bindingName) {
+    return (TreeNodeIdentifier) bindings.get(bindingName);
+  }
 
-  default String getAbsolutePath() {
-    TreeScanExpression scanExpression = TreeScanExpression.parse(getEvaluationPath());
-    scanExpression.toLiteralsOnly();
-    return scanExpression.toString();
+  public Object getObject(String bindingName) {
+    return bindings.get(bindingName);
+  }
+
+  public ScanContext update(String bindingName, NavigableTreeNode bindedToNode) {
+    bindings.put(bindingName, bindedToNode.getName());
+    bindings.put("~" + bindingName, bindedToNode.absolutePath());
+    bindings.put("@" + bindingName, bindedToNode.getValue());
+    return this;
   }
 }

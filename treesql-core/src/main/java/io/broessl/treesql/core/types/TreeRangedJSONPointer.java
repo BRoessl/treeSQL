@@ -65,10 +65,17 @@ public final class TreeRangedJSONPointer extends TreeContextValue {
     return this.selection.startsWith("~");
   }
 
-  public static final Pattern rangeLiteralPattern = Pattern.compile("~([a-z][a-z0-9_]*)");
+  public static final Pattern rangeLiteralPattern = Pattern.compile("/~([a-z][a-z0-9_]*)");
 
   @Override
   public List<String> getUsedRangedLiterals() {
+    if (this.isContextAware()) {
+      return List.of(selection.substring(1, selection.indexOf("/")));
+    }
+    return List.of();
+  }
+
+  public List<String> getProvidedRangedLiterals() {
     return rangeLiteralPattern
         .matcher(this.selection)
         .results()
