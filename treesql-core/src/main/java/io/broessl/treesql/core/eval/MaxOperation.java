@@ -1,6 +1,6 @@
 package io.broessl.treesql.core.eval;
 
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeValue;
 
 public class MaxOperation extends StackOperation {
 
@@ -15,12 +15,12 @@ public class MaxOperation extends StackOperation {
   }
 
   @Override
-  public TreePrimitive call(TreePrimitive[] arguments) {
+  public TreeValue call(TreeValue[] arguments) {
     if (arguments == null || arguments.length != 2) {
       throw new IllegalArgumentException("MAX Operation requires exactly 2 arguments");
     }
-    TreePrimitive a = arguments[0];
-    TreePrimitive b = arguments[1];
+    TreeValue a = arguments[0];
+    TreeValue b = arguments[1];
     return a.compareTo(b) >= 0 ? a : b;
   }
 }

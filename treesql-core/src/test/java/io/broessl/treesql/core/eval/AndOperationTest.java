@@ -11,29 +11,25 @@ public class AndOperationTest {
   @Test
   void testAndTrueTrue() {
     assertTrue(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(true)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(true)})).getValue());
   }
 
   @Test
   void testAndTrueFalse() {
     assertFalse(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(false)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(true), new TreeBool(false)})).getValue());
   }
 
   @Test
   void testAndFalseTrue() {
     assertFalse(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(true)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(true)})).getValue());
   }
 
   @Test
   void testAndFalseFalse() {
     assertFalse(
-        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(false)}))
-            .nativeValue());
+        ((TreeBool) op.call(new TreeBool[] {new TreeBool(false), new TreeBool(false)})).getValue());
   }
 
   @Test

@@ -27,6 +27,7 @@ public class OperatorPrecedence {
   }
 
   static {
+    operators.add(create(TreeSQLLexer.IS, 6));
     operators.add(create(TreeSQLLexer.STAR, 5));
     operators.add(create(TreeSQLLexer.DIV, 5));
     operators.add(create(TreeSQLLexer.MOD, 5));

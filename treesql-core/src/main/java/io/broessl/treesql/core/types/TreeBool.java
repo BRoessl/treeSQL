@@ -1,11 +1,11 @@
 package io.broessl.treesql.core.types;
 
-public final class TreeBool extends TreePrimitive {
+public final class TreeBool extends TreeValue {
 
   private boolean value;
 
   @Override
-  public Boolean nativeValue() {
+  public Boolean getValue() {
     return value;
   }
 
@@ -19,7 +19,7 @@ public final class TreeBool extends TreePrimitive {
   }
 
   @Override
-  public int compareTo(TreePrimitive o) {
+  public int compareTo(TreeValue o) {
     return Boolean.compare(value, ((TreeBool) o).value);
   }
 

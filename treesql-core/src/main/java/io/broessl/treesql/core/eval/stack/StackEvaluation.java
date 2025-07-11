@@ -2,8 +2,8 @@ package io.broessl.treesql.core.eval.stack;
 
 import io.broessl.treesql.core.ScannableTreeNode;
 import io.broessl.treesql.core.eval.StackOperation;
-import io.broessl.treesql.core.types.TreeContextualPrimitive;
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeContextValue;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,24 +20,32 @@ public class StackEvaluation {
 
   private final List<Stackable> stackables;
 
-  public TreePrimitive evaluate(ScannableTreeNode ctx) {
-    List<TreePrimitive> evalStack = new ArrayList<>();
+  public List<String> getUsedRangedLiterals() {
+    return stackables.stream()
+        .filter(e -> e instanceof TreeContextValue)
+        .flatMap(e -> ((TreeContextValue) e).getUsedRangedLiterals().stream())
+        .distinct()
+        .toList();
+  }
+
+  public TreeValue evaluate(ScannableTreeNode ctx) {
+    List<TreeValue> evalStack = new ArrayList<>();
     for (Stackable stackable : stackables) {
-      if (stackable instanceof TreePrimitive primitive) {
+      if (stackable instanceof TreeValue primitive) {
         evalStack.add(primitive);
-      } else if (stackable instanceof TreeContextualPrimitive evaluable) {
-        TreePrimitive result = evaluable.getPrimitiveValue(ctx);
+      } else if (stackable instanceof TreeContextValue evaluable) {
+        TreeValue result = evaluable.getPrimitiveValue(ctx);
         Objects.requireNonNull(result, "Evaluable primitive must not return null: " + evaluable);
         evalStack.add(result);
       } else if (stackable instanceof StackOperation operation) {
         if (evalStack.size() < operation.getArgumentSize()) {
           throw new IllegalArgumentException("Not enough arguments for operation: " + operation);
         }
-        TreePrimitive[] args = new TreePrimitive[operation.getArgumentSize()];
+        TreeValue[] args = new TreeValue[operation.getArgumentSize()];
         for (int i = args.length; i > 0; i--) {
           args[i - 1] = evalStack.removeLast();
         }
-        TreePrimitive operationResult = operation.call(args);
+        TreeValue operationResult = operation.call(args);
         evalStack.add(operationResult);
 
       } else {

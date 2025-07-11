@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import io.broessl.treesql.core.NavigableTreeNode;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.json.NavigableJsonNode;
 import io.broessl.treesql.spi.NavigableTreeProvider;
 import java.io.IOException;
@@ -18,24 +18,31 @@ import org.apache.commons.csv.CSVFormat;
 public class NavigableCsvProvider implements NavigableTreeProvider {
   @Override
   public String getDirective() {
-    return "~AS_CSV";
+    return "CSV";
   }
 
   @Override
-  public Optional<NavigableTreeNode> buildTreeRoot(TreePrimitive fromContent) {
-    throw new UnsupportedOperationException(
-        "NavigableCsvProvider does only support building attached tree nodes.");
+  public Optional<NavigableTreeNode> buildTreeRoot(TreeValue fromContent) {
+    if (fromContent instanceof TreeString tString) {
+      try {
+        ArrayNode array = defaultParse(tString);
+        return Optional.of(new NavigableJsonNode(array, null, null));
+      } catch (Exception e) {
+        return Optional.empty();
+      }
+    }
+    return Optional.empty();
   }
 
   @Override
   public Optional<NavigableTreeNode> attachTreeNode(
-      TreePrimitive fromContent, NavigableTreeNode parentNode, List<String> argument) {
+      String rootName, TreeValue fromContent, NavigableTreeNode parentNode, List<String> argument) {
     if (fromContent instanceof TreeString tString) {
       if (argument.isEmpty()) {
         try {
           ArrayNode array = defaultParse(tString);
-          return Optional.of(new NavigableJsonNode(array, parentNode, "!!CSV"));
-        } catch (IOException e) {
+          return Optional.of(new NavigableJsonNode(array, parentNode, rootName));
+        } catch (Exception e) {
           return Optional.empty();
         }
       } else {
@@ -57,7 +64,7 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
                   delimiter, quote, hasNamedColumns); // NavigableJsonNode.OM.readValue(argAsJson,
           // CsvSettings.class);
           ArrayNode array = settingsParse(tString, settings);
-          return Optional.of(new NavigableJsonNode(array, parentNode, "!!CSV"));
+          return Optional.of(new NavigableJsonNode(array, parentNode, rootName));
 
         } catch (JsonProcessingException e) {
           // log
@@ -75,7 +82,7 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
     var builder = CSVFormat.DEFAULT.builder();
     builder = settings.delimiter() != null ? builder.setDelimiter(settings.delimiter()) : builder;
     builder = settings.quote() != null ? builder.setQuote(settings.quote().charAt(0)) : builder;
-    try (var parsedCsv = builder.setHeader().get().parse(new StringReader(tString.nativeValue()))) {
+    try (var parsedCsv = builder.setHeader().get().parse(new StringReader(tString.getValue()))) {
       var array = NavigableJsonNode.OM.createArrayNode();
       List<String> names = parsedCsv.getHeaderNames();
       for (String expectedHeader : settings.hasNamedColumns()) {
@@ -105,11 +112,17 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
     try (var parsedCsv =
         CSVFormat.DEFAULT
             .builder()
+            .setAllowMissingColumnNames(false)
             .setHeader()
             .get()
-            .parse(new StringReader(tString.nativeValue()))) {
+            .parse(new StringReader(tString.getValue()))) {
       var array = NavigableJsonNode.OM.createArrayNode();
       List<String> names = parsedCsv.getHeaderNames();
+      if (names.isEmpty() || names.size() < 2) {
+        // simple workaround to avoid non-csv files misinterpreted as csv
+        throw new IllegalArgumentException(
+            "CSV must have at least one header with at least two columns.");
+      }
       parsedCsv.forEach(
           record -> {
             var jsonObject = NavigableJsonNode.OM.createObjectNode();
@@ -117,7 +130,8 @@ public class NavigableCsvProvider implements NavigableTreeProvider {
               String name = names.get(i);
               String value = record.get(name);
               if (value == null) {
-                jsonObject.set(name, NullNode.instance);
+                throw new IllegalArgumentException(
+                    "CSV value for header '" + name + "' is null. Might be invalid CSV content.");
               } else {
                 jsonObject.put(name, value);
               }

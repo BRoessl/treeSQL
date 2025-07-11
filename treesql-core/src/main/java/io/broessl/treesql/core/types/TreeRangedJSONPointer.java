@@ -2,8 +2,9 @@ package io.broessl.treesql.core.types;
 
 import io.broessl.treesql.core.ScannableTreeNode;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
+public final class TreeRangedJSONPointer extends TreeContextValue {
 
   private final String selection;
 
@@ -17,27 +18,27 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
   }
 
   @Override
-  public TreeList getPrimitiveValue(ScannableTreeNode stn) {
+  public TreeValue getPrimitiveValue(ScannableTreeNode stn) {
     if (this.isContextAware()) {
       return this.contextAware(stn).getPrimitiveValue(stn);
     }
+    // simple regex check if it is not a common "non-ranged" JSONPointer
+    boolean hasRange = this.selection.matches("~[^01]");
     stn.getNavigableTreeNode().getRoot();
-    List<TreePrimitive> resultOfPointer =
+    List<TreeValue> resultOfPointer =
         ScannableTreeNode.forRoot(stn.getNavigableTreeNode().getRoot())
             .scan(this.selection)
             .map(s -> s.getNavigableTreeNode().getValue())
             .toList();
-    return new TreeList(resultOfPointer);
-    /*if (resultOfPointer.isEmpty()) {
-      return TreeNull.INSTANCE;
+    if (hasRange) {
+      return new TreeList(resultOfPointer);
+    } else if (resultOfPointer.size() > 1) {
+      throw new IllegalStateException(
+          "non-ranged JSONPointer " + this.selection + " has yielded more than one result.");
+    } else if (resultOfPointer.size() == 1) {
+      return resultOfPointer.get(0);
     }
-    if (resultOfPointer.size() == 1) {
-      return new TreeString(resultOfPointer.get(0).toString());
-    }
-    if (resultOfPointer.size() > 1) {
-      return new TreeList(resultOfPointer.stream().map(n -> new TreeString(n.toString())).toList());
-    }
-    throw new IllegalStateException();*/
+    return TreeNull.INSTANCE;
   }
 
   public TreeRangedJSONPointer contextAware(ScannableTreeNode stn) {
@@ -46,12 +47,12 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
       String context;
       if (this.selection.contains("/")) {
         context = selection.substring(0, selection.indexOf("/"));
-        String pathToContext = expectAsString(stn, context).nativeValue();
+        String pathToContext = expectAsString(stn, context).getValue();
         pointer = pathToContext + selection.substring(selection.indexOf("/"));
         return new TreeRangedJSONPointer(pointer);
       } else {
         context = selection;
-        String pathToContext = expectAsString(stn, context).nativeValue();
+        String pathToContext = expectAsString(stn, context).getValue();
         pointer = pathToContext;
         return new TreeRangedJSONPointer(pointer);
       }
@@ -62,5 +63,24 @@ public final class TreeRangedJSONPointer extends TreeContextualPrimitive {
 
   private boolean isContextAware() {
     return this.selection.startsWith("~");
+  }
+
+  public static final Pattern rangeLiteralPattern = Pattern.compile("/~([a-z][a-z0-9_]*)");
+
+  @Override
+  public List<String> getUsedRangedLiterals() {
+    if (this.isContextAware()) {
+      return List.of(selection.substring(1, selection.indexOf("/")));
+    }
+    return List.of();
+  }
+
+  public List<String> getProvidedRangedLiterals() {
+    return rangeLiteralPattern
+        .matcher(this.selection)
+        .results()
+        .map(match -> match.group(1))
+        .distinct()
+        .toList();
   }
 }

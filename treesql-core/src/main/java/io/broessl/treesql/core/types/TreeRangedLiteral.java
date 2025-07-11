@@ -1,8 +1,9 @@
 package io.broessl.treesql.core.types;
 
 import io.broessl.treesql.core.ScannableTreeNode;
+import java.util.List;
 
-public final class TreeRangedLiteral extends TreeContextualPrimitive {
+public final class TreeRangedLiteral extends TreeContextValue {
 
   String literal;
 
@@ -16,7 +17,12 @@ public final class TreeRangedLiteral extends TreeContextualPrimitive {
   }
 
   @Override
-  public TreePrimitive getPrimitiveValue(ScannableTreeNode stn) {
+  public TreeValue getPrimitiveValue(ScannableTreeNode stn) {
     return expectAsStringOrInteger(stn, literal);
+  }
+
+  @Override
+  public List<String> getUsedRangedLiterals() {
+    return List.of(literal);
   }
 }

@@ -15,3 +15,4 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+treesql-core/src/main/antlr4/io/broessl/treesql/grammar/.antlr/

@@ -3,7 +3,7 @@ package io.broessl.treesql.sql;
 import io.broessl.treesql.core.eval.OperationRegistry;
 import io.broessl.treesql.core.eval.StackOperation;
 import io.broessl.treesql.core.eval.stack.Stackable;
-import io.broessl.treesql.core.types.TreeValue;
+import io.broessl.treesql.core.types.TreeStackableValue;
 import io.broessl.treesql.grammar.TreeSQLLexer;
 import io.broessl.treesql.grammar.TreeSQLParser;
 import io.broessl.treesql.grammar.TreeSQLParser.ExprContext;
@@ -71,30 +71,30 @@ public final class ExpressionParser implements ParseTreeListener {
   }
 
   private void literalNodeToOutput(TerminalNode literal) {
-    TreeValue treeLiteral = parseLiteral(literal);
+    TreeStackableValue treeLiteral = parseLiteral(literal);
     output.add(treeLiteral);
   }
 
-  private TreeValue parseLiteral(TerminalNode literal) {
+  private TreeStackableValue parseLiteral(TerminalNode literal) {
     switch (literal.getSymbol().getType()) {
       case TreeSQLLexer.NUMERIC_LITERAL:
-        return TreeValue.parseNumber(literal.getText());
+        return TreeStackableValue.parseNumber(literal.getText());
       case TreeSQLLexer.STRING_LITERAL:
-        return TreeValue.parseString(literal.getText());
+        return TreeStackableValue.parseString(literal.getText());
       case TreeSQLLexer.NULL:
-        return TreeValue.parseNull(literal.getText());
+        return TreeStackableValue.parseNull(literal.getText());
       case TreeSQLLexer.TRUE:
-        return TreeValue.parseBoolean(literal.getText());
+        return TreeStackableValue.parseBoolean(literal.getText());
       case TreeSQLLexer.FALSE:
-        return TreeValue.parseBoolean(literal.getText());
+        return TreeStackableValue.parseBoolean(literal.getText());
       case TreeSQLLexer.RANGED_LITERAL:
-        return TreeValue.parseRangedLiteral(literal.getText());
+        return TreeStackableValue.parseRangedLiteral(literal.getText());
       case TreeSQLLexer.JSON_TEXT_VALUE:
-        return TreeValue.parseRangedJSONPointer(literal.getText());
+        return TreeStackableValue.parseRangedJSONPointer(literal.getText());
       case TreeSQLLexer.VALUE_AT_LITERAL:
-        return TreeValue.parseValueAt(literal.getText());
+        return TreeStackableValue.parseValueAt(literal.getText());
       case TreeSQLLexer.PATH_VARIABLE:
-        return TreeValue.parsePathVariable(literal.getText());
+        return TreeStackableValue.parsePathVariable(literal.getText());
       default:
         break;
     }

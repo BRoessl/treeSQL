@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.broessl.treesql.core.types.TreeBool;
 import io.broessl.treesql.core.types.TreeNumber;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import org.junit.jupiter.api.Test;
 
 public class EqualsOperationTest {
@@ -13,52 +13,52 @@ public class EqualsOperationTest {
 
   @Test
   void testEqualNumbers() {
-    TreePrimitive a = new TreeNumber(5);
-    TreePrimitive b = new TreeNumber(5);
-    TreePrimitive result = equalsOp.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeNumber(5);
+    TreeValue b = new TreeNumber(5);
+    TreeValue result = equalsOp.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertTrue(((TreeBool) result).nativeValue());
+    assertTrue(((TreeBool) result).getValue());
   }
 
   @Test
   void testNotEqualNumbers() {
-    TreePrimitive a = new TreeNumber(5);
-    TreePrimitive b = new TreeNumber(7);
-    TreePrimitive result = equalsOp.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeNumber(5);
+    TreeValue b = new TreeNumber(7);
+    TreeValue result = equalsOp.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertFalse(((TreeBool) result).nativeValue());
+    assertFalse(((TreeBool) result).getValue());
   }
 
   @Test
   void testEqualStrings() {
-    TreePrimitive a = new TreeString("foo");
-    TreePrimitive b = new TreeString("foo");
-    TreePrimitive result = equalsOp.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeString("foo");
+    TreeValue b = new TreeString("foo");
+    TreeValue result = equalsOp.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertTrue(((TreeBool) result).nativeValue());
+    assertTrue(((TreeBool) result).getValue());
   }
 
   @Test
   void testNotEqualStrings() {
-    TreePrimitive a = new TreeString("foo");
-    TreePrimitive b = new TreeString("bar");
-    TreePrimitive result = equalsOp.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeString("foo");
+    TreeValue b = new TreeString("bar");
+    TreeValue result = equalsOp.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertFalse(((TreeBool) result).nativeValue());
+    assertFalse(((TreeBool) result).getValue());
   }
 
   @Test
   void testDifferentTypes() {
-    TreePrimitive a = new TreeNumber(1);
-    TreePrimitive b = new TreeString("1");
-    TreePrimitive result = equalsOp.call(new TreePrimitive[] {a, b});
+    TreeValue a = new TreeNumber(1);
+    TreeValue b = new TreeString("1");
+    TreeValue result = equalsOp.call(new TreeValue[] {a, b});
     assertTrue(result instanceof TreeBool);
-    assertFalse(((TreeBool) result).nativeValue());
+    assertFalse(((TreeBool) result).getValue());
   }
 
   @Test
   void testInvalidArguments() {
-    assertThrows(IllegalArgumentException.class, () -> equalsOp.call(new TreePrimitive[] {}));
+    assertThrows(IllegalArgumentException.class, () -> equalsOp.call(new TreeValue[] {}));
     assertThrows(IllegalArgumentException.class, () -> equalsOp.call(null));
   }
 }

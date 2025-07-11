@@ -13,27 +13,26 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 
   private ScanContext bindings;
   private TreeScanExpression scanExpression;
-  private final NavigableTreeNode node;
+  private final NavigableTreeNode navigableNode;
 
   public ScannableTreeNode(NavigableTreeNode node, ScanContext bindings) {
-    this.bindings = bindings;
-    this.node = node;
+    this.bindings = new ScanContext(bindings);
+    this.navigableNode = node;
   }
 
   public ScannableTreeNode(
       NavigableTreeNode node, ScanContext bindings, TreeScanExpression scanExpression) {
-    this.bindings = bindings;
-    this.node = node;
+    this.bindings = new ScanContext(bindings);
+    this.navigableNode = node;
     this.scanExpression = scanExpression;
   }
 
   public static ScannableTreeNode forRoot(NavigableTreeNode rootNode) {
-    return new ScannableTreeNode(rootNode, new TransientScanContext());
+    return new ScannableTreeNode(rootNode, new ScanContext());
   }
 
   public Stream<ScannableTreeNode> scan(String expression) {
     this.scanExpression = TreeScanExpression.parse(expression);
-    this.bindings = this.bindings.asMutable();
     return StreamSupport.stream(this.spliterator(), false);
   }
 
@@ -46,7 +45,7 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 
   public ScannableTreeNode get(
       String nameOrIndex, TreeScanExpression scanExpression, ScanContext bindings) {
-    NavigableTreeNode forth = node.getChildNode(nameOrIndex).orElse(null);
+    NavigableTreeNode forth = navigableNode.getChild(nameOrIndex).orElse(null);
     if (forth == null) {
       return null;
     }
@@ -63,11 +62,11 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
 
   @Override
   public String toString() {
-    return node.toString();
+    return navigableNode.toString();
   }
 
   public NavigableTreeNode getNavigableTreeNode() {
-    return node;
+    return navigableNode;
   }
 
   public ScanContext getContext() {
@@ -79,14 +78,14 @@ public class ScannableTreeNode implements Iterable<ScannableTreeNode> {
   }
 
   public void setContext(ScanContext bindings) {
-    this.bindings = bindings.asMutable();
+    this.bindings = new ScanContext(bindings);
   }
 
   public String absolutePath() {
-    return node.absolutePath();
+    return navigableNode.absolutePath();
   }
 
-  public TreeNodeIdentifier getNameOrIndex() {
-    return node.getSelfName();
+  public TreeNodeIdentifier getName() {
+    return navigableNode.getName();
   }
 }

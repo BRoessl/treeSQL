@@ -8,7 +8,7 @@ public final class TreeNumber extends TreeNodeIdentifier {
   private BigDecimal value;
 
   @Override
-  public BigDecimal nativeValue() {
+  public BigDecimal getValue() {
     return value;
   }
 
@@ -40,7 +40,7 @@ public final class TreeNumber extends TreeNodeIdentifier {
   }
 
   @Override
-  public int compareTo(TreePrimitive o) {
+  public int compareTo(TreeValue o) {
     return value.compareTo(((TreeNumber) o).value);
   }
 

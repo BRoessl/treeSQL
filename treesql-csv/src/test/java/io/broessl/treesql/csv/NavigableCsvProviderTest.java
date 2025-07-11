@@ -20,10 +20,13 @@ public class NavigableCsvProviderTest {
     var result =
         new NavigableCsvProvider()
             .attachTreeNode(
-                new TreeString(csvExample), NavigableJsonNode.fromContent("null"), List.of());
+                "root",
+                new TreeString(csvExample),
+                NavigableJsonNode.fromContent("null"),
+                List.of());
     Assertions.assertEquals(
-        "1", result.get().getChildNode("0").get().getChildNode("foo").get().getValue().toString());
+        "1", result.get().getChild("0").get().getChild("foo").get().getValue().toString());
     Assertions.assertEquals(
-        "4", result.get().getChildNode("1").get().getChildNode("bar").get().getValue().toString());
+        "4", result.get().getChild("1").get().getChild("bar").get().getValue().toString());
   }
 }

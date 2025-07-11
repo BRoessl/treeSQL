@@ -4,8 +4,8 @@ import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeNull;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -36,7 +36,7 @@ public class NavigableDirectory implements NavigableTreeNode {
   }
 
   @Override
-  public TreeNodeIdentifier getSelfName() {
+  public TreeNodeIdentifier getName() {
     if (parent == null) {
       return null;
     }
@@ -44,15 +44,21 @@ public class NavigableDirectory implements NavigableTreeNode {
   }
 
   @Override
-  public Optional<NavigableTreeNode> getParentNode() {
+  public Optional<NavigableTreeNode> getParent() {
     return Optional.ofNullable(this.parent);
   }
 
   @Override
-  public Optional<NavigableTreeNode> getChildNode(String nameOrIndex) {
-    Path nextPath = this.path.resolve(nameOrIndex);
-    if (Files.exists(nextPath, LinkOption.NOFOLLOW_LINKS)) {
-      return Optional.of(new NavigableDirectory(nextPath, this));
+  public Optional<NavigableTreeNode> getChild(String nameOrIndex) {
+    try {
+
+      Path nextPath = this.path.resolve(nameOrIndex);
+      if (Files.exists(nextPath, LinkOption.NOFOLLOW_LINKS)) {
+        return Optional.of(new NavigableDirectory(nextPath, this));
+      }
+    } catch (Exception e) {
+      // ignore
+      // might get an exception for directives containing '?'
     }
     return Optional.empty();
   }
@@ -94,9 +100,9 @@ public class NavigableDirectory implements NavigableTreeNode {
   }
 
   @Override
-  public TreePrimitive getValue() {
+  public TreeValue getValue() {
     if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-      List<TreePrimitive> list = new ArrayList<TreePrimitive>();
+      List<TreeValue> list = new ArrayList<TreeValue>();
       try {
         Files.list(path)
             .forEach(

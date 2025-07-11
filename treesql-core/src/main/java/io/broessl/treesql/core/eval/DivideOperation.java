@@ -1,7 +1,7 @@
 package io.broessl.treesql.core.eval;
 
 import io.broessl.treesql.core.types.TreeNumber;
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeValue;
 import java.math.BigDecimal;
 
 public class DivideOperation extends StackOperation {
@@ -16,17 +16,17 @@ public class DivideOperation extends StackOperation {
   }
 
   @Override
-  public TreePrimitive call(TreePrimitive[] arguments) {
+  public TreeValue call(TreeValue[] arguments) {
     if (arguments == null || arguments.length != 2) {
       throw new IllegalArgumentException("DivideOperation requires exactly 2 arguments");
     }
-    TreePrimitive a = arguments[0];
-    TreePrimitive b = arguments[1];
+    TreeValue a = arguments[0];
+    TreeValue b = arguments[1];
     if (a instanceof TreeNumber numA && b instanceof TreeNumber numB) {
-      if (numB.nativeValue().compareTo(BigDecimal.ZERO) == 0) {
+      if (numB.getValue().compareTo(BigDecimal.ZERO) == 0) {
         throw new ArithmeticException("Division by zero");
       }
-      BigDecimal result = numA.nativeValue().divide(numB.nativeValue());
+      BigDecimal result = numA.getValue().divide(numB.getValue());
       return new TreeNumber(result);
     } else {
       throw new IllegalArgumentException("DivideOperation only supports numbers");

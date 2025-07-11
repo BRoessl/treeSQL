@@ -1,7 +1,6 @@
 package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
-import io.broessl.treesql.core.types.TreeString;
 import io.broessl.treesql.spi.NavigableTree;
 import java.util.Iterator;
 import java.util.List;
@@ -41,16 +40,12 @@ class TreeScanOperations {
               expression.subExpression(),
               scannableNode
                   .getContext()
-                  .chainWithPathBinding(
-                      new TreeString(step.getRaw()),
+                  .update(
                       step.getRangeLiteral().get(),
-                      scannableNode.getNavigableTreeNode().getChildNode(step.getRaw()).get()));
+                      scannableNode.getNavigableTreeNode().getChild(step.getRaw()).get()));
     } else {
       nextNodeByStep =
-          scannableNode.get(
-              step.getRaw(),
-              expression.subExpression(),
-              scannableNode.getContext().chain(new TreeString(step.getRaw())));
+          scannableNode.get(step.getRaw(), expression.subExpression(), scannableNode.getContext());
     }
 
     return nextNodeByStep != null ? nextNodeByStep.iterator() : EMPTY_SCAN;
@@ -79,14 +74,18 @@ class TreeScanOperations {
   public Iterator<ScannableTreeNode> executeDirective(
       TreeScanExpression expression, TreeScanStep.DirectiveStep step) {
     return executeDirective(
-        expression.subExpression(), scannableNode.getContext(), step.getRaw(), step.getArguments());
+        step.getRangeLiteral().get(),
+        expression.subExpression(),
+        scannableNode.getContext(),
+        step.getRaw(),
+        step.getArguments());
   }
 
   public List<Iterator<ScannableTreeNode>> childrenScan(
       TreeScanExpression subExpression, ScanContext subBindings, Optional<String> rangeLiteral) {
-    final String alreadyBound;
+    final TreeNodeIdentifier alreadyBound;
     if (rangeLiteral.isPresent()) {
-      alreadyBound = (String) subBindings.getBinding(rangeLiteral.get());
+      alreadyBound = subBindings.getNodeName(rangeLiteral.get());
     } else {
       alreadyBound = null;
     }
@@ -97,16 +96,12 @@ class TreeScanOperations {
         .filter(refNode -> alreadyBound == null)
         .map(
             refNode -> {
-              TreeNodeIdentifier nameOrIndex = refNode.getSelfName();
               if (rangeLiteral.isPresent()) {
                 return new ScannableTreeNode(
-                        refNode,
-                        subBindings.chainWithPathBinding(nameOrIndex, rangeLiteral.get(), refNode),
-                        subExpression)
+                        refNode, subBindings.update(rangeLiteral.get(), refNode), subExpression)
                     .iterator();
               }
-              return new ScannableTreeNode(refNode, subBindings.chain(nameOrIndex), subExpression)
-                  .iterator();
+              return new ScannableTreeNode(refNode, subBindings, subExpression).iterator();
             })
         .toList();
   }
@@ -116,32 +111,29 @@ class TreeScanOperations {
       ScanContext currentBindings,
       Optional<String> rangeLiteral) {
     try {
-      NavigableTreeNode parent = scannableNode.getNavigableTreeNode().getParentNode().orElse(null);
+      NavigableTreeNode parent = scannableNode.getNavigableTreeNode().getParent().orElse(null);
       if (parent == null) {
         return EMPTY_SCAN;
       }
 
-      TreeNodeIdentifier nodeName = parent.getSelfName();
+      TreeNodeIdentifier nodeName = parent.getName();
       if (rangeLiteral.isPresent()) {
-        TreeNodeIdentifier alreadyBound =
-            (TreeNodeIdentifier) currentBindings.getBinding(rangeLiteral.get());
+        TreeNodeIdentifier alreadyBound = currentBindings.getNodeName(rangeLiteral.get());
         if (alreadyBound != null && !alreadyBound.equals(nodeName)) {
           return EMPTY_SCAN;
         }
         if (alreadyBound == null) {
           return new ScannableTreeNode(
-                  scannableNode.getNavigableTreeNode().getParentNode().orElseThrow(),
-                  currentBindings.chainWithPathBinding(
-                      new TreeString("~.."),
-                      rangeLiteral.get(),
-                      scannableNode.getNavigableTreeNode().getParentNode().get()),
+                  scannableNode.getNavigableTreeNode().getParent().orElseThrow(),
+                  currentBindings.update(
+                      rangeLiteral.get(), scannableNode.getNavigableTreeNode().getParent().get()),
                   subExpression)
               .iterator();
         }
       }
       return new ScannableTreeNode(
-              scannableNode.getNavigableTreeNode().getParentNode().orElseThrow(),
-              currentBindings.chain(new TreeString("~..")),
+              scannableNode.getNavigableTreeNode().getParent().orElseThrow(),
+              currentBindings,
               subExpression)
           .iterator();
     } catch (NoSuchElementException e) {
@@ -150,6 +142,7 @@ class TreeScanOperations {
   }
 
   public Iterator<ScannableTreeNode> executeDirective(
+      String rootName,
       TreeScanExpression subExpression,
       ScanContext currentBindings,
       String directive,
@@ -157,16 +150,14 @@ class TreeScanOperations {
     Optional<NavigableTreeNode> virtualChild =
         NavigableTree.providerFor(directive)
             .attachTreeNode(
+                rootName,
                 scannableNode.getNavigableTreeNode().getValue(),
                 scannableNode.getNavigableTreeNode(),
                 arguments);
     if (virtualChild.isEmpty()) {
       return EMPTY_SCAN;
     }
-    String virtualName = virtualChild.get().getSelfName().toString();
-    return new ScannableTreeNode(
-            virtualChild.get(), currentBindings.chain(new TreeString(virtualName)), subExpression)
-        .iterator();
+    return new ScannableTreeNode(virtualChild.get(), currentBindings, subExpression).iterator();
   }
 
   public Iterator<ScannableTreeNode> offsetScan(
@@ -181,17 +172,10 @@ class TreeScanOperations {
     }
 
     if (rangeLiteral.isEmpty()) {
-      return new ScannableTreeNode(
-              sibling,
-              subBindings.chain(new TreeString("[" + indexManipulation + "]~")),
-              subExpression)
-          .iterator();
+      return new ScannableTreeNode(sibling, subBindings, subExpression).iterator();
     } else {
       return new ScannableTreeNode(
-              sibling,
-              subBindings.chainWithPathBinding(
-                  new TreeString("[" + indexManipulation + "]~"), rangeLiteral.get(), sibling),
-              subExpression)
+              sibling, subBindings.update(rangeLiteral.get(), sibling), subExpression)
           .iterator();
     }
   }

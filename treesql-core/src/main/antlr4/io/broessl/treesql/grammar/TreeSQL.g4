@@ -16,6 +16,7 @@ expr
     | expr ' '? ( NOT | IN | NOT_IN | MATCH | NOT_MATCH) ' '? expr
     | expr ' '? AND ' '? expr
     | expr ' '? OR ' '? expr
+    | expr ' '? IS ' '? expr
     | functionName OPEN_PAR funcArgs CLOSE_PAR
     | functionName OPEN_PAR CLOSE_PAR
     | OPEN_PAR expr CLOSE_PAR
@@ -44,7 +45,7 @@ selectStmt
 selectCore
     : (
         SELECT ' ' resultColumn (COMMA ' '? resultColumn)* (
-            ' ' FROM ' ' (jsonTextValue (' JOIN '? jsonTextValue)?)
+            ' ' FROM ' ' (jsonTextValue (' JOIN '? jsonTextValue)*)
         )?
     )
     ;
@@ -96,6 +97,10 @@ CLOSE_PAR
 
 COMMA
     : ','
+    ;
+
+IS
+    : 'IS'
     ;
 
 STAR
@@ -215,7 +220,11 @@ FALSE
     ;
 
 FUNC_NAME
-    : [A-Z]+
+    : [A-Z_]+
+    ;
+
+TREE_VALUE_TYPE
+    : 'STRING' | 'NUMBER' | 'LIST' | 'BOOL' | NULL
     ;
 
 NUMERIC_LITERAL
@@ -224,10 +233,6 @@ NUMERIC_LITERAL
 
 STRING_LITERAL
     : '\'' (~'\'' | '\'\'')* '\''
-    ;
-
-SINGLE_LINE_COMMENT
-    : '--' ~[\r\n]* (('\r'? '\n') | EOF) -> channel(HIDDEN)
     ;
 
 JSON_TEXT_VALUE

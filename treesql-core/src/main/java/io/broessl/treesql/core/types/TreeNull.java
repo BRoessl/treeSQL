@@ -1,13 +1,13 @@
 package io.broessl.treesql.core.types;
 
-public final class TreeNull extends TreePrimitive {
+public final class TreeNull extends TreeValue {
 
   public static final TreeNull INSTANCE = new TreeNull();
 
   private TreeNull() {}
 
   @Override
-  public Object nativeValue() {
+  public Object getValue() {
     return null;
   }
 
@@ -17,7 +17,7 @@ public final class TreeNull extends TreePrimitive {
   }
 
   @Override
-  public int compareTo(TreePrimitive o) {
+  public int compareTo(TreeValue o) {
     if (equals(o)) {
       return 0;
     }

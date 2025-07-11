@@ -5,8 +5,8 @@ import io.broessl.treesql.core.types.TreeList;
 import io.broessl.treesql.core.types.TreeNodeIdentifier;
 import io.broessl.treesql.core.types.TreeNull;
 import io.broessl.treesql.core.types.TreeNumber;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeString;
+import io.broessl.treesql.core.types.TreeValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +58,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
   }
 
   @Override
-  public TreeNodeIdentifier getSelfName() {
+  public TreeNodeIdentifier getName() {
     if (textNode != null) {
       return new TreeString("text()");
     }
@@ -79,12 +79,12 @@ public class NavigableXmlNode implements NavigableTreeNode {
   }
 
   @Override
-  public Optional<NavigableTreeNode> getParentNode() {
+  public Optional<NavigableTreeNode> getParent() {
     return Optional.ofNullable(parent);
   }
 
   @Override
-  public Optional<NavigableTreeNode> getChildNode(String nameOrIndex) {
+  public Optional<NavigableTreeNode> getChild(String nameOrIndex) {
     if (element instanceof Element elem) {
       if (nameOrIndex.startsWith("@")) {
         Attribute att = elem.attribute(nameOrIndex.substring(1));
@@ -127,7 +127,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
     if (element != null && !element.isRootElement()) {
       int siblingIndex = this.index + indexOffset;
       try {
-        NavigableXmlNode parentNode = (NavigableXmlNode) getParentNode().orElseThrow();
+        NavigableXmlNode parentNode = (NavigableXmlNode) getParent().orElseThrow();
         return Optional.of(
             new NavigableXmlNode(parentNode.nodes.get(siblingIndex), parentNode, siblingIndex));
       } catch (IndexOutOfBoundsException e) {
@@ -169,8 +169,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
       }
       return childrenList.stream();
     }
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'children'");
+    throw new IllegalStateException("Code should be unreachable.");
   }
 
   @Override
@@ -195,7 +194,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
   }
 
   @Override
-  public TreePrimitive getValue() {
+  public TreeValue getValue() {
     if (attribute != null) {
       return new TreeString(attribute.getValue());
     }
@@ -203,7 +202,7 @@ public class NavigableXmlNode implements NavigableTreeNode {
       return new TreeString(textNode);
     }
     if (element instanceof Element elem) {
-      List<TreePrimitive> childrenList = new ArrayList<>();
+      List<TreeValue> childrenList = new ArrayList<>();
       elem.elements().stream()
           .map(e -> e.getName())
           .distinct()
@@ -218,9 +217,9 @@ public class NavigableXmlNode implements NavigableTreeNode {
       return new TreeList(childrenList);
     }
     if (nodes != null) {
-      List<TreePrimitive> childNames =
+      List<TreeValue> childNames =
           IntStream.range(0, nodes.size())
-              .mapToObj(i -> (TreePrimitive) new TreeNumber((Integer) i))
+              .mapToObj(i -> (TreeValue) new TreeNumber((Integer) i))
               .toList();
       return new TreeList(childNames);
     }

@@ -2,6 +2,7 @@ package io.broessl.treesql.core;
 
 import io.broessl.treesql.core.types.TreeNumber;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -14,32 +15,33 @@ public abstract sealed class TreeScanStep {
   private static final Pattern ANON_FORWARD = Pattern.compile("^~$");
   private static final Pattern NAMED_FORWARD = Pattern.compile("^~([a-z]\\w+)$");
 
-  private static final Pattern ANON_BACK = Pattern.compile("^\\.\\.~$");
-  private static final Pattern NAMED_BACK = Pattern.compile("^\\.\\.~([a-z]\\w+)$");
+  private static final Pattern ANON_BACK = Pattern.compile("^~\\.\\.$");
+  private static final Pattern NAMED_BACK = Pattern.compile("^~([a-z][a-z0-9_]*)\\.\\.$");
 
-  private static final Pattern ANON_SIBLING = Pattern.compile("^\\[(0|[+-][\\d]+)\\]~$");
+  private static final Pattern ANON_SIBLING = Pattern.compile("^~\\[(0|[+-][\\d]+)\\]$");
   private static final Pattern NAMED_SIBLING =
-      Pattern.compile("^\\[(0|[+-][\\d]+)\\]~([a-z]\\w*)$");
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\[(0|[+-][\\d]+)\\]$");
 
   private static final Pattern ANON_DEPTH_RANGED_SCAN =
-      Pattern.compile("^\\{(-?\\d+),(-?\\d+)\\}~$");
+      Pattern.compile("^~\\{(-?\\d+),(-?\\d+)\\}$");
   private static final Pattern NAMED_DEPTH_RANGED_SCAN =
-      Pattern.compile("^\\{(-?\\d+),(-?\\d+)\\}~([a-z]\\w+)$");
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\{(-?\\d+),(-?\\d+)\\}$");
 
-  private static final Pattern ANON_DEPTH_SCAN = Pattern.compile("^\\{(-?\\d+)\\}~$");
-  private static final Pattern NAMED_DEPTH_SCAN = Pattern.compile("^\\{(-?\\d+)\\}~([a-z]\\w+)$");
+  private static final Pattern ANON_DEPTH_SCAN = Pattern.compile("~^\\{(-?\\d+)\\}$");
+  private static final Pattern NAMED_DEPTH_SCAN =
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\{(-?\\d+)\\}$");
 
   private static final Pattern ANON_LEVEL_SCAN =
-      Pattern.compile("^\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]~$");
+      Pattern.compile("^~\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]$");
   private static final Pattern NAMED_LEVEL_SCAN =
-      Pattern.compile("^\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]~([a-z]\\w+)$");
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\[(0|[+-][\\d]+),(0|[+-][\\d]+)\\]$");
 
-  private static final Pattern ANON_REGEX_CHILDREN_SCAN = Pattern.compile("^(\\(.*\\))~$");
+  private static final Pattern ANON_REGEX_CHILDREN_SCAN = Pattern.compile("^~(\\(.*\\))$");
   private static final Pattern NAMED_REGEX_CHILDREN_SCAN =
-      Pattern.compile("^(\\(.*\\))~([a-z]\\w+)$");
+      Pattern.compile("^~([a-z][a-z0-9_]*)(\\(.*\\))$");
 
   private static final Pattern SPECIAL_DIRECTIVE =
-      Pattern.compile("^~([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
+      Pattern.compile("^~([a-z][a-z0-9_]*)\\?([A-Z]\\w+)(?:\\((.*)\\))?$", Pattern.DOTALL);
 
   private String raw;
 
@@ -91,19 +93,15 @@ public abstract sealed class TreeScanStep {
 
   public static TreeScanStep matchRangedPattern(
       String raw, Function<String, TreeScanStep> fallback) {
-    if (raw.endsWith("~")) {
-      // must be anonymous step
-      return anonymousStep(raw);
-    }
-    if (raw.matches(".*~[a-z].*")) {
+    if (raw.matches("~[a-z].*")) {
       // must be named step
       return namedStep(raw);
     }
-    // special directive "~MY_DIRECTIVE"
-    Matcher matcher = SPECIAL_DIRECTIVE.matcher(raw);
-    if (matcher.matches()) {
-      return new DirectiveStep("~" + matcher.group(1), matcher.group(2));
+    if ("~".equals(raw) || raw.matches("~[^01A-Z].*")) {
+      // must be anonymous step
+      return anonymousStep(raw);
     }
+
     // is not a ranged step, but might be a literal step
     if (fallback == null) {
       throw new IllegalArgumentException("Unknown pattern for '" + raw + "'.");
@@ -124,36 +122,43 @@ public abstract sealed class TreeScanStep {
     matcher = NAMED_DEPTH_RANGED_SCAN.matcher(raw);
     if (matcher.matches()) {
       ScanBoundaries boundaries =
-          new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
-      return new DepthScan(raw, boundaries, matcher.group(3));
+          new ScanBoundaries(matcher.group(2), matcher.group(3), matcher.group(0));
+      return new DepthScan(raw, boundaries, matcher.group(1));
     }
     matcher = NAMED_DEPTH_SCAN.matcher(raw);
     if (matcher.matches()) {
       ScanBoundaries boundaries =
-          new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
-      return new DepthScan(raw, boundaries, matcher.group(3));
+          new ScanBoundaries(matcher.group(2), matcher.group(2), matcher.group(0));
+      return new DepthScan(raw, boundaries, matcher.group(1));
     }
     matcher = NAMED_SIBLING.matcher(raw);
     if (matcher.matches()) {
       ScanBoundaries boundaries =
-          new ScanBoundaries(matcher.group(1), matcher.group(1), matcher.group(0));
-      String rangeLiteral = matcher.group(2);
+          new ScanBoundaries(matcher.group(2), matcher.group(2), matcher.group(0));
+      String rangeLiteral = matcher.group(1);
       return new SingleSideStep(raw, rangeLiteral, boundaries.startInclusive);
     }
 
     matcher = NAMED_REGEX_CHILDREN_SCAN.matcher(raw);
     if (matcher.matches()) {
-      String rangeLiteral = matcher.group(2);
-      return new RegexStep(raw, rangeLiteral, matcher.group(1));
+      String rangeLiteral = matcher.group(1);
+      return new RegexStep(raw, rangeLiteral, matcher.group(2));
     }
 
     matcher = NAMED_LEVEL_SCAN.matcher(raw);
     if (matcher.matches()) {
       ScanBoundaries boundaries =
-          new ScanBoundaries(matcher.group(1), matcher.group(2), matcher.group(0));
-      String rangeLiteral = matcher.group(3);
+          new ScanBoundaries(matcher.group(2), matcher.group(3), matcher.group(0));
+      String rangeLiteral = matcher.group(1);
       return new LevelScan(raw, rangeLiteral, boundaries);
     }
+
+    // special directive "~foo?MY_DIRECTIVE" must always be named
+    matcher = SPECIAL_DIRECTIVE.matcher(raw);
+    if (matcher.matches()) {
+      return new DirectiveStep(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+
     throw new IllegalArgumentException("Unknown pattern for an named ranged step: '" + raw + "'.");
   }
 
@@ -351,12 +356,12 @@ public abstract sealed class TreeScanStep {
     public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
       return contextNode
           .children()
-          .filter(c -> pattern.matcher(c.getSelfName().nativeValue().toString()).matches())
+          .filter(c -> pattern.matcher(c.getName().getValue().toString()).matches())
           .map(
               c -> {
                 TreeScanStep step =
                     new TreeScanStep.LiteralForwardStep(
-                        c.getSelfName().nativeValue().toString(), getRangeLiteral().orElse(null));
+                        c.getName().getValue().toString(), getRangeLiteral().orElse(null));
                 return List.of(step);
               })
           .toList();
@@ -384,8 +389,8 @@ public abstract sealed class TreeScanStep {
 
     public List<List<TreeScanStep>> interpolate(NavigableTreeNode contextNode) {
       Integer index;
-      if (contextNode.getSelfName() instanceof TreeNumber idx) {
-        index = idx.nativeValue().intValue();
+      if (contextNode.getName() instanceof TreeNumber idx) {
+        index = idx.getValue().intValue();
       } else {
         // this is bad introduce new ImpossibleStep
         return List.of(List.of());
@@ -393,7 +398,7 @@ public abstract sealed class TreeScanStep {
 
       Integer size =
           contextNode
-              .getParentNode()
+              .getParent()
               .orElseThrow()
               .getSize()
               .orElseThrow(() -> new IllegalStateException());
@@ -470,12 +475,12 @@ public abstract sealed class TreeScanStep {
 
     private List<String> arguments;
 
-    DirectiveStep(String directive, String argument) {
-      super(directive, null);
+    DirectiveStep(String nameForDirective, String directive, String argument) {
+      super(directive, nameForDirective);
       if (argument == null || argument.trim().isEmpty()) {
         arguments = List.of();
       } else {
-        this.arguments = argument.lines().toList();
+        this.arguments = Arrays.stream(argument.split("&")).toList();
       }
     }
 

@@ -2,7 +2,7 @@ package io.broessl.treesql.core.eval;
 
 import io.broessl.treesql.core.types.TreeBool;
 import io.broessl.treesql.core.types.TreeList;
-import io.broessl.treesql.core.types.TreePrimitive;
+import io.broessl.treesql.core.types.TreeValue;
 
 public class NotInOperation extends StackOperation {
   @Override
@@ -16,12 +16,12 @@ public class NotInOperation extends StackOperation {
   }
 
   @Override
-  public TreePrimitive call(TreePrimitive[] arguments) {
+  public TreeValue call(TreeValue[] arguments) {
     if (arguments == null || arguments.length != 2) {
       throw new IllegalArgumentException("NotInOperation requires exactly 2 arguments");
     }
-    TreePrimitive a = arguments[0];
-    TreePrimitive b = arguments[1];
+    TreeValue a = arguments[0];
+    TreeValue b = arguments[1];
     if (b instanceof TreeList list) {
       boolean result = list.stream().noneMatch(item -> item.equals(a));
       return new TreeBool(result);

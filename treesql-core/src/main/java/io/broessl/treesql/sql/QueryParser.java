@@ -4,14 +4,15 @@ import io.broessl.treesql.core.NavigableTreeNode;
 import io.broessl.treesql.core.ScannableTreeNode;
 import io.broessl.treesql.core.eval.stack.StackEvaluation;
 import io.broessl.treesql.core.types.TreeBool;
-import io.broessl.treesql.core.types.TreePrimitive;
 import io.broessl.treesql.core.types.TreeRangedJSONPointer;
+import io.broessl.treesql.core.types.TreeStackableValue;
 import io.broessl.treesql.core.types.TreeValue;
 import io.broessl.treesql.grammar.TreeSQLBaseListener;
 import io.broessl.treesql.grammar.TreeSQLLexer;
 import io.broessl.treesql.grammar.TreeSQLParser;
 import io.broessl.treesql.grammar.TreeSQLParser.LimitStmtContext;
 import io.broessl.treesql.grammar.TreeSQLParser.OrderByStmtContext;
+import io.broessl.treesql.grammar.TreeSQLParser.SelectStmtContext;
 import io.broessl.treesql.grammar.TreeSQLParser.WhereExprContext;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,50 +59,49 @@ public class QueryParser extends TreeSQLBaseListener {
   private boolean conditionOkay(ScannableTreeNode stn) {
     var evalCondition = whereCondition.evaluate(stn);
     if (evalCondition instanceof TreeBool bool) {
-      return bool.nativeValue();
+      return bool.getValue();
     }
     throw new IllegalStateException(
         "WHERE condition did not evaluate to a boolean: " + evalCondition);
   }
 
-  public Stream<List<TreePrimitive>> execute(NavigableTreeNode root) {
+  public Stream<List<TreeValue>> execute(NavigableTreeNode root) {
     if (rangedJsonPointers.isEmpty()) {
-      if (conditionOkay(null)) {
+      if (conditionOkay(ScannableTreeNode.forRoot(root))) {
         return Stream.of(
-            columnExpressions.stream().sequential().map(stack -> stack.evaluate(null)).toList());
+            columnExpressions.stream()
+                .sequential()
+                .map(stack -> stack.evaluate(ScannableTreeNode.forRoot(root)))
+                .toList());
       } else {
         return Stream.empty();
       }
     } else {
-      Stream<ScannableTreeNode> allFromStream;
-      Stream<ScannableTreeNode> oneFromStream =
+      Stream<ScannableTreeNode> joinedStreams =
           ScannableTreeNode.forRoot(root).scan(this.rangedJsonPointers.get(0).toString());
-      allFromStream = oneFromStream;
-      if (rangedJsonPointers.size() == 2) {
-        allFromStream =
-            oneFromStream.flatMap(
+      for (int i = 1; i < this.rangedJsonPointers.size(); i++) {
+        final int forRJP = i;
+        Stream<ScannableTreeNode> currentStream = joinedStreams;
+        joinedStreams =
+            currentStream.flatMap(
                 new Function<ScannableTreeNode, Stream<ScannableTreeNode>>() {
                   @Override
                   public Stream<ScannableTreeNode> apply(ScannableTreeNode t) {
                     var nextScan = ScannableTreeNode.forRoot(root);
                     nextScan.setContext(t.getContext());
-                    return nextScan.scan(rangedJsonPointers.get(1).contextAware(t).toString());
+                    return nextScan.scan(rangedJsonPointers.get(forRJP).contextAware(t).toString());
                   }
                 });
       }
-      if (rangedJsonPointers.size() > 2) {
-        throw new IllegalArgumentException(
-            "Only two RANGED_JSON_POINTERs are supported in a query.");
-      }
 
-      Stream<ScannableTreeNode> filteredStream = allFromStream.filter(this::conditionOkay);
+      Stream<ScannableTreeNode> filteredStream = joinedStreams.filter(this::conditionOkay);
       Stream<ScannableTreeNode> orderedStream = filteredStream;
       if (ordering.isPresent()) {
         orderedStream =
             filteredStream.sorted(
                 (stn1, stn2) -> {
-                  TreePrimitive value1 = ordering.get().evaluate(stn1);
-                  TreePrimitive value2 = ordering.get().evaluate(stn2);
+                  TreeValue value1 = ordering.get().evaluate(stn1);
+                  TreeValue value2 = ordering.get().evaluate(stn2);
                   int order = value1.compareTo(value2);
                   return orderDescending ? -order : order;
                 });
@@ -134,7 +134,8 @@ public class QueryParser extends TreeSQLBaseListener {
                   new StackEvaluation(ExpressionParser.parseExpressionStack(column.expr())));
             } else if (child instanceof TreeSQLParser.JsonTextValueContext rJsonPointer) {
               TreeRangedJSONPointer rJSONPtr =
-                  TreeValue.parseRangedJSONPointer(rJsonPointer.JSON_TEXT_VALUE().getText());
+                  TreeStackableValue.parseRangedJSONPointer(
+                      rJsonPointer.JSON_TEXT_VALUE().getText());
               rangedJsonPointers.add(rJSONPtr);
             }
           }
@@ -161,5 +162,72 @@ public class QueryParser extends TreeSQLBaseListener {
   @Override
   public void enterLimitStmt(LimitStmtContext ctx) {
     limit = Optional.of(Integer.parseInt(ctx.NUMERIC_LITERAL().getText()));
+  }
+
+  @Override
+  public void exitSelectStmt(SelectStmtContext ctx) {
+    List<String> rangedLiteralsProvided =
+        rangedJsonPointers.stream()
+            .map(rjp -> rjp.getProvidedRangedLiterals())
+            .flatMap(l -> l.stream())
+            .distinct()
+            .toList();
+    rangedJsonPointers.forEach(
+        rjp -> {
+          rjp.getUsedRangedLiterals()
+              .forEach(
+                  literalUsed -> {
+                    if (!rangedLiteralsProvided.contains(literalUsed)) {
+                      throw new IllegalArgumentException(
+                          "literal '"
+                              + literalUsed
+                              + "' is used in FROM clause for a context-aware (relative) rJP, but only "
+                              + rangedLiteralsProvided.toString()
+                              + " are provided in FROM statement.");
+                    }
+                  });
+        });
+    this.columnExpressions.forEach(
+        se -> {
+          se.getUsedRangedLiterals()
+              .forEach(
+                  literalUsed -> {
+                    if (!rangedLiteralsProvided.contains(literalUsed)) {
+                      throw new IllegalArgumentException(
+                          "literal '"
+                              + literalUsed
+                              + "' is used in SELECT clause but only "
+                              + rangedLiteralsProvided.toString()
+                              + " are provided in FROM statement.");
+                    }
+                  });
+        });
+    this.whereCondition
+        .getUsedRangedLiterals()
+        .forEach(
+            literalUsed -> {
+              if (!rangedLiteralsProvided.contains(literalUsed)) {
+                throw new IllegalArgumentException(
+                    "literal '"
+                        + literalUsed
+                        + "' is used in WHERE clause but only "
+                        + rangedLiteralsProvided.toString()
+                        + " are provided in FROM statement.");
+              }
+            });
+    this.ordering.ifPresent(
+        se ->
+            se.getUsedRangedLiterals()
+                .forEach(
+                    literalUsed -> {
+                      if (!rangedLiteralsProvided.contains(literalUsed)) {
+                        throw new IllegalArgumentException(
+                            "literal '"
+                                + literalUsed
+                                + "' is used in ORDER clause but only "
+                                + rangedLiteralsProvided.toString()
+                                + " are provided in FROM statement.");
+                      }
+                    }));
   }
 }
