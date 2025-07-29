@@ -7,33 +7,32 @@ import io.broessl.treesql.core.types.TreeValue;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class MaxOperation extends StackAggregateOperation {
+public class SumOperation extends StackAggregateOperation {
 
   @Override
   public String getSymbol() {
-    return "MAX";
+    return "SUM";
   }
 
   @Override
   public TreeValue call(TreeValue[] arguments) {
     List<TreeValue> flatArguments = flatArguments(arguments);
-    TreeNumber max = null;
+    BigDecimal sum = null;
     for (TreeValue treeValue : flatArguments) {
       if (treeValue instanceof TreeNumber treeNum) {
-        max = max != null ? max : treeNum;
-        max = max.compareTo(treeNum) > 0 ? max : treeNum;
+        sum = sum != null ? sum.add(treeNum.getValue()) : treeNum.getValue();
       } else if (treeValue instanceof TreeBool treeBool) {
-        TreeNumber asNumber =
-            treeBool.getValue() ? new TreeNumber(BigDecimal.ONE) : new TreeNumber(BigDecimal.ZERO);
-        max = max != null ? max : asNumber;
-        max = max.compareTo(asNumber) > 0 ? max : asNumber;
+        sum =
+            sum != null
+                ? sum.add(treeBool.getValue() ? BigDecimal.ONE : BigDecimal.ZERO)
+                : treeBool.getValue() ? BigDecimal.ONE : BigDecimal.ZERO;
       } else {
         // ignore
       }
     }
-    if (max == null) {
+    if (sum == null) {
       return TreeNull.INSTANCE;
     }
-    return max;
+    return new TreeNumber(sum);
   }
 }

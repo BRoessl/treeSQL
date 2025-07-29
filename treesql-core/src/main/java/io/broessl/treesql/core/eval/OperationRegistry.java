@@ -30,11 +30,17 @@ public class OperationRegistry {
     registerOperation(new ModuloOperation());
     registerOperation(new MatchOperation());
     registerOperation(new NotMatchOperation());
-    registerOperation(new MaxOperation());
     registerOperation(new SinOperation());
     registerOperation(new IsOperation());
     registerOperation(new AsNumberFunction());
     registerOperation(new AsStringFunction());
+    registerOperation(new MinOperation());
+    registerOperation(new MaxOperation());
+    registerOperation(new SumOperation());
+    registerOperation(new AvgOperation());
+    registerOperation(new CountOperation());
+    registerOperation(new ListOperation());
+    registerOperation(new FlatOperation());
   }
 
   private final Map<String, StackOperation> operations = new HashMap<>();

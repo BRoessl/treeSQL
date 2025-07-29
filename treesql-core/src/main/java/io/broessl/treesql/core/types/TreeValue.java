@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract sealed class TreeValue extends TreeStackableValue implements Comparable<TreeValue>
-    permits TreeNull, TreeBool, TreeList, TreeNodeIdentifier {
+    permits TreeNull, TreeBool, TreeList, TreeNodeIdentifier, SpecialArgumentsEndMarker {
 
   public abstract Object getValue();
 

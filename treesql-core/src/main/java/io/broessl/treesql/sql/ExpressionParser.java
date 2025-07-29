@@ -3,6 +3,7 @@ package io.broessl.treesql.sql;
 import io.broessl.treesql.core.eval.OperationRegistry;
 import io.broessl.treesql.core.eval.StackOperation;
 import io.broessl.treesql.core.eval.stack.Stackable;
+import io.broessl.treesql.core.types.SpecialArgumentsEndMarker;
 import io.broessl.treesql.core.types.TreeStackableValue;
 import io.broessl.treesql.grammar.TreeSQLLexer;
 import io.broessl.treesql.grammar.TreeSQLParser;
@@ -120,6 +121,7 @@ public final class ExpressionParser implements ParseTreeListener {
       literalNodeToOutput(node);
     } else if (node.getSymbol().getType() == TreeSQLLexer.FUNC_NAME) {
       operatorStack.add(node);
+      output.add(SpecialArgumentsEndMarker.INSTANCE);
     } else if (OperatorPrecedence.contains(node.getSymbol().getType())) {
       var op1 = OperatorPrecedence.get(node.getSymbol().getType());
       while (!operatorStack.isEmpty()
@@ -138,7 +140,6 @@ public final class ExpressionParser implements ParseTreeListener {
       }
     } else if (node.getSymbol().getType() == TreeSQLLexer.OPEN_PAR) {
       operatorStack.addLast(node);
-
     } else if (node.getSymbol().getType() == TreeSQLLexer.CLOSE_PAR) {
       while (operatorStack.getLast().getSymbol().getType() != TreeSQLLexer.OPEN_PAR) {
         operatorNodeToOutput(operatorStack.removeLast());

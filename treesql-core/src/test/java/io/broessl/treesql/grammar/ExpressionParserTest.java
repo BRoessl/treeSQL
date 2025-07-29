@@ -20,7 +20,7 @@ public class ExpressionParserTest {
   void testShuntingYardAlgoExampleB() {
     var stack = ExpressionParser.parseExpressionStack("SIN(MAX(2, 3) / 3 * 4)");
     Assertions.assertEquals(
-        "2, 3, MAX, 3, /, 4, *, SIN",
+        "#, #, 2, 3, MAX, 3, /, 4, *, SIN",
         stack.stream().map(Stackable::toString).collect(Collectors.joining(", ")));
   }
 }

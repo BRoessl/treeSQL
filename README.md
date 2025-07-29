@@ -190,8 +190,51 @@ A directive might use arguments to specify constraints or interpretation behavio
 
 Sometimes the name of the range literal for the directive might be used as argument as well. E.g. for XML, the named literal should be named to match the XML root name. Thus only XML files with such root name are part of the potential result set. This should mitigate confusion with XML using named root object.
 
-## (DRAFT) Aggregates - COUNT/MAX/MIN/SUM
-(TODO) Extend Shunting Yard and Revers Polish Notation to support Functions with dynamicaly sized arguments OR using list object.
+## Aggregates - COUNT/MAX/MIN/SUM
+### An example
+Apply query<br>
+`SELECT name, SUM(amounts) AS sum FROM "/bills/~row" GROUP BY "~row/customer_name" AS name AGGREGATE "~row/amount" AS amounts`
+<br>on data
+```json
+{
+  "bills": [
+    {
+      "id": "B001",
+      "customer_name": "Alice Johnson",
+      "amount": 120.5
+    },
+    {
+      "id": "B002",
+      "customer_name": "Bob Smith",
+      "amount": 99.99
+    },
+    {
+      "id": "B003",
+      "customer_name": "Alice Johnson",
+      "amount": 230.0
+    },
+    {
+      "id": "B004",
+      "customer_name": "Bob Smith",
+      "amount": 45.75
+    },
+    {
+      "id": "B005",
+      "customer_name": "Emily Davis",
+      "amount": 310.2
+    }
+  ]
+}
+```
+results into
+|name|sum|
+|---|---|
+|Alice Johnson|350.5|
+|Bob Smith|145.74|
+|Emily Davis|310.2|
+
+### Explanation
+In traditional SQL, you choose a column which values you want to group together and for other columns, you have to derive a single value using an aggregate function (SUM, COUNT, MAX, ...). In treeSQL, any expression is virtually a column, so your **GROUP BY** is followed by an expression (which probably yields a string or integer). You must use the **AS** keyword and reference it in the select statement, since the expression itself is not a valid identification. The aggregate function can be applied on lists, and these lists are created in the **AGGREGATE** clause.
 
 ## (DRAFT) Using a different ouput format than tables
 

@@ -2,6 +2,7 @@ package io.broessl.treesql.core.eval.stack;
 
 import io.broessl.treesql.core.ScannableTreeNode;
 import io.broessl.treesql.core.eval.StackOperation;
+import io.broessl.treesql.core.types.SpecialArgumentsEndMarker;
 import io.broessl.treesql.core.types.TreeContextValue;
 import io.broessl.treesql.core.types.TreeValue;
 import java.util.ArrayList;
@@ -38,16 +39,29 @@ public class StackEvaluation {
         Objects.requireNonNull(result, "Evaluable primitive must not return null: " + evaluable);
         evalStack.add(result);
       } else if (stackable instanceof StackOperation operation) {
-        if (evalStack.size() < operation.getArgumentSize()) {
+        if (operation.getArgumentSize() == -1) {
+          TreeValue argument;
+          List<TreeValue> allArguments = new ArrayList<>();
+          while (!((argument = evalStack.removeLast()) instanceof SpecialArgumentsEndMarker)) {
+            allArguments.add(argument);
+          }
+          TreeValue operationResult =
+              operation.call(allArguments.reversed().toArray(new TreeValue[allArguments.size()]));
+          evalStack.add(operationResult);
+        } else if (evalStack.size() < operation.getArgumentSize()) {
           throw new IllegalArgumentException("Not enough arguments for operation: " + operation);
+        } else {
+          TreeValue[] args = new TreeValue[operation.getArgumentSize()];
+          for (int i = args.length; i > 0; i--) {
+            args[i - 1] = evalStack.removeLast();
+          }
+          if (!evalStack.isEmpty() && evalStack.getLast() instanceof SpecialArgumentsEndMarker) {
+            // if arguments are fix sized but also enclosed in parenthesis
+            evalStack.removeLast();
+          }
+          TreeValue operationResult = operation.call(args);
+          evalStack.add(operationResult);
         }
-        TreeValue[] args = new TreeValue[operation.getArgumentSize()];
-        for (int i = args.length; i > 0; i--) {
-          args[i - 1] = evalStack.removeLast();
-        }
-        TreeValue operationResult = operation.call(args);
-        evalStack.add(operationResult);
-
       } else {
         throw new IllegalArgumentException(
             "Unknown stackable type: " + stackable.getClass().getName());

@@ -7,33 +7,33 @@ import io.broessl.treesql.core.types.TreeValue;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class MaxOperation extends StackAggregateOperation {
+public class AvgOperation extends StackAggregateOperation {
 
   @Override
   public String getSymbol() {
-    return "MAX";
+    return "AVG";
   }
 
   @Override
   public TreeValue call(TreeValue[] arguments) {
     List<TreeValue> flatArguments = flatArguments(arguments);
-    TreeNumber max = null;
+    BigDecimal sum = BigDecimal.ZERO;
+    int count = 0;
     for (TreeValue treeValue : flatArguments) {
       if (treeValue instanceof TreeNumber treeNum) {
-        max = max != null ? max : treeNum;
-        max = max.compareTo(treeNum) > 0 ? max : treeNum;
+        count++;
+        sum = sum.add(treeNum.getValue());
       } else if (treeValue instanceof TreeBool treeBool) {
-        TreeNumber asNumber =
-            treeBool.getValue() ? new TreeNumber(BigDecimal.ONE) : new TreeNumber(BigDecimal.ZERO);
-        max = max != null ? max : asNumber;
-        max = max.compareTo(asNumber) > 0 ? max : asNumber;
+        count++;
+        sum = sum.add(treeBool.getValue() ? BigDecimal.ONE : BigDecimal.ZERO);
       } else {
-        // ignore
+        throw new IllegalArgumentException(
+            "AVG Operation is not applicable on data type " + treeValue.getClass().getSimpleName());
       }
     }
-    if (max == null) {
+    if (count == 0) {
       return TreeNull.INSTANCE;
     }
-    return max;
+    return new TreeNumber(sum.divide(BigDecimal.valueOf(count)));
   }
 }

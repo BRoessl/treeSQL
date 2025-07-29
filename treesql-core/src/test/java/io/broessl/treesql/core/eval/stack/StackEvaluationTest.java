@@ -33,6 +33,50 @@ public class StackEvaluationTest {
   }
 
   @Test
+  void testEvaluateAggregateFunctionA() {
+    List<Stackable> expressionStack = ExpressionParser.parseExpressionStack("AVG(1, 2, 3)");
+    var result = new StackEvaluation(expressionStack).evaluate(null);
+    Assertions.assertEquals(new TreeNumber(2), result);
+  }
+
+  @Test
+  void testEvaluateAggregateFunctionB() {
+    List<Stackable> expressionStack = ExpressionParser.parseExpressionStack("AVG(1)");
+    var result = new StackEvaluation(expressionStack).evaluate(null);
+    Assertions.assertEquals(new TreeNumber(1), result);
+  }
+
+  @Test
+  void testEvaluateAggregateFunctionC() {
+    List<Stackable> expressionStack = ExpressionParser.parseExpressionStack("AVG(LIST(1, 2, 3))");
+    var result = new StackEvaluation(expressionStack).evaluate(null);
+    Assertions.assertEquals(new TreeNumber(2), result);
+  }
+
+  @Test
+  void testEvaluateAggregateFunctionD() {
+    List<Stackable> expressionStack = ExpressionParser.parseExpressionStack("AVG(1, LIST(2, 3))");
+    var result = new StackEvaluation(expressionStack).evaluate(null);
+    Assertions.assertEquals(new TreeNumber(2), result);
+  }
+
+  @Test
+  void testEvaluateAggregateFunctionE() {
+    List<Stackable> expressionStack =
+        ExpressionParser.parseExpressionStack("AVG(1, LIST(LIST(2, 5), 4))");
+    var result = new StackEvaluation(expressionStack).evaluate(null);
+    Assertions.assertEquals(new TreeNumber(3), result);
+  }
+
+  @Test
+  void testEvaluateAggregateFunctionF() {
+    List<Stackable> expressionStack =
+        ExpressionParser.parseExpressionStack("AVG(1, FLAT(LIST(LIST(2, 3))))");
+    var result = new StackEvaluation(expressionStack).evaluate(null);
+    Assertions.assertEquals(new TreeNumber(2), result);
+  }
+
+  @Test
   void testEvaluateEquals() {
     List<Stackable> expressionStack = ExpressionParser.parseExpressionStack("MAX(1, 2) == 1 + 1");
     var result = new StackEvaluation(expressionStack).evaluate(null);
